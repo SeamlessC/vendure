@@ -1,10 +1,11 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
     DeletionResponse,
+    MutationAssignFacetsToChannelArgs,
     MutationCreateFacetArgs,
     MutationCreateFacetValuesArgs,
     MutationDeleteFacetArgs,
-    MutationDeleteFacetValuesArgs,
+    MutationDeleteFacetValuesArgs, MutationRemoveFacetsFromChannelArgs,
     MutationUpdateFacetArgs,
     MutationUpdateFacetValuesArgs,
     Permission,
@@ -32,7 +33,8 @@ export class FacetResolver {
         private facetService: FacetService,
         private facetValueService: FacetValueService,
         private configService: ConfigService,
-    ) {}
+    ) {
+    }
 
     @Query()
     @Allow(Permission.ReadCatalog, Permission.ReadProduct, Permission.ReadFacet)
@@ -139,5 +141,25 @@ export class FacetResolver {
             results.push(await this.facetValueService.delete(ctx, id, args.force || false));
         }
         return results;
+    }
+
+    @Transaction()
+    @Mutation()
+    @Allow(Permission.UpdateCatalog, Permission.UpdateFacet)
+    async assignFacetsToChannel(
+        @Ctx() ctx: RequestContext,
+        @Args() args: MutationAssignFacetsToChannelArgs,
+    ): Promise<Array<Translated<Facet>>> {
+        return this.facetService.assignFacetsToChannel(ctx, args.input);
+    }
+
+    @Transaction()
+    @Mutation()
+    @Allow(Permission.UpdateCatalog, Permission.UpdateFacet)
+    async removeFacetsFromChannel(
+        @Ctx() ctx: RequestContext,
+        @Args() args: MutationRemoveFacetsFromChannelArgs,
+    ): Promise<Array<Translated<Facet>>> {
+        return this.facetService.removeFacetsFromChannel(ctx, args.input);
     }
 }

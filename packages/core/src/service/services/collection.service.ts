@@ -1,12 +1,13 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import {
+    AssignCollectionsToChannelInput,
     ConfigurableOperation,
     ConfigurableOperationDefinition,
     CreateCollectionInput,
     DeletionResponse,
     DeletionResult,
-    MoveCollectionInput,
-    PreviewCollectionVariantsInput,
+    MoveCollectionInput, Permission,
+    PreviewCollectionVariantsInput, RemoveCollectionsFromChannelInput,
     UpdateCollectionInput,
 } from '@vendure/common/lib/generated-types';
 import { pick } from '@vendure/common/lib/pick';
@@ -17,17 +18,17 @@ import { debounceTime } from 'rxjs/operators';
 
 import { RequestContext, SerializedRequestContext } from '../../api/common/request-context';
 import { RelationPaths } from '../../api/index';
-import { IllegalOperationError } from '../../common/error/errors';
+import { ForbiddenError, IllegalOperationError, UserInputError } from '../../common/error/errors';
 import { ListQueryOptions } from '../../common/types/common-types';
 import { Translated } from '../../common/types/locale-types';
 import { assertFound, idsAreEqual } from '../../common/utils';
 import { ConfigService } from '../../config/config.service';
 import { Logger } from '../../config/logger/vendure-logger';
 import { TransactionalConnection } from '../../connection/transactional-connection';
-import { Asset, FacetValue } from '../../entity';
 import { CollectionTranslation } from '../../entity/collection/collection-translation.entity';
 import { Collection } from '../../entity/collection/collection.entity';
 import { ProductVariant } from '../../entity/product-variant/product-variant.entity';
+import { CollectionChannelEvent } from '../../event-bus';
 import { EventBus } from '../../event-bus/event-bus';
 import { CollectionEvent } from '../../event-bus/events/collection-event';
 import { CollectionModificationEvent } from '../../event-bus/events/collection-modification-event';
@@ -46,6 +47,7 @@ import { translateDeep } from '../helpers/utils/translate-entity';
 import { AssetService } from './asset.service';
 import { ChannelService } from './channel.service';
 import { FacetValueService } from './facet-value.service';
+import { RoleService } from './role.service';
 
 export type ApplyCollectionFiltersJobData = {
     ctx: SerializedRequestContext;
@@ -77,6 +79,7 @@ export class CollectionService implements OnModuleInit {
         private slugValidator: SlugValidator,
         private configArgService: ConfigArgService,
         private customFieldRelationService: CustomFieldRelationService,
+        private roleService: RoleService,
     ) {}
 
     /**
@@ -704,5 +707,85 @@ export class CollectionService implements OnModuleInit {
         );
         this.rootCollection = translateDeep(newRoot, ctx.languageCode);
         return this.rootCollection;
+    }
+
+    /**
+     * @description
+     * Assigns a Collections to the specified Channel
+     */
+    async assignCollectionsToChannel(
+        ctx: RequestContext,
+        input: AssignCollectionsToChannelInput,
+    ): Promise<Array<Translated<Collection>>> {
+        const hasPermission = await this.roleService.userHasPermissionOnChannel(
+            ctx,
+            input.channelId,
+            Permission.UpdateCatalog,
+        );
+        if (!hasPermission) {
+            throw new ForbiddenError();
+        }
+        const collections = await this.connection
+            .getRepository(ctx, Collection)
+            .findByIds(input.collectionIds);
+
+        await Promise.all(
+            collections.map(async collection => {
+                await this.channelService.assignToChannels(ctx, Collection, collection.id, [input.channelId]);
+                return this.eventBus.publish(new CollectionChannelEvent(ctx, collection, input.channelId, 'assigned'));
+            }),
+        );
+
+        return this.connection.findByIdsInChannel(
+            ctx,
+            Collection,
+            collections.map(f => f.id),
+            ctx.channelId,
+            {},
+        ).then(clcs =>
+            clcs.map(collection => translateDeep(collection, ctx.languageCode)),
+        );
+    }
+
+    /**
+     * @description
+     * Remove a Collections from the specified Channel
+     */
+    async removeCollectionsFromChannel(
+        ctx: RequestContext,
+        input: RemoveCollectionsFromChannelInput,
+    ): Promise<Array<Translated<Collection>>> {
+        const hasPermission = await this.roleService.userHasPermissionOnChannel(
+            ctx,
+            input.channelId,
+            Permission.UpdateCatalog,
+        );
+        if (!hasPermission) {
+            throw new ForbiddenError();
+        }
+        const defaultChannel = await this.channelService.getDefaultChannel(ctx);
+        if (idsAreEqual(input.channelId, defaultChannel.id)) {
+            throw new UserInputError('error.collections-cannot-be-removed-from-default-channel');
+        }
+        const collections = await this.connection
+            .getRepository(ctx, Collection)
+            .findByIds(input.collectionIds);
+
+        await Promise.all(
+            collections.map(async collection => {
+                await this.channelService.removeFromChannels(ctx, Collection, collection.id, [input.channelId]);
+                return this.eventBus.publish(new CollectionChannelEvent(ctx, collection, input.channelId, 'removed'));
+            }),
+        );
+
+        return this.connection.findByIdsInChannel(
+            ctx,
+            Collection,
+            collections.map(f => f.id),
+            defaultChannel.id,
+            {},
+        ).then(clcs =>
+            clcs.map(collection => translateDeep(collection, ctx.languageCode)),
+        );
     }
 }
