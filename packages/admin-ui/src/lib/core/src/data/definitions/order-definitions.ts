@@ -55,6 +55,7 @@ export const ORDER_FRAGMENT = gql`
             id
             firstName
             lastName
+            phoneNumber
         }
         shippingLines {
             shippingMethod {
@@ -133,6 +134,7 @@ export const ORDER_DETAIL_FRAGMENT = gql`
             id
             firstName
             lastName
+            phoneNumber
         }
         lines {
             ...OrderLine

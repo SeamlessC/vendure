@@ -17,6 +17,8 @@
         </thead>
         <tbody>
             <tr
+                [ngClass]="'order-status-' + item.state"
+                [ngStyle]="{ height: customRowHeight ? customRowHeight + 'rem' : 'auto' }"
                 *ngFor="
                     let item of items
                         | paginate

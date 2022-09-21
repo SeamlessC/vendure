@@ -5,6 +5,7 @@ import {
     SUPER_ADMIN_USER_PASSWORD,
 } from '@vendure/common/lib/shared-constants';
 
+import { TypeORMHealthCheckStrategy } from '../health-check/typeorm-health-check-strategy';
 import { InMemoryJobQueueStrategy } from '../job-queue/in-memory-job-queue-strategy';
 import { InMemoryJobBufferStorageStrategy } from '../job-queue/job-buffer/in-memory-job-buffer-storage-strategy';
 
@@ -17,6 +18,12 @@ import { NativeAuthenticationStrategy } from './auth/native-authentication-strat
 import { defaultCollectionFilters } from './catalog/default-collection-filters';
 import { DefaultProductVariantPriceCalculationStrategy } from './catalog/default-product-variant-price-calculation-strategy';
 import { DefaultStockDisplayStrategy } from './catalog/default-stock-display-strategy';
+import {
+    orderFinishedProcess,
+    orderProcessingProcess,
+    orderReadyForPickupProcess,
+    orderReceivedProcess,
+} from './custom-order-states';
 import { AutoIncrementIdStrategy } from './entity-id-strategy/auto-increment-id-strategy';
 import { manualFulfillmentHandler } from './fulfillment/manual-fulfillment-handler';
 import { DefaultLogger } from './logger/default-logger';
@@ -32,7 +39,6 @@ import { defaultPromotionActions, defaultPromotionConditions } from './promotion
 import { InMemorySessionCacheStrategy } from './session-cache/in-memory-session-cache-strategy';
 import { defaultShippingCalculator } from './shipping-method/default-shipping-calculator';
 import { defaultShippingEligibilityChecker } from './shipping-method/default-shipping-eligibility-checker';
-import { TypeORMHealthCheckStrategy } from '../health-check/typeorm-health-check-strategy';
 import { DefaultTaxLineCalculationStrategy } from './tax/default-tax-line-calculation-strategy';
 import { DefaultTaxZoneStrategy } from './tax/default-tax-zone-strategy';
 import { RuntimeVendureConfig } from './vendure-config';
@@ -130,7 +136,12 @@ export const defaultConfig: RuntimeVendureConfig = {
         orderItemPriceCalculationStrategy: new DefaultOrderItemPriceCalculationStrategy(),
         mergeStrategy: new MergeOrdersStrategy(),
         checkoutMergeStrategy: new UseGuestStrategy(),
-        process: [],
+        process: [
+            orderReceivedProcess,
+            orderFinishedProcess,
+            orderReadyForPickupProcess,
+            orderProcessingProcess,
+        ],
         stockAllocationStrategy: new DefaultStockAllocationStrategy(),
         orderCodeStrategy: new DefaultOrderCodeStrategy(),
         orderByCodeAccessStrategy: new DefaultOrderByCodeAccessStrategy('2h'),

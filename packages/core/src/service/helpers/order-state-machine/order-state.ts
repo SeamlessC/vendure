@@ -21,6 +21,10 @@ export type OrderState =
     | 'Delivered'
     | 'Modifying'
     | 'ArrangingAdditionalPayment'
+    | 'Received'
+    | 'Processing'
+    | 'ReadyForPickup'
+    | 'Finished'
     | 'Cancelled';
 
 export const orderStateTransitions: Transitions<OrderState> = {
@@ -80,6 +84,18 @@ export const orderStateTransitions: Transitions<OrderState> = {
         ],
     },
     Cancelled: {
+        to: [],
+    },
+    Received: {
+        to: ['PaymentSettled'],
+    },
+    Processing: {
+        to: ['ReadyForPickup'],
+    },
+    ReadyForPickup: {
+        to: ['Finished'],
+    },
+    Finished: {
         to: [],
     },
 };
