@@ -39,13 +39,13 @@ export const orderReadyForPickupProcess: CustomOrderProcess<'ReadyForPickup'> = 
     },
 };
 
-export const orderFinishedProcess: CustomOrderProcess<'Finished'> = {
+export const orderFinishedProcess: CustomOrderProcess<'Completed'> = {
     transitions: {
         ReadyForPickup: {
-            to: ['Finished'],
+            to: ['Completed'],
             mergeStrategy: 'replace',
         },
-        Finished: {
+        Completed: {
             to: [],
         },
     },

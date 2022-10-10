@@ -12,19 +12,16 @@ import { Order } from '../../../entity/order/order.entity';
 export type OrderState =
     | 'Created'
     | 'AddingItems'
-    | 'ArrangingPayment'
-    | 'PaymentAuthorized'
+    | 'ArrangingCardPayment'
+    | 'AwaitingCashCollection'
     | 'PaymentSettled'
-    | 'PartiallyShipped'
-    | 'Shipped'
-    | 'PartiallyDelivered'
     | 'Delivered'
+    | 'Delivering'
     | 'Modifying'
-    | 'ArrangingAdditionalPayment'
     | 'Received'
     | 'Processing'
     | 'ReadyForPickup'
-    | 'Finished'
+    | 'Completed'
     | 'Cancelled';
 
 export const orderStateTransitions: Transitions<OrderState> = {
@@ -32,59 +29,16 @@ export const orderStateTransitions: Transitions<OrderState> = {
         to: ['AddingItems'],
     },
     AddingItems: {
-        to: ['ArrangingPayment', 'Cancelled'],
+        to: ['ArrangingCardPayment', 'Cancelled'],
     },
-    ArrangingPayment: {
-        to: ['PaymentAuthorized', 'PaymentSettled', 'AddingItems', 'Cancelled'],
+    ArrangingCardPayment: {
+        to: ['PaymentSettled', 'AddingItems', 'Cancelled'],
     },
-    PaymentAuthorized: {
-        to: ['PaymentSettled', 'Cancelled', 'Modifying', 'ArrangingAdditionalPayment'],
+    AwaitingCashCollection: {
+        to: ['PaymentSettled', 'AddingItems', 'Cancelled'],
     },
     PaymentSettled: {
-        to: [
-            'PartiallyDelivered',
-            'Delivered',
-            'PartiallyShipped',
-            'Shipped',
-            'Cancelled',
-            'Modifying',
-            'ArrangingAdditionalPayment',
-        ],
-    },
-    PartiallyShipped: {
-        to: ['Shipped', 'PartiallyDelivered', 'Cancelled', 'Modifying'],
-    },
-    Shipped: {
-        to: ['PartiallyDelivered', 'Delivered', 'Cancelled', 'Modifying'],
-    },
-    PartiallyDelivered: {
-        to: ['Delivered', 'Cancelled', 'Modifying'],
-    },
-    Delivered: {
-        to: ['Cancelled'],
-    },
-    Modifying: {
-        to: [
-            'PaymentAuthorized',
-            'PaymentSettled',
-            'PartiallyShipped',
-            'Shipped',
-            'PartiallyDelivered',
-            'ArrangingAdditionalPayment',
-        ],
-    },
-    ArrangingAdditionalPayment: {
-        to: [
-            'PaymentAuthorized',
-            'PaymentSettled',
-            'PartiallyShipped',
-            'Shipped',
-            'PartiallyDelivered',
-            'Cancelled',
-        ],
-    },
-    Cancelled: {
-        to: [],
+        to: ['Received', 'Delivered', 'Cancelled', 'Modifying'],
     },
     Received: {
         to: ['PaymentSettled'],
@@ -93,9 +47,21 @@ export const orderStateTransitions: Transitions<OrderState> = {
         to: ['ReadyForPickup'],
     },
     ReadyForPickup: {
-        to: ['Finished'],
+        to: ['Completed'],
     },
-    Finished: {
+    Delivering: {
+        to: ['Delivered', 'Cancelled', 'Modifying'],
+    },
+    Delivered: {
+        to: ['Cancelled'],
+    },
+    Modifying: {
+        to: ['PaymentSettled'],
+    },
+    Cancelled: {
+        to: [],
+    },
+    Completed: {
         to: [],
     },
 };
