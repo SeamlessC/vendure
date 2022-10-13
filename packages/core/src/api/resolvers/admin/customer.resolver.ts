@@ -2,12 +2,14 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
     CreateCustomerResult,
     DeletionResponse,
+    MutationAddCustomerLoyaltyPointsArgs,
     MutationAddNoteToCustomerArgs,
     MutationCreateCustomerAddressArgs,
     MutationCreateCustomerArgs,
     MutationDeleteCustomerAddressArgs,
     MutationDeleteCustomerArgs,
     MutationDeleteCustomerNoteArgs,
+    MutationRemoveCustomerLoyaltyPointsArgs,
     MutationUpdateCustomerAddressArgs,
     MutationUpdateCustomerArgs,
     MutationUpdateCustomerNoteArgs,
@@ -96,6 +98,28 @@ export class CustomerResolver {
     ): Promise<Address> {
         const { input } = args;
         return this.customerService.updateAddress(ctx, input);
+    }
+
+    @Transaction()
+    @Mutation()
+    @Allow(Permission.UpdateCustomer)
+    async addCustomerLoyaltyPoints(
+        @Ctx() ctx: RequestContext,
+        @Args() args: MutationAddCustomerLoyaltyPointsArgs,
+    ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
+        const { customerId, input } = args;
+        return this.customerService.addLoyaltyPoints(ctx, customerId, input);
+    }
+
+    @Transaction()
+    @Mutation()
+    @Allow(Permission.UpdateCustomer)
+    async removeCustomerLoyaltyPoints(
+        @Ctx() ctx: RequestContext,
+        @Args() args: MutationRemoveCustomerLoyaltyPointsArgs,
+    ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
+        const { customerId } = args;
+        return this.customerService.removeLoyaltyPoints(ctx, customerId);
     }
 
     @Transaction()

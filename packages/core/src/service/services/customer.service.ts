@@ -661,7 +661,7 @@ export class CustomerService {
         if (!customer) {
             return false;
         }
-        const oldLoyaltyPoints = customer.customFields.loyaltyPoints;
+        const oldLoyaltyPoints = (customer.customFields as any).loyaltyPoints;
         input.customFields.loyaltyPoints += oldLoyaltyPoints;
 
         const updatedCustomer = patchEntity(customer, input);
@@ -699,7 +699,8 @@ export class CustomerService {
         const input: UpdateCustomerInput = {
             id: userId,
         };
-        const oldLoyaltyPoints = customer.customFields.loyaltyPoints;
+
+        const oldLoyaltyPoints = (customer.customFields as any).loyaltyPoints;
         if (oldLoyaltyPoints > 1000) {
             input.customFields.loyaltyPoints = oldLoyaltyPoints - 1000;
         }
