@@ -645,6 +645,82 @@ export class CustomerService {
 
     /**
      * @description
+     * Given a valid email update token published in a {@link IdentifierChangeRequestEvent}, this method
+     * will update the Customer Loyalty Points.
+     */
+    async addLoyaltyPoints(
+        ctx: RequestContext,
+        userId: ID,
+        input: UpdateCustomerInput,
+    ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
+        const user = await this.userService.getUserById(ctx, userId);
+        if (!user) {
+            return false;
+        }
+        const customer = await this.findOneByUserId(ctx, user.id);
+        if (!customer) {
+            return false;
+        }
+        const oldLoyaltyPoints = customer.customFields.loyaltyPoints;
+        input.customFields.loyaltyPoints += oldLoyaltyPoints;
+
+        const updatedCustomer = patchEntity(customer, input);
+        await this.connection.getRepository(ctx, Customer).save(updatedCustomer, { reload: false });
+        await this.customFieldRelationService.updateRelations(ctx, Customer, input, updatedCustomer);
+        await this.historyService.createHistoryEntryForCustomer({
+            customerId: customer.id,
+            ctx,
+            type: HistoryEntryType.CUSTOMER_DETAIL_UPDATED,
+            data: {
+                input,
+            },
+        });
+        this.eventBus.publish(new CustomerEvent(ctx, customer, 'updated', input));
+        return assertFound(this.findOne(ctx, customer.id));
+    }
+
+    /**
+     * @description
+     * Given a valid email update token published in a {@link IdentifierChangeRequestEvent}, this method
+     * will update the Customer Loyalty Points.
+     */
+    async removeLoyaltyPoints(
+        ctx: RequestContext,
+        userId: ID,
+    ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
+        const user = await this.userService.getUserById(ctx, userId);
+        if (!user) {
+            return false;
+        }
+        const customer = await this.findOneByUserId(ctx, user.id);
+        if (!customer) {
+            return false;
+        }
+        const input: UpdateCustomerInput = {
+            id: userId,
+        };
+        const oldLoyaltyPoints = customer.customFields.loyaltyPoints;
+        if (oldLoyaltyPoints > 1000) {
+            input.customFields.loyaltyPoints = oldLoyaltyPoints - 1000;
+        }
+
+        const updatedCustomer = patchEntity(customer, input);
+        await this.connection.getRepository(ctx, Customer).save(updatedCustomer, { reload: false });
+        await this.customFieldRelationService.updateRelations(ctx, Customer, input, updatedCustomer);
+        await this.historyService.createHistoryEntryForCustomer({
+            customerId: customer.id,
+            ctx,
+            type: HistoryEntryType.CUSTOMER_DETAIL_UPDATED,
+            data: {
+                input,
+            },
+        });
+        this.eventBus.publish(new CustomerEvent(ctx, customer, 'updated', input));
+        return assertFound(this.findOne(ctx, customer.id));
+    }
+
+    /**
+     * @description
      * For guest checkouts, we assume that a matching email address is the same customer.
      */
     async createOrUpdate(
@@ -822,7 +898,7 @@ export class CustomerService {
             return {
                 result: DeletionResult.DELETED,
             };
-        } catch (e) {
+        } catch (e: any) {
             return {
                 result: DeletionResult.NOT_DELETED,
                 message: e.message,
