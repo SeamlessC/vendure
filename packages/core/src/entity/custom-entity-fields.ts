@@ -6,7 +6,11 @@ export class CustomCollectionFields {}
 export class CustomCollectionFieldsTranslation {}
 export class CustomCountryFields {}
 export class CustomCountryFieldsTranslation {}
-export class CustomCustomerFields {}
+export class CustomCustomerFields {
+    referredBy: string;
+    isReferralCompleted: boolean;
+    loyaltyPoints: number;
+}
 export class CustomCustomerGroupFields {}
 export class CustomFacetFields {}
 export class CustomFacetFieldsTranslation {}

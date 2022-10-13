@@ -29,10 +29,10 @@ export const orderStateTransitions: Transitions<OrderState> = {
         to: ['AddingItems'],
     },
     AddingItems: {
-        to: ['ArrangingCardPayment', 'Cancelled'],
+        to: ['AwaitingCashCollection', 'ArrangingCardPayment', 'Cancelled'],
     },
     ArrangingCardPayment: {
-        to: ['PaymentSettled', 'AddingItems', 'Cancelled'],
+        to: ['PaymentSettled', 'AddingItems', 'Cancelled', 'Completed'],
     },
     AwaitingCashCollection: {
         to: ['PaymentSettled', 'AddingItems', 'Cancelled'],
@@ -62,7 +62,7 @@ export const orderStateTransitions: Transitions<OrderState> = {
         to: [],
     },
     Completed: {
-        to: [],
+        to: ['ArrangingCardPayment'],
     },
 };
 
