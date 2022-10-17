@@ -107,8 +107,8 @@ export class CustomerResolver {
         @Ctx() ctx: RequestContext,
         @Args() args: MutationAddCustomerLoyaltyPointsArgs,
     ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
-        const { customerId, input } = args;
-        return this.customerService.addLoyaltyPoints(ctx, customerId, input);
+        const { id, input } = args;
+        return this.customerService.addLoyaltyPoints(ctx, id, input);
     }
 
     @Transaction()
@@ -118,8 +118,8 @@ export class CustomerResolver {
         @Ctx() ctx: RequestContext,
         @Args() args: MutationRemoveCustomerLoyaltyPointsArgs,
     ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
-        const { customerId } = args;
-        return this.customerService.removeLoyaltyPoints(ctx, customerId);
+        const { id } = args;
+        return this.customerService.removeLoyaltyPoints(ctx, id);
     }
 
     @Transaction()
