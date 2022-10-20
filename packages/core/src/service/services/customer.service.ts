@@ -661,8 +661,8 @@ export class CustomerService {
         if (!customer) {
             return false;
         }
-        const oldLoyaltyPoints = (customer.customFields as any).loyaltyPoints;
-        input.customFields.loyaltyPoints += oldLoyaltyPoints;
+        const oldLoyaltyPoints = customer.customFields.loyaltyPoints;
+        input.customFields.loyaltyPoints = input.customFields.loyaltyPoints + oldLoyaltyPoints;
 
         const updatedCustomer = patchEntity(customer, input);
         await this.connection.getRepository(ctx, Customer).save(updatedCustomer, { reload: false });
@@ -698,10 +698,11 @@ export class CustomerService {
         }
         const input: UpdateCustomerInput = {
             id: userId,
+            customFields: { loyaltyPoints: 0 },
         };
 
-        const oldLoyaltyPoints = (customer.customFields as any).loyaltyPoints;
-        if (oldLoyaltyPoints > 1000) {
+        const oldLoyaltyPoints = customer.customFields.loyaltyPoints;
+        if (!!oldLoyaltyPoints && oldLoyaltyPoints > 1000) {
             input.customFields.loyaltyPoints = oldLoyaltyPoints - 1000;
         }
 

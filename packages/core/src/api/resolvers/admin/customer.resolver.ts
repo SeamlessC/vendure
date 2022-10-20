@@ -2,14 +2,14 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
     CreateCustomerResult,
     DeletionResponse,
-    MutationAddCustomerLoyaltyPointsArgs,
+    // MutationAddCustomerLoyaltyPointsArgs,
     MutationAddNoteToCustomerArgs,
     MutationCreateCustomerAddressArgs,
     MutationCreateCustomerArgs,
     MutationDeleteCustomerAddressArgs,
     MutationDeleteCustomerArgs,
     MutationDeleteCustomerNoteArgs,
-    MutationRemoveCustomerLoyaltyPointsArgs,
+    // MutationRemoveCustomerLoyaltyPointsArgs,
     MutationUpdateCustomerAddressArgs,
     MutationUpdateCustomerArgs,
     MutationUpdateCustomerNoteArgs,
@@ -73,9 +73,9 @@ export class CustomerResolver {
     async updateCustomer(
         @Ctx() ctx: RequestContext,
         @Args() args: MutationUpdateCustomerArgs,
-    ): Promise<ErrorResultUnion<UpdateCustomerResult, Customer>> {
+    ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
         const { input } = args;
-        return this.customerService.update(ctx, input);
+        return this.customerService.removeLoyaltyPoints(ctx, input.id);
     }
 
     @Transaction()
@@ -100,27 +100,27 @@ export class CustomerResolver {
         return this.customerService.updateAddress(ctx, input);
     }
 
-    @Transaction()
-    @Mutation()
-    @Allow(Permission.UpdateCustomer)
-    async addCustomerLoyaltyPoints(
-        @Ctx() ctx: RequestContext,
-        @Args() args: MutationAddCustomerLoyaltyPointsArgs,
-    ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
-        const { id, input } = args;
-        return this.customerService.addLoyaltyPoints(ctx, id, input);
-    }
+    // @Transaction()
+    // @Mutation()
+    // @Allow(Permission.UpdateCustomer)
+    // async addCustomerLoyaltyPoints(
+    //     @Ctx() ctx: RequestContext,
+    //     @Args() args: MutationAddCustomerLoyaltyPointsArgs,
+    // ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
+    //     const { id, input } = args;
+    //     return this.customerService.addLoyaltyPoints(ctx, id, input);
+    // }
 
-    @Transaction()
-    @Mutation()
-    @Allow(Permission.UpdateCustomer)
-    async removeCustomerLoyaltyPoints(
-        @Ctx() ctx: RequestContext,
-        @Args() args: MutationRemoveCustomerLoyaltyPointsArgs,
-    ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
-        const { id } = args;
-        return this.customerService.removeLoyaltyPoints(ctx, id);
-    }
+    // @Transaction()
+    // @Mutation()
+    // @Allow(Permission.UpdateCustomer)
+    // async removeCustomerLoyaltyPoints(
+    //     @Ctx() ctx: RequestContext,
+    //     @Args() args: MutationRemoveCustomerLoyaltyPointsArgs,
+    // ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
+    //     const { id } = args;
+    //     return this.customerService.removeLoyaltyPoints(ctx, id);
+    // }
 
     @Transaction()
     @Mutation()
