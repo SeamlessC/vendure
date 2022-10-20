@@ -7,7 +7,7 @@ export class CustomCollectionFieldsTranslation {}
 export class CustomCountryFields {}
 export class CustomCountryFieldsTranslation {}
 export class CustomCustomerFields {
-    Customer: [{ name: 'loyaltyPoints'; type: 'float'; defaultValue: 0 }];
+    loyaltyPoints: number;
 }
 export class CustomCustomerGroupFields {}
 export class CustomFacetFields {}

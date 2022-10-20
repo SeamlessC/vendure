@@ -89,6 +89,7 @@ export const devConfig: VendureConfig = {
             { name: 'referral', type: 'string' },
             { name: 'barcode', type: 'string' },
         ],
+        Customer: [{ name: 'loyaltyPoints', type: 'float' }],
     },
     logger: new DefaultLogger({ level: LogLevel.Verbose }),
     importExportOptions: {
