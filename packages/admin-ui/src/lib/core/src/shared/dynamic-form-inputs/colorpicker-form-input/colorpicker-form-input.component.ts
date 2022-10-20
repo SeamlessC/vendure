@@ -19,7 +19,7 @@ import { FormInputComponent, InputComponentConfig } from '../../../common/compon
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ColorPickerFormInputComponent implements FormInputComponent, OnInit {
-    static readonly id: DefaultFormComponentId = 'colorpicker-form-input';
+    static readonly id: string = 'colorpicker-form-input';
     readonly: boolean;
     formControl: FormControl;
     color: string;

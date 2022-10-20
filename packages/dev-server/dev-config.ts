@@ -57,6 +57,24 @@ export const devConfig: VendureConfig = {
         paymentMethodHandlers: [dummyPaymentHandler],
     },
     customFields: {
+        Channel: [
+            {
+                name: 'longtitude',
+                type: 'float',
+            },
+            {
+                name: 'latitude',
+                type: 'float',
+            },
+            {
+                name: 'location',
+                type: 'string',
+            },
+            {
+                name: 'name',
+                type: 'string',
+            },
+        ],
         Facet: [
             {
                 name: 'color1',
@@ -88,6 +106,15 @@ export const devConfig: VendureConfig = {
         User: [
             { name: 'referral', type: 'string' },
             { name: 'barcode', type: 'string' },
+            { name: 'referredBy', type: 'string' },
+            { name: 'isReferralCompleted', type: 'boolean' },
+            { name: 'loyaltyPoints', type: 'float' },
+        ],
+        Customer: [
+            { name: 'referralCode', type: 'string' },
+            { name: 'referredBy', type: 'string' },
+            { name: 'isReferralCompleted', type: 'boolean' },
+            { name: 'loyaltyPoints', type: 'float' },
         ],
     },
     logger: new DefaultLogger({ level: LogLevel.Verbose }),
@@ -163,7 +190,7 @@ function getDbConfig(): ConnectionOptions {
                 synchronize: true,
                 type: 'mysql',
                 host: 'localhost',
-                port: 3306,
+                port: 3307,
                 username: 'root',
                 password: 'root',
                 database: 'vendure-dev',

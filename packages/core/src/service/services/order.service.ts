@@ -860,6 +860,34 @@ export class OrderService {
         state: OrderState,
     ): Promise<Order | OrderStateTransitionError> {
         const order = await this.getOrderOrThrow(ctx, orderId);
+        // check if this is the transition after which the loyalty points should apply
+        if (
+            order.customer &&
+            !order.customer.customFields.isReferralCompleted &&
+            state === 'Completed' &&
+            order.customer &&
+            order.customer.customFields.referredBy
+        ) {
+            const referringCustomer = await this.customerService.findOneByPhoneNumber(
+                ctx,
+                order.customer.customFields.referredBy, // phone number
+            );
+            if (referringCustomer) {
+                this.customerService.update(ctx, {
+                    id: order.customer.id,
+                    customFields: {
+                        isReferralCompleted: true,
+                    },
+                });
+                this.customerService.update(ctx, {
+                    id: referringCustomer.id,
+                    customFields: {
+                        loyaltyPoints: order.customer.customFields.loyaltyPoints + 10, // Where should it come from?
+                    },
+                });
+            }
+        }
+
         order.payments = await this.getOrderPayments(ctx, orderId);
         const fromState = order.state;
         try {
