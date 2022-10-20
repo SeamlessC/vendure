@@ -15,14 +15,14 @@ export type OrderState =
     | 'ArrangingCardPayment'
     | 'AwaitingCashCollection'
     | 'PaymentSettled'
-    | 'Delivered'
     | 'Delivering'
     | 'Modifying'
-    | 'Received'
+    | 'OrderReceived'
     | 'Processing'
     | 'ReadyForPickup'
     | 'Completed'
-    | 'Cancelled';
+    | 'Cancelled'
+    | 'ReadyForDelivery';
 
 export const orderStateTransitions: Transitions<OrderState> = {
     Created: {
@@ -32,28 +32,28 @@ export const orderStateTransitions: Transitions<OrderState> = {
         to: ['AwaitingCashCollection', 'ArrangingCardPayment', 'Cancelled'],
     },
     ArrangingCardPayment: {
-        to: ['PaymentSettled', 'AddingItems', 'Cancelled', 'Completed'],
+        to: ['PaymentSettled', 'Cancelled', 'Completed'],
     },
     AwaitingCashCollection: {
-        to: ['PaymentSettled', 'AddingItems', 'Cancelled'],
+        to: ['PaymentSettled', 'Cancelled', 'Completed'],
     },
     PaymentSettled: {
-        to: ['Received', 'Delivered', 'Cancelled', 'Modifying'],
+        to: ['OrderReceived', 'Completed', 'Cancelled'],
     },
-    Received: {
-        to: ['PaymentSettled'],
+    OrderReceived: {
+        to: ['Processing'],
     },
     Processing: {
-        to: ['ReadyForPickup'],
+        to: ['ReadyForDelivery', 'ReadyForPickup'],
     },
     ReadyForPickup: {
-        to: ['Completed'],
+        to: ['Completed', 'AwaitingCashCollection'],
+    },
+    ReadyForDelivery: {
+        to: ['Delivering'],
     },
     Delivering: {
-        to: ['Delivered', 'Cancelled', 'Modifying'],
-    },
-    Delivered: {
-        to: ['Cancelled'],
+        to: ['AwaitingCashCollection', 'Completed', 'Cancelled'],
     },
     Modifying: {
         to: ['PaymentSettled'],
@@ -62,7 +62,7 @@ export const orderStateTransitions: Transitions<OrderState> = {
         to: [],
     },
     Completed: {
-        to: ['ArrangingCardPayment'],
+        to: [],
     },
 };
 

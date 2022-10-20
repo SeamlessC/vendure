@@ -861,22 +861,28 @@ export class OrderService {
     ): Promise<Order | OrderStateTransitionError> {
         const order = await this.getOrderOrThrow(ctx, orderId);
         // check if this is the transition after which the loyalty points should apply
-        if (state === 'Completed' && order.customer && order.customer.customFields.referredBy) {
-            // check if this is the first order of that customer
-            const ordersForCustomer = await this.findByCustomerId(
+        if (
+            order.customer &&
+            !order.customer.customFields.isReferralCompleted &&
+            state === 'Completed' &&
+            order.customer &&
+            order.customer.customFields.referredBy
+        ) {
+            const referringCustomer = await this.customerService.findOneByPhoneNumber(
                 ctx,
-                order.customer.customFields.referredBy,
+                order.customer.customFields.referredBy, // phone number
             );
-            const referringCustomer = await this.customerService.findOne(
-                ctx,
-                order.customer.customFields.referredBy,
-            );
-            if (ordersForCustomer.totalItems === 0 && !referringCustomer?.customFields.isReferralCompleted) {
+            if (referringCustomer) {
                 this.customerService.update(ctx, {
-                    id: order.customer.customFields.referredBy,
+                    id: order.customer.id,
                     customFields: {
-                        loyaltyPoints: 10, // Where should it come from?
                         isReferralCompleted: true,
+                    },
+                });
+                this.customerService.update(ctx, {
+                    id: referringCustomer.id,
+                    customFields: {
+                        loyaltyPoints: order.customer.customFields.loyaltyPoints + 10, // Where should it come from?
                     },
                 });
             }

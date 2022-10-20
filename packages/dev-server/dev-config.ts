@@ -57,6 +57,24 @@ export const devConfig: VendureConfig = {
         paymentMethodHandlers: [dummyPaymentHandler],
     },
     customFields: {
+        Channel: [
+            {
+                name: 'longtitude',
+                type: 'float',
+            },
+            {
+                name: 'latitude',
+                type: 'float',
+            },
+            {
+                name: 'location',
+                type: 'string',
+            },
+            {
+                name: 'name',
+                type: 'string',
+            },
+        ],
         Facet: [
             {
                 name: 'color1',

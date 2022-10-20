@@ -17,8 +17,8 @@ export const orderReceivedProcess: CustomOrderProcess<any> = {
 
 export const orderProcessingProcess: CustomOrderProcess<'Processing'> = {
     transitions: {
-        Received: {
-            to: ['Processing'],
+        ReadyForDelivery: {
+            to: ['ReadyForDelivery', 'ReadyForPickup'],
             mergeStrategy: 'replace',
         },
         Processing: {
