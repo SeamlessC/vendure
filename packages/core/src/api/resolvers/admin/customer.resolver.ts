@@ -75,7 +75,7 @@ export class CustomerResolver {
         @Args() args: MutationUpdateCustomerArgs,
     ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
         const { input } = args;
-        return this.customerService.update(ctx, input);
+        return this.customerService.removeLoyaltyPoints(ctx, input.id);
     }
 
     @Transaction()
