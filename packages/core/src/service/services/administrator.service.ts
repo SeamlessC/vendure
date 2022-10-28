@@ -274,19 +274,20 @@ export class AdministratorService {
                 roleIds: [superAdminRole.id],
             });
         } else {
-            const superAdministrator = await this.connection.rawConnection.getRepository(Administrator).findOne({
-                where: {
-                    user: superAdminUser,
-                },
-            });
+            const superAdministrator = await this.connection.rawConnection
+                .getRepository(Administrator)
+                .findOne({
+                    where: {
+                        user: superAdminUser,
+                    },
+                });
             if (!superAdministrator) {
                 const administrator = new Administrator({
                     emailAddress: superadminCredentials.identifier,
                     firstName: 'Super',
                     lastName: 'Admin',
                 });
-                const createdAdministrator = await this.connection
-                    .rawConnection
+                const createdAdministrator = await this.connection.rawConnection
                     .getRepository(Administrator)
                     .save(administrator);
                 createdAdministrator.user = superAdminUser;

@@ -2,6 +2,7 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
     CreateCustomerResult,
     DeletionResponse,
+    LoyaltyPointUpdatedResponse,
     MutationAddNoteToCustomerArgs,
     MutationCreateCustomerAddressArgs,
     MutationCreateCustomerArgs,
@@ -17,7 +18,7 @@ import {
     Success,
     UpdateCustomerResult,
 } from '@vendure/common/lib/generated-types';
-import { PaginatedList } from '@vendure/common/lib/shared-types';
+import { ID, PaginatedList } from '@vendure/common/lib/shared-types';
 
 import { ErrorResultUnion } from '../../../common/error/error-result';
 import { Address } from '../../../entity/address/address.entity';
@@ -71,7 +72,7 @@ export class CustomerResolver {
     async updateCustomer(
         @Ctx() ctx: RequestContext,
         @Args() args: MutationUpdateCustomerArgs,
-    ): Promise<ErrorResultUnion<UpdateCustomerResult, Customer>> {
+    ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
         const { input } = args;
         return this.customerService.update(ctx, input);
     }
@@ -96,6 +97,27 @@ export class CustomerResolver {
     ): Promise<Address> {
         const { input } = args;
         return this.customerService.updateAddress(ctx, input);
+    }
+
+    @Transaction()
+    @Mutation()
+    @Allow(Permission.UpdateCustomer)
+    async addCustomerLoyaltyPoints(
+        @Ctx() ctx: RequestContext,
+        @Args() args: { id: ID; loyaltyPoints: number },
+    ): Promise<LoyaltyPointUpdatedResponse> {
+        return this.customerService.addLoyaltyPoints(ctx, args.id, args.loyaltyPoints);
+    }
+
+    @Transaction()
+    @Mutation()
+    @Allow(Permission.UpdateCustomer)
+    async redeemCustomerLoyaltyPoints(
+        @Ctx() ctx: RequestContext,
+        @Args() args: ID,
+    ): Promise<LoyaltyPointUpdatedResponse> {
+        const id = args;
+        return this.customerService.redeemLoyaltyPoints(ctx, id);
     }
 
     @Transaction()

@@ -6,7 +6,9 @@ export class CustomCollectionFields {}
 export class CustomCollectionFieldsTranslation {}
 export class CustomCountryFields {}
 export class CustomCountryFieldsTranslation {}
-export class CustomCustomerFields {}
+export class CustomCustomerFields {
+    loyaltyPoints: number;
+}
 export class CustomCustomerGroupFields {}
 export class CustomFacetFields {}
 export class CustomFacetFieldsTranslation {}

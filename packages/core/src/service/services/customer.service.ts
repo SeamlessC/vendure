@@ -14,6 +14,7 @@ import {
     DeletionResponse,
     DeletionResult,
     HistoryEntryType,
+    LoyaltyPointUpdatedResponse,
     UpdateAddressInput,
     UpdateCustomerInput,
     UpdateCustomerNoteInput,
@@ -25,7 +26,10 @@ import { RequestContext } from '../../api/common/request-context';
 import { RelationPaths } from '../../api/index';
 import { ErrorResultUnion, isGraphQlErrorResult } from '../../common/error/error-result';
 import { EntityNotFoundError, InternalServerError } from '../../common/error/errors';
-import { EmailAddressConflictError as EmailAddressConflictAdminError } from '../../common/error/generated-graphql-admin-errors';
+import {
+    EmailAddressConflictError as EmailAddressConflictAdminError,
+    LoyaltyPointsNotEnoughError,
+} from '../../common/error/generated-graphql-admin-errors';
 import {
     EmailAddressConflictError,
     IdentifierChangeTokenExpiredError,
@@ -645,6 +649,88 @@ export class CustomerService {
 
     /**
      * @description
+     * Given a valid email update token published in a {@link IdentifierChangeRequestEvent}, this method
+     * will update the Customer Loyalty Points.
+     */
+    async addLoyaltyPoints(
+        ctx: RequestContext,
+        userId: ID,
+        loyaltyPoints: number,
+    ): Promise<LoyaltyPointUpdatedResponse> {
+        const user = await this.userService.getUserById(ctx, userId);
+        if (!user) {
+            return new EntityNotFoundError('User', userId);
+        }
+        const customer = await this.findOneByUserId(ctx, user.id);
+        if (!customer) {
+            return new EntityNotFoundError('User', user.id);
+        }
+        const input: UpdateCustomerInput = {
+            id: userId,
+            customFields: { loyaltyPoints },
+        };
+
+        const oldLoyaltyPoints = customer.customFields.loyaltyPoints;
+        input.customFields.loyaltyPoints = input.customFields.loyaltyPoints + oldLoyaltyPoints;
+
+        const updatedCustomer = patchEntity(customer, input);
+        await this.connection.getRepository(ctx, Customer).save(updatedCustomer, { reload: false });
+        await this.customFieldRelationService.updateRelations(ctx, Customer, input, updatedCustomer);
+        await this.historyService.createHistoryEntryForCustomer({
+            customerId: customer.id,
+            ctx,
+            type: HistoryEntryType.CUSTOMER_DETAIL_UPDATED,
+            data: {
+                input,
+            },
+        });
+        this.eventBus.publish(new CustomerEvent(ctx, customer, 'updated', input));
+        return { message: 'SUCCESS', data: { 'New Loyalty Points': customer.customFields.loyaltyPoints } };
+    }
+
+    /**
+     * @description
+     * Given a valid email update token published in a {@link IdentifierChangeRequestEvent}, this method
+     * will update the Customer Loyalty Points.
+     */
+    async redeemLoyaltyPoints(ctx: RequestContext, userId: ID): Promise<LoyaltyPointUpdatedResponse> {
+        const user = await this.userService.getUserById(ctx, userId);
+        if (!user) {
+            return new EntityNotFoundError('User', userId);
+        }
+        const customer = await this.findOneByUserId(ctx, user.id);
+        if (!customer) {
+            return new EntityNotFoundError('User', userId);
+        }
+        const input: UpdateCustomerInput = {
+            id: userId,
+            customFields: { loyaltyPoints: 0 },
+        };
+
+        const oldLoyaltyPoints = customer.customFields.loyaltyPoints;
+        if (!!oldLoyaltyPoints && oldLoyaltyPoints > 1000) {
+            input.customFields.loyaltyPoints = oldLoyaltyPoints - 1000;
+        } else {
+            return new LoyaltyPointsNotEnoughError();
+        }
+
+        const updatedCustomer = patchEntity(customer, input);
+        await this.connection.getRepository(ctx, Customer).save(updatedCustomer, { reload: false });
+        await this.customFieldRelationService.updateRelations(ctx, Customer, input, updatedCustomer);
+        await this.historyService.createHistoryEntryForCustomer({
+            customerId: customer.id,
+            ctx,
+            type: HistoryEntryType.CUSTOMER_DETAIL_UPDATED,
+            data: {
+                input,
+            },
+        });
+        this.eventBus.publish(new CustomerEvent(ctx, customer, 'updated', input));
+        return { message: 'SUCCESS', data: { 'New Loyalty Points': customer.customFields.loyaltyPoints } };
+    }
+
+    /**
+     * @description
      * For guest checkouts, we assume that a matching email address is the same customer.
      */
     async createOrUpdate(
@@ -822,7 +908,7 @@ export class CustomerService {
             return {
                 result: DeletionResult.DELETED,
             };
-        } catch (e) {
+        } catch (e: any) {
             return {
                 result: DeletionResult.NOT_DELETED,
                 message: e.message,

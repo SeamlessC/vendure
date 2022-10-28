@@ -2304,6 +2304,13 @@ export type MultipleOrderError = ErrorResult & {
   message: Scalars['String'];
 };
 
+export type LoyaltyPointsNotEnoughError =  ErrorResult & {
+    __typename?: 'LoyaltyPointsNotEnoughError';
+  errorCode: ErrorCode;
+  message: Scalars['String'];
+}
+
+
 export type Mutation = {
   __typename?: 'Mutation';
   /** Add Customers to a CustomerGroup */

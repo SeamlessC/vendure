@@ -1,7 +1,7 @@
 {
     "name": "dev-server",
     "version": "1.6.5",
-    "main": "index.js",
+    "main": "index.ts",
     "license": "MIT",
     "private": true,
     "scripts": {
