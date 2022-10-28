@@ -14,6 +14,7 @@ import {
     DeletionResponse,
     DeletionResult,
     HistoryEntryType,
+    LoyaltyPointUpdatedResponse,
     UpdateAddressInput,
     UpdateCustomerInput,
     UpdateCustomerNoteInput,
@@ -25,7 +26,10 @@ import { RequestContext } from '../../api/common/request-context';
 import { RelationPaths } from '../../api/index';
 import { ErrorResultUnion, isGraphQlErrorResult } from '../../common/error/error-result';
 import { EntityNotFoundError, InternalServerError } from '../../common/error/errors';
-import { EmailAddressConflictError as EmailAddressConflictAdminError } from '../../common/error/generated-graphql-admin-errors';
+import {
+    EmailAddressConflictError as EmailAddressConflictAdminError,
+    LoyaltyPointsNotEnoughError,
+} from '../../common/error/generated-graphql-admin-errors';
 import {
     EmailAddressConflictError,
     IdentifierChangeTokenExpiredError,
@@ -651,16 +655,21 @@ export class CustomerService {
     async addLoyaltyPoints(
         ctx: RequestContext,
         userId: ID,
-        input: UpdateCustomerInput,
-    ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
+        loyaltyPoints: number,
+    ): Promise<LoyaltyPointUpdatedResponse> {
         const user = await this.userService.getUserById(ctx, userId);
         if (!user) {
-            return false;
+            throw new EntityNotFoundError('User', userId);
         }
         const customer = await this.findOneByUserId(ctx, user.id);
         if (!customer) {
-            return false;
+            throw new EntityNotFoundError('Customer', user.id);
         }
+        const input: UpdateCustomerInput = {
+            id: userId,
+            customFields: { loyaltyPoints },
+        };
+
         const oldLoyaltyPoints = customer.customFields.loyaltyPoints;
         input.customFields.loyaltyPoints = input.customFields.loyaltyPoints + oldLoyaltyPoints;
 
@@ -676,7 +685,7 @@ export class CustomerService {
             },
         });
         this.eventBus.publish(new CustomerEvent(ctx, customer, 'updated', input));
-        return assertFound(this.findOne(ctx, customer.id));
+        return { message: 'SUCCESS', data: { 'New Loyalty Points': customer.customFields.loyaltyPoints } };
     }
 
     /**
@@ -684,17 +693,14 @@ export class CustomerService {
      * Given a valid email update token published in a {@link IdentifierChangeRequestEvent}, this method
      * will update the Customer Loyalty Points.
      */
-    async removeLoyaltyPoints(
-        ctx: RequestContext,
-        userId: ID,
-    ): Promise<boolean | ErrorResultUnion<UpdateCustomerResult, Customer>> {
+    async redeemLoyaltyPoints(ctx: RequestContext, userId: ID): Promise<LoyaltyPointUpdatedResponse> {
         const user = await this.userService.getUserById(ctx, userId);
         if (!user) {
-            return false;
+            throw new EntityNotFoundError('User', userId);
         }
         const customer = await this.findOneByUserId(ctx, user.id);
         if (!customer) {
-            return false;
+            throw new EntityNotFoundError('User', userId);
         }
         const input: UpdateCustomerInput = {
             id: userId,
@@ -704,6 +710,8 @@ export class CustomerService {
         const oldLoyaltyPoints = customer.customFields.loyaltyPoints;
         if (!!oldLoyaltyPoints && oldLoyaltyPoints > 1000) {
             input.customFields.loyaltyPoints = oldLoyaltyPoints - 1000;
+        } else {
+            throw new LoyaltyPointsNotEnoughError();
         }
 
         const updatedCustomer = patchEntity(customer, input);
@@ -718,7 +726,7 @@ export class CustomerService {
             },
         });
         this.eventBus.publish(new CustomerEvent(ctx, customer, 'updated', input));
-        return assertFound(this.findOne(ctx, customer.id));
+        return { message: 'SUCCESS', data: { 'New Loyalty Points': customer.customFields.loyaltyPoints } };
     }
 
     /**

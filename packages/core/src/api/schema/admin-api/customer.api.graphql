@@ -10,12 +10,6 @@ type Mutation {
     "Update an existing Customer"
     updateCustomer(input: UpdateCustomerInput!): UpdateCustomerResult!
 
-    "add Loyalty points to existing customer"
-    addCustomerLoyaltyPoints(input: UpdateCustomerInput!): UpdateCustomerResult!
-
-    "remove Loyalty Points from existing customer"
-    removeCustomerLoyaltyPoints(input: UpdateCustomerInput!): UpdateCustomerResult!
-
     "Delete a Customer"
     deleteCustomer(id: ID!): DeletionResponse!
 
@@ -31,6 +25,11 @@ type Mutation {
     addNoteToCustomer(input: AddNoteToCustomerInput!): Customer!
     updateCustomerNote(input: UpdateCustomerNoteInput!): HistoryEntry!
     deleteCustomerNote(id: ID!): DeletionResponse!
+}
+
+extend type Mutation {
+    addCustomerLoyaltyPoints(id: ID!, loyaltyPoints: Float!): LoyaltyPointUpdatedResponse!
+    redeemCustomerLoyaltyPoints(id: ID!): LoyaltyPointUpdatedResponse!
 }
 
 input UpdateCustomerInput {
@@ -58,6 +57,16 @@ input AddNoteToCustomerInput {
 input UpdateCustomerNoteInput {
     noteId: ID!
     note: String!
+}
+
+input MutationAddCustomerLoyaltyPointsArgs {
+    id: ID!
+    loyaltyPoints: Float!
+}
+
+type LoyaltyPointUpdatedResponse {
+    message: String!
+    data: JSON!
 }
 
 union CreateCustomerResult = Customer | EmailAddressConflictError
