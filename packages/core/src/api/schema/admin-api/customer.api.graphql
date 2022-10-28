@@ -64,10 +64,14 @@ input MutationAddCustomerLoyaltyPointsArgs {
     loyaltyPoints: Float!
 }
 
-type LoyaltyPointUpdatedResponse {
+type LoyaltyPointUpdatedSuccessResponse {
     message: String!
     data: JSON!
 }
 
 union CreateCustomerResult = Customer | EmailAddressConflictError
 union UpdateCustomerResult = Customer | EmailAddressConflictError
+union LoyaltyPointUpdatedResponse =
+      LoyaltyPointUpdatedSuccessResponse
+    | LoyaltyPointsNotEnoughError
+    | EntityNotFoundError

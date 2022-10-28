@@ -659,11 +659,11 @@ export class CustomerService {
     ): Promise<LoyaltyPointUpdatedResponse> {
         const user = await this.userService.getUserById(ctx, userId);
         if (!user) {
-            throw new EntityNotFoundError('User', userId);
+            return new EntityNotFoundError('User', userId);
         }
         const customer = await this.findOneByUserId(ctx, user.id);
         if (!customer) {
-            throw new EntityNotFoundError('Customer', user.id);
+            return new EntityNotFoundError('User', user.id);
         }
         const input: UpdateCustomerInput = {
             id: userId,
@@ -696,11 +696,11 @@ export class CustomerService {
     async redeemLoyaltyPoints(ctx: RequestContext, userId: ID): Promise<LoyaltyPointUpdatedResponse> {
         const user = await this.userService.getUserById(ctx, userId);
         if (!user) {
-            throw new EntityNotFoundError('User', userId);
+            return new EntityNotFoundError('User', userId);
         }
         const customer = await this.findOneByUserId(ctx, user.id);
         if (!customer) {
-            throw new EntityNotFoundError('User', userId);
+            return new EntityNotFoundError('User', userId);
         }
         const input: UpdateCustomerInput = {
             id: userId,
@@ -711,7 +711,7 @@ export class CustomerService {
         if (!!oldLoyaltyPoints && oldLoyaltyPoints > 1000) {
             input.customFields.loyaltyPoints = oldLoyaltyPoints - 1000;
         } else {
-            throw new LoyaltyPointsNotEnoughError();
+            return new LoyaltyPointsNotEnoughError();
         }
 
         const updatedCustomer = patchEntity(customer, input);

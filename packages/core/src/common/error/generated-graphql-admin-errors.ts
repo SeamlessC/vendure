@@ -29,17 +29,6 @@ export class AlreadyRefundedError extends ErrorResult {
   }
 }
 
-
-  export class LoyaltyPointsNotEnoughError extends ErrorResult {
-    readonly __typename = 'LoyaltyPointsNotEnoughError';
-    readonly errorCode = 'LOYALTY_POINTS_NOT_ENOUGH_TO_REDEEM_ERROR' as any;
-    readonly message = 'LOYALTY_POINTS_NOT_ENOUGH_TO_REDEEM_ERROR';
-    constructor(
-    ) {
-      super();
-    }
-  }
-
 export class CancelActiveOrderError extends ErrorResult {
   readonly __typename = 'CancelActiveOrderError';
   readonly errorCode = 'CANCEL_ACTIVE_ORDER_ERROR' as any;
@@ -333,6 +322,16 @@ export class PaymentMethodMissingError extends ErrorResult {
     super();
   }
 }
+
+export class LoyaltyPointsNotEnoughError extends ErrorResult {
+    readonly __typename = 'LoyaltyPointsNotEnoughError';
+    readonly errorCode = 'LOYALTY_POINTS_NOT_ENOUGH_ERROR' as any;
+    readonly message = 'LOYALTY_POINTS_NOT_ENOUGH_ERROR';
+    constructor() {
+        super();
+    }
+}
+
 
 export class PaymentOrderMismatchError extends ErrorResult {
   readonly __typename = 'PaymentOrderMismatchError';

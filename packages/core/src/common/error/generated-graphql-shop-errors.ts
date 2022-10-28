@@ -92,7 +92,6 @@ export class IdentifierChangeTokenInvalidError extends ErrorResult {
   }
 }
 
-
 export class IneligiblePaymentMethodError extends ErrorResult {
   readonly __typename = 'IneligiblePaymentMethodError';
   readonly errorCode = 'INELIGIBLE_PAYMENT_METHOD_ERROR' as any;
