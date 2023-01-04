@@ -1,0 +1,11 @@
+{
+  "main": "../bundles/vendure-admin-ui-login.umd.js",
+  "module": "../fesm2015/vendure-admin-ui-login.js",
+  "es2015": "../fesm2015/vendure-admin-ui-login.js",
+  "esm2015": "../esm2015/login/vendure-admin-ui-login.js",
+  "fesm2015": "../fesm2015/vendure-admin-ui-login.js",
+  "typings": "vendure-admin-ui-login.d.ts",
+  "metadata": "vendure-admin-ui-login.metadata.json",
+  "sideEffects": false,
+  "name": "@vendure/admin-ui/login"
+}

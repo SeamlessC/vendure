@@ -1,0 +1,35 @@
+import { ChangeDetectorRef, OnDestroy, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { DataService, GetCollectionList, LanguageCode, ModalService, NotificationService, SelectionManager, ServerConfigService } from '@vendure/admin-ui/core';
+import { Observable } from 'rxjs';
+import { CollectionPartial, RearrangeEvent } from '../collection-tree/collection-tree.component';
+export declare class CollectionListComponent implements OnInit, OnDestroy {
+    private dataService;
+    private notificationService;
+    private modalService;
+    private router;
+    private route;
+    private serverConfigService;
+    private changeDetectorRef;
+    filterTermControl: FormControl;
+    activeCollectionId$: Observable<string | null>;
+    activeCollectionTitle$: Observable<string>;
+    items$: Observable<GetCollectionList.Items[]>;
+    availableLanguages$: Observable<LanguageCode[]>;
+    contentLanguage$: Observable<LanguageCode>;
+    expandAll: boolean;
+    expandedIds: string[];
+    selectionManager: SelectionManager<CollectionPartial>;
+    private queryResult;
+    private destroy$;
+    constructor(dataService: DataService, notificationService: NotificationService, modalService: ModalService, router: Router, route: ActivatedRoute, serverConfigService: ServerConfigService, changeDetectorRef: ChangeDetectorRef);
+    ngOnInit(): void;
+    ngOnDestroy(): void;
+    toggleExpandAll(): void;
+    onRearrange(event: RearrangeEvent): void;
+    deleteCollection(id: string): void;
+    closeContents(): void;
+    setLanguage(code: LanguageCode): void;
+    refresh(): void;
+}

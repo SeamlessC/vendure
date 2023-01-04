@@ -1,0 +1,66 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker';
+import { BaseListComponent, DataService, DeletionResult, ModalService, NotificationService, } from '@vendure/admin-ui/core';
+import { EMPTY } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+export class PaymentMethodListComponent extends BaseListComponent {
+    constructor(dataService, router, route, modalService, notificationService) {
+        super(router, route);
+        this.dataService = dataService;
+        this.modalService = modalService;
+        this.notificationService = notificationService;
+        super.setQueryFn((...args) => this.dataService.settings.getPaymentMethods(...args).refetchOnChannelChange(), data => data.paymentMethods);
+    }
+    deletePaymentMethod(paymentMethodId) {
+        this.showModalAndDelete(paymentMethodId)
+            .pipe(switchMap(response => {
+            if (response.result === DeletionResult.DELETED) {
+                return [true];
+            }
+            else {
+                return this.showModalAndDelete(paymentMethodId, response.message || '').pipe(map(r => r.result === DeletionResult.DELETED));
+            }
+        }), 
+        // Refresh the cached facets to reflect the changes
+        switchMap(() => this.dataService.settings.getPaymentMethods(100).single$))
+            .subscribe(() => {
+            this.notificationService.success(_('common.notify-delete-success'), {
+                entity: 'PaymentMethod',
+            });
+            this.refresh();
+        }, err => {
+            this.notificationService.error(_('common.notify-delete-error'), {
+                entity: 'PaymentMethod',
+            });
+        });
+    }
+    showModalAndDelete(paymentMethodId, message) {
+        return this.modalService
+            .dialog({
+            title: _('settings.confirm-delete-payment-method'),
+            body: message,
+            buttons: [
+                { type: 'secondary', label: _('common.cancel') },
+                { type: 'danger', label: _('common.delete'), returnValue: true },
+            ],
+        })
+            .pipe(switchMap(res => res ? this.dataService.settings.deletePaymentMethod(paymentMethodId, !!message) : EMPTY), map(res => res.deletePaymentMethod));
+    }
+}
+PaymentMethodListComponent.decorators = [
+    { type: Component, args: [{
+                selector: 'vdr-payment-method-list',
+                template: "<vdr-action-bar>\n    <vdr-ab-right>\n        <vdr-action-bar-items locationId=\"payment-method-list\"></vdr-action-bar-items>\n        <a class=\"btn btn-primary\" [routerLink]=\"['./create']\" *vdrIfPermissions=\"['CreateSettings', 'CreatePaymentMethod']\">\n            <clr-icon shape=\"plus\"></clr-icon>\n            {{ 'settings.create-new-payment-method' | translate }}\n        </a>\n    </vdr-ab-right>\n</vdr-action-bar>\n\n<vdr-data-table\n    [items]=\"items$ | async\"\n    [itemsPerPage]=\"itemsPerPage$ | async\"\n    [totalItems]=\"totalItems$ | async\"\n    [currentPage]=\"currentPage$ | async\"\n    (pageChange)=\"setPageNumber($event)\"\n    (itemsPerPageChange)=\"setItemsPerPage($event)\"\n>\n    <vdr-dt-column>{{ 'common.code' | translate }}</vdr-dt-column>\n    <vdr-dt-column>{{ 'common.enabled' | translate }}</vdr-dt-column>\n    <vdr-dt-column></vdr-dt-column>\n    <vdr-dt-column></vdr-dt-column>\n    <ng-template let-paymentMethod=\"item\">\n        <td class=\"left align-middle\">{{ paymentMethod.code }}</td>\n        <td class=\"left align-middle\">{{ paymentMethod.enabled }}</td>\n        <td class=\"right align-middle\">\n            <vdr-table-row-action\n                iconShape=\"edit\"\n                [label]=\"'common.edit' | translate\"\n                [linkTo]=\"['./', paymentMethod.id]\"\n            ></vdr-table-row-action>\n        </td>\n        <td class=\"right align-middle\">\n            <vdr-dropdown>\n                <button type=\"button\" class=\"btn btn-link btn-sm\" vdrDropdownTrigger>\n                    {{ 'common.actions' | translate }}\n                    <clr-icon shape=\"caret down\"></clr-icon>\n                </button>\n                <vdr-dropdown-menu vdrPosition=\"bottom-right\">\n                    <button\n                        type=\"button\"\n                        class=\"delete-button\"\n                        (click)=\"deletePaymentMethod(paymentMethod.id)\"\n                        [disabled]=\"!(['DeleteSettings', 'DeletePaymentMethod'] | hasPermission)\"\n                        vdrDropdownItem\n                    >\n                        <clr-icon shape=\"trash\" class=\"is-danger\"></clr-icon>\n                        {{ 'common.delete' | translate }}\n                    </button>\n                </vdr-dropdown-menu>\n            </vdr-dropdown>\n        </td>\n    </ng-template>\n</vdr-data-table>\n",
+                changeDetection: ChangeDetectionStrategy.OnPush,
+                styles: [""]
+            },] }
+];
+PaymentMethodListComponent.ctorParameters = () => [
+    { type: DataService },
+    { type: Router },
+    { type: ActivatedRoute },
+    { type: ModalService },
+    { type: NotificationService }
+];
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicGF5bWVudC1tZXRob2QtbGlzdC5jb21wb25lbnQuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi9zcmMvbGliL3NldHRpbmdzL3NyYy9jb21wb25lbnRzL3BheW1lbnQtbWV0aG9kLWxpc3QvcGF5bWVudC1tZXRob2QtbGlzdC5jb21wb25lbnQudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsT0FBTyxFQUFFLHVCQUF1QixFQUFFLFNBQVMsRUFBRSxNQUFNLGVBQWUsQ0FBQztBQUNuRSxPQUFPLEVBQUUsY0FBYyxFQUFFLE1BQU0sRUFBRSxNQUFNLGlCQUFpQixDQUFDO0FBQ3pELE9BQU8sRUFBRSxNQUFNLElBQUksQ0FBQyxFQUFFLE1BQU0seUNBQXlDLENBQUM7QUFDdEUsT0FBTyxFQUNILGlCQUFpQixFQUNqQixXQUFXLEVBQ1gsY0FBYyxFQUVkLFlBQVksRUFDWixtQkFBbUIsR0FDdEIsTUFBTSx3QkFBd0IsQ0FBQztBQUNoQyxPQUFPLEVBQUUsS0FBSyxFQUFFLE1BQU0sTUFBTSxDQUFDO0FBQzdCLE9BQU8sRUFBRSxHQUFHLEVBQUUsU0FBUyxFQUFFLE1BQU0sZ0JBQWdCLENBQUM7QUFRaEQsTUFBTSxPQUFPLDBCQUEyQixTQUFRLGlCQUcvQztJQUNHLFlBQ1ksV0FBd0IsRUFDaEMsTUFBYyxFQUNkLEtBQXFCLEVBQ2IsWUFBMEIsRUFDMUIsbUJBQXdDO1FBRWhELEtBQUssQ0FBQyxNQUFNLEVBQUUsS0FBSyxDQUFDLENBQUM7UUFOYixnQkFBVyxHQUFYLFdBQVcsQ0FBYTtRQUd4QixpQkFBWSxHQUFaLFlBQVksQ0FBYztRQUMxQix3QkFBbUIsR0FBbkIsbUJBQW1CLENBQXFCO1FBR2hELEtBQUssQ0FBQyxVQUFVLENBQ1osQ0FBQyxHQUFHLElBQVcsRUFBRSxFQUFFLENBQUMsSUFBSSxDQUFDLFdBQVcsQ0FBQyxRQUFRLENBQUMsaUJBQWlCLENBQUMsR0FBRyxJQUFJLENBQUMsQ0FBQyxzQkFBc0IsRUFBRSxFQUNqRyxJQUFJLENBQUMsRUFBRSxDQUFDLElBQUksQ0FBQyxjQUFjLENBQzlCLENBQUM7SUFDTixDQUFDO0lBRUQsbUJBQW1CLENBQUMsZUFBdUI7UUFDdkMsSUFBSSxDQUFDLGtCQUFrQixDQUFDLGVBQWUsQ0FBQzthQUNuQyxJQUFJLENBQ0QsU0FBUyxDQUFDLFFBQVEsQ0FBQyxFQUFFO1lBQ2pCLElBQUksUUFBUSxDQUFDLE1BQU0sS0FBSyxjQUFjLENBQUMsT0FBTyxFQUFFO2dCQUM1QyxPQUFPLENBQUMsSUFBSSxDQUFDLENBQUM7YUFDakI7aUJBQU07Z0JBQ0gsT0FBTyxJQUFJLENBQUMsa0JBQWtCLENBQUMsZUFBZSxFQUFFLFFBQVEsQ0FBQyxPQUFPLElBQUksRUFBRSxDQUFDLENBQUMsSUFBSSxDQUN4RSxHQUFHLENBQUMsQ0FBQyxDQUFDLEVBQUUsQ0FBQyxDQUFDLENBQUMsTUFBTSxLQUFLLGNBQWMsQ0FBQyxPQUFPLENBQUMsQ0FDaEQsQ0FBQzthQUNMO1FBQ0wsQ0FBQyxDQUFDO1FBQ0YsbURBQW1EO1FBQ25ELFNBQVMsQ0FBQyxHQUFHLEVBQUUsQ0FBQyxJQUFJLENBQUMsV0FBVyxDQUFDLFFBQVEsQ0FBQyxpQkFBaUIsQ0FBQyxHQUFHLENBQUMsQ0FBQyxPQUFPLENBQUMsQ0FDNUU7YUFDQSxTQUFTLENBQ04sR0FBRyxFQUFFO1lBQ0QsSUFBSSxDQUFDLG1CQUFtQixDQUFDLE9BQU8sQ0FBQyxDQUFDLENBQUMsOEJBQThCLENBQUMsRUFBRTtnQkFDaEUsTUFBTSxFQUFFLGVBQWU7YUFDMUIsQ0FBQyxDQUFDO1lBQ0gsSUFBSSxDQUFDLE9BQU8sRUFBRSxDQUFDO1FBQ25CLENBQUMsRUFDRCxHQUFHLENBQUMsRUFBRTtZQUNGLElBQUksQ0FBQyxtQkFBbUIsQ0FBQyxLQUFLLENBQUMsQ0FBQyxDQUFDLDRCQUE0QixDQUFDLEVBQUU7Z0JBQzVELE1BQU0sRUFBRSxlQUFlO2FBQzFCLENBQUMsQ0FBQztRQUNQLENBQUMsQ0FDSixDQUFDO0lBQ1YsQ0FBQztJQUVPLGtCQUFrQixDQUFDLGVBQXVCLEVBQUUsT0FBZ0I7UUFDaEUsT0FBTyxJQUFJLENBQUMsWUFBWTthQUNuQixNQUFNLENBQUM7WUFDSixLQUFLLEVBQUUsQ0FBQyxDQUFDLHdDQUF3QyxDQUFDO1lBQ2xELElBQUksRUFBRSxPQUFPO1lBQ2IsT0FBTyxFQUFFO2dCQUNMLEVBQUUsSUFBSSxFQUFFLFdBQVcsRUFBRSxLQUFLLEVBQUUsQ0FBQyxDQUFDLGVBQWUsQ0FBQyxFQUFFO2dCQUNoRCxFQUFFLElBQUksRUFBRSxRQUFRLEVBQUUsS0FBSyxFQUFFLENBQUMsQ0FBQyxlQUFlLENBQUMsRUFBRSxXQUFXLEVBQUUsSUFBSSxFQUFFO2FBQ25FO1NBQ0osQ0FBQzthQUNELElBQUksQ0FDRCxTQUFTLENBQUMsR0FBRyxDQUFDLEVBQUUsQ0FDWixHQUFHLENBQUMsQ0FBQyxDQUFDLElBQUksQ0FBQyxXQUFXLENBQUMsUUFBUSxDQUFDLG1CQUFtQixDQUFDLGVBQWUsRUFBRSxDQUFDLENBQUMsT0FBTyxDQUFDLENBQUMsQ0FBQyxDQUFDLEtBQUssQ0FDMUYsRUFDRCxHQUFHLENBQUMsR0FBRyxDQUFDLEVBQUUsQ0FBQyxHQUFHLENBQUMsbUJBQW1CLENBQUMsQ0FDdEMsQ0FBQztJQUNWLENBQUM7OztZQXRFSixTQUFTLFNBQUM7Z0JBQ1AsUUFBUSxFQUFFLHlCQUF5QjtnQkFDbkMsczRFQUFtRDtnQkFFbkQsZUFBZSxFQUFFLHVCQUF1QixDQUFDLE1BQU07O2FBQ2xEOzs7WUFkRyxXQUFXO1lBSlUsTUFBTTtZQUF0QixjQUFjO1lBT25CLFlBQVk7WUFDWixtQkFBbUIiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBDaGFuZ2VEZXRlY3Rpb25TdHJhdGVneSwgQ29tcG9uZW50IH0gZnJvbSAnQGFuZ3VsYXIvY29yZSc7XG5pbXBvcnQgeyBBY3RpdmF0ZWRSb3V0ZSwgUm91dGVyIH0gZnJvbSAnQGFuZ3VsYXIvcm91dGVyJztcbmltcG9ydCB7IG1hcmtlciBhcyBfIH0gZnJvbSAnQGJpZXNiamVyZy9uZ3gtdHJhbnNsYXRlLWV4dHJhY3QtbWFya2VyJztcbmltcG9ydCB7XG4gICAgQmFzZUxpc3RDb21wb25lbnQsXG4gICAgRGF0YVNlcnZpY2UsXG4gICAgRGVsZXRpb25SZXN1bHQsXG4gICAgR2V0UGF5bWVudE1ldGhvZExpc3QsXG4gICAgTW9kYWxTZXJ2aWNlLFxuICAgIE5vdGlmaWNhdGlvblNlcnZpY2UsXG59IGZyb20gJ0B2ZW5kdXJlL2FkbWluLXVpL2NvcmUnO1xuaW1wb3J0IHsgRU1QVFkgfSBmcm9tICdyeGpzJztcbmltcG9ydCB7IG1hcCwgc3dpdGNoTWFwIH0gZnJvbSAncnhqcy9vcGVyYXRvcnMnO1xuXG5AQ29tcG9uZW50KHtcbiAgICBzZWxlY3RvcjogJ3Zkci1wYXltZW50LW1ldGhvZC1saXN0JyxcbiAgICB0ZW1wbGF0ZVVybDogJy4vcGF5bWVudC1tZXRob2QtbGlzdC5jb21wb25lbnQuaHRtbCcsXG4gICAgc3R5bGVVcmxzOiBbJy4vcGF5bWVudC1tZXRob2QtbGlzdC5jb21wb25lbnQuc2NzcyddLFxuICAgIGNoYW5nZURldGVjdGlvbjogQ2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3kuT25QdXNoLFxufSlcbmV4cG9ydCBjbGFzcyBQYXltZW50TWV0aG9kTGlzdENvbXBvbmVudCBleHRlbmRzIEJhc2VMaXN0Q29tcG9uZW50PFxuICAgIEdldFBheW1lbnRNZXRob2RMaXN0LlF1ZXJ5LFxuICAgIEdldFBheW1lbnRNZXRob2RMaXN0Lkl0ZW1zXG4+IHtcbiAgICBjb25zdHJ1Y3RvcihcbiAgICAgICAgcHJpdmF0ZSBkYXRhU2VydmljZTogRGF0YVNlcnZpY2UsXG4gICAgICAgIHJvdXRlcjogUm91dGVyLFxuICAgICAgICByb3V0ZTogQWN0aXZhdGVkUm91dGUsXG4gICAgICAgIHByaXZhdGUgbW9kYWxTZXJ2aWNlOiBNb2RhbFNlcnZpY2UsXG4gICAgICAgIHByaXZhdGUgbm90aWZpY2F0aW9uU2VydmljZTogTm90aWZpY2F0aW9uU2VydmljZSxcbiAgICApIHtcbiAgICAgICAgc3VwZXIocm91dGVyLCByb3V0ZSk7XG4gICAgICAgIHN1cGVyLnNldFF1ZXJ5Rm4oXG4gICAgICAgICAgICAoLi4uYXJnczogYW55W10pID0+IHRoaXMuZGF0YVNlcnZpY2Uuc2V0dGluZ3MuZ2V0UGF5bWVudE1ldGhvZHMoLi4uYXJncykucmVmZXRjaE9uQ2hhbm5lbENoYW5nZSgpLFxuICAgICAgICAgICAgZGF0YSA9PiBkYXRhLnBheW1lbnRNZXRob2RzLFxuICAgICAgICApO1xuICAgIH1cblxuICAgIGRlbGV0ZVBheW1lbnRNZXRob2QocGF5bWVudE1ldGhvZElkOiBzdHJpbmcpIHtcbiAgICAgICAgdGhpcy5zaG93TW9kYWxBbmREZWxldGUocGF5bWVudE1ldGhvZElkKVxuICAgICAgICAgICAgLnBpcGUoXG4gICAgICAgICAgICAgICAgc3dpdGNoTWFwKHJlc3BvbnNlID0+IHtcbiAgICAgICAgICAgICAgICAgICAgaWYgKHJlc3BvbnNlLnJlc3VsdCA9PT0gRGVsZXRpb25SZXN1bHQuREVMRVRFRCkge1xuICAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIFt0cnVlXTtcbiAgICAgICAgICAgICAgICAgICAgfSBlbHNlIHtcbiAgICAgICAgICAgICAgICAgICAgICAgIHJldHVybiB0aGlzLnNob3dNb2RhbEFuZERlbGV0ZShwYXltZW50TWV0aG9kSWQsIHJlc3BvbnNlLm1lc3NhZ2UgfHwgJycpLnBpcGUoXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgbWFwKHIgPT4gci5yZXN1bHQgPT09IERlbGV0aW9uUmVzdWx0LkRFTEVURUQpLFxuICAgICAgICAgICAgICAgICAgICAgICAgKTtcbiAgICAgICAgICAgICAgICAgICAgfVxuICAgICAgICAgICAgICAgIH0pLFxuICAgICAgICAgICAgICAgIC8vIFJlZnJlc2ggdGhlIGNhY2hlZCBmYWNldHMgdG8gcmVmbGVjdCB0aGUgY2hhbmdlc1xuICAgICAgICAgICAgICAgIHN3aXRjaE1hcCgoKSA9PiB0aGlzLmRhdGFTZXJ2aWNlLnNldHRpbmdzLmdldFBheW1lbnRNZXRob2RzKDEwMCkuc2luZ2xlJCksXG4gICAgICAgICAgICApXG4gICAgICAgICAgICAuc3Vic2NyaWJlKFxuICAgICAgICAgICAgICAgICgpID0+IHtcbiAgICAgICAgICAgICAgICAgICAgdGhpcy5ub3RpZmljYXRpb25TZXJ2aWNlLnN1Y2Nlc3MoXygnY29tbW9uLm5vdGlmeS1kZWxldGUtc3VjY2VzcycpLCB7XG4gICAgICAgICAgICAgICAgICAgICAgICBlbnRpdHk6ICdQYXltZW50TWV0aG9kJyxcbiAgICAgICAgICAgICAgICAgICAgfSk7XG4gICAgICAgICAgICAgICAgICAgIHRoaXMucmVmcmVzaCgpO1xuICAgICAgICAgICAgICAgIH0sXG4gICAgICAgICAgICAgICAgZXJyID0+IHtcbiAgICAgICAgICAgICAgICAgICAgdGhpcy5ub3RpZmljYXRpb25TZXJ2aWNlLmVycm9yKF8oJ2NvbW1vbi5ub3RpZnktZGVsZXRlLWVycm9yJyksIHtcbiAgICAgICAgICAgICAgICAgICAgICAgIGVudGl0eTogJ1BheW1lbnRNZXRob2QnLFxuICAgICAgICAgICAgICAgICAgICB9KTtcbiAgICAgICAgICAgICAgICB9LFxuICAgICAgICAgICAgKTtcbiAgICB9XG5cbiAgICBwcml2YXRlIHNob3dNb2RhbEFuZERlbGV0ZShwYXltZW50TWV0aG9kSWQ6IHN0cmluZywgbWVzc2FnZT86IHN0cmluZykge1xuICAgICAgICByZXR1cm4gdGhpcy5tb2RhbFNlcnZpY2VcbiAgICAgICAgICAgIC5kaWFsb2coe1xuICAgICAgICAgICAgICAgIHRpdGxlOiBfKCdzZXR0aW5ncy5jb25maXJtLWRlbGV0ZS1wYXltZW50LW1ldGhvZCcpLFxuICAgICAgICAgICAgICAgIGJvZHk6IG1lc3NhZ2UsXG4gICAgICAgICAgICAgICAgYnV0dG9uczogW1xuICAgICAgICAgICAgICAgICAgICB7IHR5cGU6ICdzZWNvbmRhcnknLCBsYWJlbDogXygnY29tbW9uLmNhbmNlbCcpIH0sXG4gICAgICAgICAgICAgICAgICAgIHsgdHlwZTogJ2RhbmdlcicsIGxhYmVsOiBfKCdjb21tb24uZGVsZXRlJyksIHJldHVyblZhbHVlOiB0cnVlIH0sXG4gICAgICAgICAgICAgICAgXSxcbiAgICAgICAgICAgIH0pXG4gICAgICAgICAgICAucGlwZShcbiAgICAgICAgICAgICAgICBzd2l0Y2hNYXAocmVzID0+XG4gICAgICAgICAgICAgICAgICAgIHJlcyA/IHRoaXMuZGF0YVNlcnZpY2Uuc2V0dGluZ3MuZGVsZXRlUGF5bWVudE1ldGhvZChwYXltZW50TWV0aG9kSWQsICEhbWVzc2FnZSkgOiBFTVBUWSxcbiAgICAgICAgICAgICAgICApLFxuICAgICAgICAgICAgICAgIG1hcChyZXMgPT4gcmVzLmRlbGV0ZVBheW1lbnRNZXRob2QpLFxuICAgICAgICAgICAgKTtcbiAgICB9XG59XG4iXX0=

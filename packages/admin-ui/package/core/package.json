@@ -1,0 +1,11 @@
+{
+  "main": "../bundles/vendure-admin-ui-core.umd.js",
+  "module": "../fesm2015/vendure-admin-ui-core.js",
+  "es2015": "../fesm2015/vendure-admin-ui-core.js",
+  "esm2015": "../esm2015/core/vendure-admin-ui-core.js",
+  "fesm2015": "../fesm2015/vendure-admin-ui-core.js",
+  "typings": "vendure-admin-ui-core.d.ts",
+  "metadata": "vendure-admin-ui-core.metadata.json",
+  "sideEffects": false,
+  "name": "@vendure/admin-ui/core"
+}

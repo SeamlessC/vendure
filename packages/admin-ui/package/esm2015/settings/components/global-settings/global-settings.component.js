@@ -1,0 +1,89 @@
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker';
+import { BaseDetailComponent, DataService, LanguageCode, NotificationService, Permission, ServerConfigService, } from '@vendure/admin-ui/core';
+import { switchMap, tap, withLatestFrom } from 'rxjs/operators';
+export class GlobalSettingsComponent extends BaseDetailComponent {
+    constructor(router, route, serverConfigService, changeDetector, dataService, formBuilder, notificationService) {
+        super(route, router, serverConfigService, dataService);
+        this.changeDetector = changeDetector;
+        this.dataService = dataService;
+        this.formBuilder = formBuilder;
+        this.notificationService = notificationService;
+        this.languageCodes = Object.values(LanguageCode);
+        this.updatePermission = [Permission.UpdateSettings, Permission.UpdateGlobalSettings];
+        this.customFields = this.getCustomFieldConfig('GlobalSettings');
+        this.detailForm = this.formBuilder.group({
+            availableLanguages: [''],
+            trackInventory: false,
+            outOfStockThreshold: [0, Validators.required],
+            customFields: this.formBuilder.group(this.customFields.reduce((hash, field) => (Object.assign(Object.assign({}, hash), { [field.name]: '' })), {})),
+        });
+    }
+    ngOnInit() {
+        this.init();
+        this.dataService.client.userStatus().single$.subscribe(({ userStatus }) => {
+            if (!userStatus.permissions.includes(Permission.UpdateSettings)) {
+                const languagesSelect = this.detailForm.get('availableLanguages');
+                if (languagesSelect) {
+                    languagesSelect.disable();
+                }
+            }
+        });
+    }
+    save() {
+        if (!this.detailForm.dirty) {
+            return;
+        }
+        this.dataService.settings
+            .updateGlobalSettings(this.detailForm.value)
+            .pipe(tap(({ updateGlobalSettings }) => {
+            switch (updateGlobalSettings.__typename) {
+                case 'GlobalSettings':
+                    this.detailForm.markAsPristine();
+                    this.changeDetector.markForCheck();
+                    this.notificationService.success(_('common.notify-update-success'), {
+                        entity: 'Settings',
+                    });
+                    break;
+                case 'ChannelDefaultLanguageError':
+                    this.notificationService.error(updateGlobalSettings.message);
+            }
+        }), switchMap(() => this.serverConfigService.refreshGlobalSettings()), withLatestFrom(this.dataService.client.uiState().single$))
+            .subscribe(([{ globalSettings }, { uiState }]) => {
+            const availableLangs = globalSettings.availableLanguages;
+            if (availableLangs.length && !availableLangs.includes(uiState.contentLanguage)) {
+                this.dataService.client.setContentLanguage(availableLangs[0]).subscribe();
+            }
+        });
+    }
+    setFormValues(entity, languageCode) {
+        this.detailForm.patchValue({
+            availableLanguages: entity.availableLanguages,
+            trackInventory: entity.trackInventory,
+            outOfStockThreshold: entity.outOfStockThreshold,
+        });
+        if (this.customFields.length) {
+            this.setCustomFieldFormValues(this.customFields, this.detailForm.get('customFields'), entity);
+        }
+    }
+}
+GlobalSettingsComponent.decorators = [
+    { type: Component, args: [{
+                selector: 'vdr-global-settings',
+                template: "<vdr-action-bar>\n    <vdr-ab-right>\n        <vdr-action-bar-items locationId=\"global-settings-detail\"></vdr-action-bar-items>\n        <button\n            class=\"btn btn-primary\"\n            (click)=\"save()\"\n            *vdrIfPermissions=\"updatePermission\"\n            [disabled]=\"detailForm.invalid || detailForm.pristine\"\n        >\n            {{ 'common.update' | translate }}\n        </button>\n    </vdr-ab-right>\n</vdr-action-bar>\n\n<form class=\"form\" [formGroup]=\"detailForm\">\n    <vdr-form-field [label]=\"'common.available-languages' | translate\" for=\"availableLanguages\">\n        <ng-select\n            [items]=\"languageCodes\"\n            [addTag]=\"false\"\n            [hideSelected]=\"true\"\n            multiple=\"true\"\n            appendTo=\"body\"\n            formControlName=\"availableLanguages\"\n        >\n            <ng-template ng-label-tmp let-item=\"item\" let-clear=\"clear\">\n                <span class=\"ng-value-icon left\" (click)=\"clear.call(null, item)\" aria-hidden=\"true\">\n                    \u00D7\n                </span>\n                <span class=\"ng-value-label\">{{ item | localeLanguageName }} ({{ item }})</span>\n            </ng-template>\n            <ng-template ng-option-tmp let-item=\"item\">\n                {{ item | localeLanguageName }} ({{ item }})\n            </ng-template>\n        </ng-select>\n    </vdr-form-field>\n    <vdr-form-field\n        [label]=\"'settings.global-out-of-stock-threshold' | translate\"\n        for=\"outOfStockThreshold\"\n        [tooltip]=\"'settings.global-out-of-stock-threshold-tooltip' | translate\"\n    >\n        <input\n            id=\"outOfStockThreshold\"\n            type=\"number\"\n            formControlName=\"outOfStockThreshold\"\n            [readonly]=\"!(updatePermission | hasPermission)\"\n        />\n    </vdr-form-field>\n    <vdr-form-field\n        [label]=\"'settings.track-inventory-default' | translate\"\n        for=\"enabled\"\n        [tooltip]=\"'catalog.track-inventory-tooltip' | translate\"\n    >\n        <clr-toggle-wrapper>\n            <input\n                type=\"checkbox\"\n                clrToggle\n                name=\"enabled\"\n                formControlName=\"trackInventory\"\n                [vdrDisabled]=\"!(updatePermission | hasPermission)\"\n            />\n        </clr-toggle-wrapper>\n    </vdr-form-field>\n    <section formGroupName=\"customFields\" *ngIf=\"customFields.length\">\n        <label>{{ 'common.custom-fields' | translate }}</label>\n        <vdr-tabbed-custom-fields\n            entityName=\"GlobalSettings\"\n            [customFields]=\"customFields\"\n            [customFieldsFormGroup]=\"detailForm.get('customFields')\"\n            [readonly]=\"!(updatePermission | hasPermission)\"\n        ></vdr-tabbed-custom-fields>\n    </section>\n    <vdr-custom-detail-component-host\n        locationId=\"global-settings-detail\"\n        [entity$]=\"entity$\"\n        [detailForm]=\"detailForm\"\n    ></vdr-custom-detail-component-host>\n</form>\n",
+                changeDetection: ChangeDetectionStrategy.OnPush,
+                styles: ["::ng-deep ng-select .ng-value>span{margin:0!important}::ng-deep ng-select .ng-arrow-wrapper .ng-arrow{margin:0!important}::ng-deep ng-select .ng-select-container>span{margin:0!important}\n"]
+            },] }
+];
+GlobalSettingsComponent.ctorParameters = () => [
+    { type: Router },
+    { type: ActivatedRoute },
+    { type: ServerConfigService },
+    { type: ChangeDetectorRef },
+    { type: DataService },
+    { type: FormBuilder },
+    { type: NotificationService }
+];
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZ2xvYmFsLXNldHRpbmdzLmNvbXBvbmVudC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9saWIvc2V0dGluZ3Mvc3JjL2NvbXBvbmVudHMvZ2xvYmFsLXNldHRpbmdzL2dsb2JhbC1zZXR0aW5ncy5jb21wb25lbnQudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsT0FBTyxFQUFFLHVCQUF1QixFQUFFLGlCQUFpQixFQUFFLFNBQVMsRUFBVSxNQUFNLGVBQWUsQ0FBQztBQUM5RixPQUFPLEVBQUUsV0FBVyxFQUFhLFVBQVUsRUFBRSxNQUFNLGdCQUFnQixDQUFDO0FBQ3BFLE9BQU8sRUFBRSxjQUFjLEVBQUUsTUFBTSxFQUFFLE1BQU0saUJBQWlCLENBQUM7QUFDekQsT0FBTyxFQUFFLE1BQU0sSUFBSSxDQUFDLEVBQUUsTUFBTSx5Q0FBeUMsQ0FBQztBQUN0RSxPQUFPLEVBQ0gsbUJBQW1CLEVBRW5CLFdBQVcsRUFFWCxZQUFZLEVBQ1osbUJBQW1CLEVBQ25CLFVBQVUsRUFDVixtQkFBbUIsR0FDdEIsTUFBTSx3QkFBd0IsQ0FBQztBQUNoQyxPQUFPLEVBQUUsU0FBUyxFQUFFLEdBQUcsRUFBRSxjQUFjLEVBQUUsTUFBTSxnQkFBZ0IsQ0FBQztBQVFoRSxNQUFNLE9BQU8sdUJBQXdCLFNBQVEsbUJBQW1DO0lBTTVFLFlBQ0ksTUFBYyxFQUNkLEtBQXFCLEVBQ3JCLG1CQUF3QyxFQUNoQyxjQUFpQyxFQUMvQixXQUF3QixFQUMxQixXQUF3QixFQUN4QixtQkFBd0M7UUFFaEQsS0FBSyxDQUFDLEtBQUssRUFBRSxNQUFNLEVBQUUsbUJBQW1CLEVBQUUsV0FBVyxDQUFDLENBQUM7UUFML0MsbUJBQWMsR0FBZCxjQUFjLENBQW1CO1FBQy9CLGdCQUFXLEdBQVgsV0FBVyxDQUFhO1FBQzFCLGdCQUFXLEdBQVgsV0FBVyxDQUFhO1FBQ3hCLHdCQUFtQixHQUFuQixtQkFBbUIsQ0FBcUI7UUFWcEQsa0JBQWEsR0FB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QUFRLENBQUMsT0FBTyxDQUFDLGVBQWUsQ0FBQyxFQUFFO2dCQUM1RSxJQUFJLENBQUMsV0FBVyxDQUFDLE1BQU0sQ0FBQyxrQkFBa0IsQ0FBQyxjQUFjLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQyxTQUFTLEVBQUUsQ0FBQzthQUM3RTtRQUNMLENBQUMsQ0FBQyxDQUFDO0lBQ1gsQ0FBQztJQUVTLGFBQWEsQ0FBQyxNQUFzQixFQUFFLFlBQTBCO1FBQ3RFLElBQUksQ0FBQyxVQUFVLENBQUMsVUFBVSxDQUFDO1lBQ3ZCLGtCQUFrQixFQUFFLE1BQU0sQ0FBQyxrQkFBa0I7WUFDN0MsY0FBYyxFQUFFLE1BQU0sQ0FBQyxjQUFjO1lBQ3JDLG1CQUFtQixFQUFFLE1BQU0sQ0FBQyxtQkFBbUI7U0FDbEQsQ0FBQyxDQUFDO1FBQ0gsSUFBSSxJQUFJLENBQUMsWUFBWSxDQUFDLE1BQU0sRUFBRTtZQUMxQixJQUFJLENBQUMsd0JBQXdCLENBQUMsSUFBSSxDQUFDLFlBQVksRUFBRSxJQUFJLENBQUMsVUFBVSxDQUFDLEdBQUcsQ0FBQyxjQUFjLENBQUMsRUFBRSxNQUFNLENBQUMsQ0FBQztTQUNqRztJQUNMLENBQUM7OztZQXRGSixTQUFTLFNBQUM7Z0JBQ1AsUUFBUSxFQUFFLHFCQUFxQjtnQkFDL0IsK2dHQUErQztnQkFFL0MsZUFBZSxFQUFFLHVCQUF1QixDQUFDLE1BQU07O2FBQ2xEOzs7WUFuQndCLE1BQU07WUFBdEIsY0FBYztZQVVuQixtQkFBbUI7WUFaVyxpQkFBaUI7WUFPL0MsV0FBVztZQU5OLFdBQVc7WUFTaEIsbUJBQW1CIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgQ2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3ksIENoYW5nZURldGVjdG9yUmVmLCBDb21wb25lbnQsIE9uSW5pdCB9IGZyb20gJ0Bhbmd1bGFyL2NvcmUnO1xuaW1wb3J0IHsgRm9ybUJ1aWxkZXIsIEZvcm1Hcm91cCwgVmFsaWRhdG9ycyB9IGZyb20gJ0Bhbmd1bGFyL2Zvcm1zJztcbmltcG9ydCB7IEFjdGl2YXRlZFJvdXRlLCBSb3V0ZXIgfSBmcm9tICdAYW5ndWxhci9yb3V0ZXInO1xuaW1wb3J0IHsgbWFya2VyIGFzIF8gfSBmcm9tICdAYmllc2JqZXJnL25neC10cmFuc2xhdGUtZXh0cmFjdC1tYXJrZXInO1xuaW1wb3J0IHtcbiAgICBCYXNlRGV0YWlsQ29tcG9uZW50LFxuICAgIEN1c3RvbUZpZWxkQ29uZmlnLFxuICAgIERhdGFTZXJ2aWNlLFxuICAgIEdsb2JhbFNldHRpbmdzLFxuICAgIExhbmd1YWdlQ29kZSxcbiAgICBOb3RpZmljYXRpb25TZXJ2aWNlLFxuICAgIFBlcm1pc3Npb24sXG4gICAgU2VydmVyQ29uZmlnU2VydmljZSxcbn0gZnJvbSAnQHZlbmR1cmUvYWRtaW4tdWkvY29yZSc7XG5pbXBvcnQgeyBzd2l0Y2hNYXAsIHRhcCwgd2l0aExhdGVzdEZyb20gfSBmcm9tICdyeGpzL29wZXJhdG9ycyc7XG5cbkBDb21wb25lbnQoe1xuICAgIHNlbGVjdG9yOiAndmRyLWdsb2JhbC1zZXR0aW5ncycsXG4gICAgdGVtcGxhdGVVcmw6ICcuL2dsb2JhbC1zZXR0aW5ncy5jb21wb25lbnQuaHRtbCcsXG4gICAgc3R5bGVVcmxzOiBbJy4vZ2xvYmFsLXNldHRpbmdzLmNvbXBvbmVudC5zY3NzJ10sXG4gICAgY2hhbmdlRGV0ZWN0aW9uOiBDaGFuZ2VEZXRlY3Rpb25TdHJhdGVneS5PblB1c2gsXG59KVxuZXhwb3J0IGNsYXNzIEdsb2JhbFNldHRpbmdzQ29tcG9uZW50IGV4dGVuZHMgQmFzZURldGFpbENvbXBvbmVudDxHbG9iYWxTZXR0aW5ncz4gaW1wbGVtZW50cyBPbkluaXQge1xuICAgIGRldGFpbEZvcm06IEZvcm1Hcm91cDtcbiAgICBjdXN0b21GaWVsZHM6IEN1c3RvbUZpZWxkQ29uZmlnW107XG4gICAgbGFuZ3VhZ2VDb2RlcyA9IE9iamVjdC52YWx1ZXMoTGFuZ3VhZ2VDb2RlKTtcbiAgICByZWFkb25seSB1cGRhdGVQZXJtaXNzaW9uID0gW1Blcm1pc3Npb24uVXBkYXRlU2V0dGluZ3MsIFBlcm1pc3Npb24uVXBkYXRlR2xvYmFsU2V0dGluZ3NdO1xuXG4gICAgY29uc3RydWN0b3IoXG4gICAgICAgIHJvdXRlcjogUm91dGVyLFxuICAgICAgICByb3V0ZTogQWN0aXZhdGVkUm91dGUsXG4gICAgICAgIHNlcnZlckNvbmZpZ1NlcnZpY2U6IFNlcnZlckNvbmZpZ1NlcnZpY2UsXG4gICAgICAgIHByaXZhdGUgY2hhbmdlRGV0ZWN0b3I6IENoYW5nZURldGVjdG9yUmVmLFxuICAgICAgICBwcm90ZWN0ZWQgZGF0YVNlcnZpY2U6IERhdGFTZXJ2aWNlLFxuICAgICAgICBwcml2YXRlIGZvcm1CdWlsZGVyOiBGb3JtQnVpbGRlcixcbiAgICAgICAgcHJpdmF0ZSBub3RpZmljYXRpb25TZXJ2aWNlOiBOb3RpZmljYXRpb25TZXJ2aWNlLFxuICAgICkge1xuICAgICAgICBzdXBlcihyb3V0ZSwgcm91dGVyLCBzZXJ2ZXJDb25maWdTZXJ2aWNlLCBkYXRhU2VydmljZSk7XG4gICAgICAgIHRoaXMuY3VzdG9tRmllbGRzID0gdGhpcy5nZXRDdXN0b21GaWVsZENvbmZpZygnR2xvYmFsU2V0dGluZ3MnKTtcbiAgICAgICAgdGhpcy5kZXRhaWxGb3JtID0gdGhpcy5mb3JtQnVpbGRlci5ncm91cCh7XG4gICAgICAgICAgICBhdmFpbGFibGVMYW5ndWFnZXM6IFsnJ10sXG4gICAgICAgICAgICB0cmFja0ludmVudG9yeTogZmFsc2UsXG4gICAgICAgICAgICBvdXRPZlN0b2NrVGhyZXNob2xkOiBbMCwgVmFsaWRhdG9ycy5yZXF1aXJlZF0sXG4gICAgICAgICAgICBjdXN0b21GaWVsZHM6IHRoaXMuZm9ybUJ1aWxkZXIuZ3JvdXAoXG4gICAgICAgICAgICAgICAgdGhpcy5jdXN0b21GaWVsZHMucmVkdWNlKChoYXNoLCBmaWVsZCkgPT4gKHsgLi4uaGFzaCwgW2ZpZWxkLm5hbWVdOiAnJyB9KSwge30pLFxuICAgICAgICAgICAgKSxcbiAgICAgICAgfSk7XG4gICAgfVxuXG4gICAgbmdPbkluaXQoKTogdm9pZCB7XG4gICAgICAgIHRoaXMuaW5pdCgpO1xuICAgICAgICB0aGlzLmRhdGFTZXJ2aWNlLmNsaWVudC51c2VyU3RhdHVzKCkuc2luZ2xlJC5zdWJzY3JpYmUoKHsgdXNlclN0YXR1cyB9KSA9PiB7XG4gICAgICAgICAgICBpZiAoIXVzZXJTdGF0dXMucGVybWlzc2lvbnMuaW5jbHVkZXMoUGVybWlzc2lvbi5VcGRhdGVTZXR0aW5ncykpIHtcbiAgICAgICAgICAgICAgICBjb25zdCBsYW5ndWFnZXNTZWxlY3QgPSB0aGlzLmRldGFpbEZvcm0uZ2V0KCdhdmFpbGFibGVMYW5ndWFnZXMnKTtcbiAgICAgICAgICAgICAgICBpZiAobGFuZ3VhZ2VzU2VsZWN0KSB7XG4gICAgICAgICAgICAgICAgICAgIGxhbmd1YWdlc1NlbGVjdC5kaXNhYmxlKCk7XG4gICAgICAgICAgICAgICAgfVxuICAgICAgICAgICAgfVxuICAgICAgICB9KTtcbiAgICB9XG5cbiAgICBzYXZlKCkge1xuICAgICAgICBpZiAoIXRoaXMuZGV0YWlsRm9ybS5kaXJ0eSkge1xuICAgICAgICAgICAgcmV0dXJuO1xuICAgICAgICB9XG5cbiAgICAgICAgdGhpcy5kYXRhU2VydmljZS5zZXR0aW5nc1xuICAgICAgICAgICAgLnVwZGF0ZUdsb2JhbFNldHRpbmdzKHRoaXMuZGV0YWlsRm9ybS52YWx1ZSlcbiAgICAgICAgICAgIC5waXBlKFxuICAgICAgICAgICAgICAgIHRhcCgoeyB1cGRhdGVHbG9iYWxTZXR0aW5ncyB9KSA9PiB7XG4gICAgICAgICAgICAgICAgICAgIHN3aXRjaCAodXBkYXRlR2xvYmFsU2V0dGluZ3MuX190eXBlbmFtZSkge1xuICAgICAgICAgICAgICAgICAgICAgICAgY2FzZSAnR2xvYmFsU2V0dGluZ3MnOlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRoaXMuZGV0YWlsRm9ybS5tYXJrQXNQcmlzdGluZSgpO1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRoaXMuY2hhbmdlRGV0ZWN0b3IubWFya0ZvckNoZWNrKCk7XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgdGhpcy5ub3RpZmljYXRpb25TZXJ2aWNlLnN1Y2Nlc3MoXygnY29tbW9uLm5vdGlmeS11cGRhdGUtc3VjY2VzcycpLCB7XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGVudGl0eTogJ1NldHRpbmdzJyxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICB9KTtcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICBicmVhaztcbiAgICAgICAgICAgICAgICAgICAgICAgIGNhc2UgJ0NoYW5uZWxEZWZhdWx0TGFuZ3VhZ2VFcnJvcic6XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgdGhpcy5ub3RpZmljYXRpb25TZXJ2aWNlLmVycm9yKHVwZGF0ZUdsb2JhbFNldHRpbmdzLm1lc3NhZ2UpO1xuICAgICAgICAgICAgICAgICAgICB9XG4gICAgICAgICAgICAgICAgfSksXG4gICAgICAgICAgICAgICAgc3dpdGNoTWFwKCgpID0+IHRoaXMuc2VydmVyQ29uZmlnU2VydmljZS5yZWZyZXNoR2xvYmFsU2V0dGluZ3MoKSksXG4gICAgICAgICAgICAgICAgd2l0aExhdGVzdEZyb20odGhpcy5kYXRhU2VydmljZS5jbGllbnQudWlTdGF0ZSgpLnNpbmdsZSQpLFxuICAgICAgICAgICAgKVxuICAgICAgICAgICAgLnN1YnNjcmliZSgoW3sgZ2xvYmFsU2V0dGluZ3MgfSwgeyB1aVN0YXRlIH1dKSA9PiB7XG4gICAgICAgICAgICAgICAgY29uc3QgYXZhaWxhYmxlTGFuZ3MgPSBnbG9iYWxTZXR0aW5ncy5hdmFpbGFibGVMYW5ndWFnZXM7XG4gICAgICAgICAgICAgICAgaWYgKGF2YWlsYWJsZUxhbmdzLmxlbmd0aCAmJiAhYXZhaWxhYmxlTGFuZ3MuaW5jbHVkZXModWlTdGF0ZS5jb250ZW50TGFuZ3VhZ2UpKSB7XG4gICAgICAgICAgICAgICAgICAgIHRoaXMuZGF0YVNlcnZpY2UuY2xpZW50LnNldENvbnRlbnRMYW5ndWFnZShhdmFpbGFibGVMYW5nc1swXSkuc3Vic2NyaWJlKCk7XG4gICAgICAgICAgICAgICAgfVxuICAgICAgICAgICAgfSk7XG4gICAgfVxuXG4gICAgcHJvdGVjdGVkIHNldEZvcm1WYWx1ZXMoZW50aXR5OiBHbG9iYWxTZXR0aW5ncywgbGFuZ3VhZ2VDb2RlOiBMYW5ndWFnZUNvZGUpOiB2b2lkIHtcbiAgICAgICAgdGhpcy5kZXRhaWxGb3JtLnBhdGNoVmFsdWUoe1xuICAgICAgICAgICAgYXZhaWxhYmxlTGFuZ3VhZ2VzOiBlbnRpdHkuYXZhaWxhYmxlTGFuZ3VhZ2VzLFxuICAgICAgICAgICAgdHJhY2tJbnZlbnRvcnk6IGVudGl0eS50cmFja0ludmVudG9yeSxcbiAgICAgICAgICAgIG91dE9mU3RvY2tUaHJlc2hvbGQ6IGVudGl0eS5vdXRPZlN0b2NrVGhyZXNob2xkLFxuICAgICAgICB9KTtcbiAgICAgICAgaWYgKHRoaXMuY3VzdG9tRmllbGRzLmxlbmd0aCkge1xuICAgICAgICAgICAgdGhpcy5zZXRDdXN0b21GaWVsZEZvcm1WYWx1ZXModGhpcy5jdXN0b21GaWVsZHMsIHRoaXMuZGV0YWlsRm9ybS5nZXQoJ2N1c3RvbUZpZWxkcycpLCBlbnRpdHkpO1xuICAgICAgICB9XG4gICAgfVxufVxuIl19

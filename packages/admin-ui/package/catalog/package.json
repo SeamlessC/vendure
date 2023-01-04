@@ -1,0 +1,11 @@
+{
+  "main": "../bundles/vendure-admin-ui-catalog.umd.js",
+  "module": "../fesm2015/vendure-admin-ui-catalog.js",
+  "es2015": "../fesm2015/vendure-admin-ui-catalog.js",
+  "esm2015": "../esm2015/catalog/vendure-admin-ui-catalog.js",
+  "fesm2015": "../fesm2015/vendure-admin-ui-catalog.js",
+  "typings": "vendure-admin-ui-catalog.d.ts",
+  "metadata": "vendure-admin-ui-catalog.metadata.json",
+  "sideEffects": false,
+  "name": "@vendure/admin-ui/catalog"
+}

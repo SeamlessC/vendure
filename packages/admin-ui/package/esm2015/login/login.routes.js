@@ -1,0 +1,11 @@
+import { LoginComponent } from './components/login/login.component';
+import { LoginGuard } from './providers/login.guard';
+export const loginRoutes = [
+    {
+        path: '',
+        component: LoginComponent,
+        pathMatch: 'full',
+        canActivate: [LoginGuard],
+    },
+];
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibG9naW4ucm91dGVzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2xpYi9sb2dpbi9zcmMvbG9naW4ucm91dGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUVBLE9BQU8sRUFBRSxjQUFjLEVBQUUsTUFBTSxvQ0FBb0MsQ0FBQztBQUNwRSxPQUFPLEVBQUUsVUFBVSxFQUFFLE1BQU0seUJBQXlCLENBQUM7QUFFckQsTUFBTSxDQUFDLE1BQU0sV0FBVyxHQUFXO0lBQy9CO1FBQ0ksSUFBSSxFQUFFLEVBQUU7UUFDUixTQUFTLEVBQUUsY0FBYztRQUN6QixTQUFTLEVBQUUsTUFBTTtRQUNqQixXQUFXLEVBQUUsQ0FBQyxVQUFVLENBQUM7S0FDNUI7Q0FDSixDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgUm91dGVzIH0gZnJvbSAnQGFuZ3VsYXIvcm91dGVyJztcblxuaW1wb3J0IHsgTG9naW5Db21wb25lbnQgfSBmcm9tICcuL2NvbXBvbmVudHMvbG9naW4vbG9naW4uY29tcG9uZW50JztcbmltcG9ydCB7IExvZ2luR3VhcmQgfSBmcm9tICcuL3Byb3ZpZGVycy9sb2dpbi5ndWFyZCc7XG5cbmV4cG9ydCBjb25zdCBsb2dpblJvdXRlczogUm91dGVzID0gW1xuICAgIHtcbiAgICAgICAgcGF0aDogJycsXG4gICAgICAgIGNvbXBvbmVudDogTG9naW5Db21wb25lbnQsXG4gICAgICAgIHBhdGhNYXRjaDogJ2Z1bGwnLFxuICAgICAgICBjYW5BY3RpdmF0ZTogW0xvZ2luR3VhcmRdLFxuICAgIH0sXG5dO1xuIl19

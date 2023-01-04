@@ -1,0 +1,11 @@
+{
+  "main": "../bundles/vendure-admin-ui-customer.umd.js",
+  "module": "../fesm2015/vendure-admin-ui-customer.js",
+  "es2015": "../fesm2015/vendure-admin-ui-customer.js",
+  "esm2015": "../esm2015/customer/vendure-admin-ui-customer.js",
+  "fesm2015": "../fesm2015/vendure-admin-ui-customer.js",
+  "typings": "vendure-admin-ui-customer.d.ts",
+  "metadata": "vendure-admin-ui-customer.metadata.json",
+  "sideEffects": false,
+  "name": "@vendure/admin-ui/customer"
+}

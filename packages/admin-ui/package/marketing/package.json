@@ -1,0 +1,11 @@
+{
+  "main": "../bundles/vendure-admin-ui-marketing.umd.js",
+  "module": "../fesm2015/vendure-admin-ui-marketing.js",
+  "es2015": "../fesm2015/vendure-admin-ui-marketing.js",
+  "esm2015": "../esm2015/marketing/vendure-admin-ui-marketing.js",
+  "fesm2015": "../fesm2015/vendure-admin-ui-marketing.js",
+  "typings": "vendure-admin-ui-marketing.d.ts",
+  "metadata": "vendure-admin-ui-marketing.metadata.json",
+  "sideEffects": false,
+  "name": "@vendure/admin-ui/marketing"
+}

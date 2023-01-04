@@ -1,0 +1,16 @@
+export declare const REQUEST_STARTED: import("graphql").DocumentNode;
+export declare const REQUEST_COMPLETED: import("graphql").DocumentNode;
+export declare const USER_STATUS_FRAGMENT: import("graphql").DocumentNode;
+export declare const SET_AS_LOGGED_IN: import("graphql").DocumentNode;
+export declare const SET_AS_LOGGED_OUT: import("graphql").DocumentNode;
+export declare const SET_UI_LANGUAGE_AND_LOCALE: import("graphql").DocumentNode;
+export declare const SET_UI_LOCALE: import("graphql").DocumentNode;
+export declare const SET_DISPLAY_UI_EXTENSION_POINTS: import("graphql").DocumentNode;
+export declare const SET_CONTENT_LANGUAGE: import("graphql").DocumentNode;
+export declare const SET_UI_THEME: import("graphql").DocumentNode;
+export declare const GET_NEWTORK_STATUS: import("graphql").DocumentNode;
+export declare const GET_USER_STATUS: import("graphql").DocumentNode;
+export declare const GET_UI_STATE: import("graphql").DocumentNode;
+export declare const GET_CLIENT_STATE: import("graphql").DocumentNode;
+export declare const SET_ACTIVE_CHANNEL: import("graphql").DocumentNode;
+export declare const UPDATE_USER_CHANNELS: import("graphql").DocumentNode;

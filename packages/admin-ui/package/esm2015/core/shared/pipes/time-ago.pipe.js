@@ -1,0 +1,51 @@
+import { Pipe } from '@angular/core';
+import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker';
+import dayjs from 'dayjs';
+import { I18nService } from '../../providers/i18n/i18n.service';
+/**
+ * @description
+ * Converts a date into the format "3 minutes ago", "5 hours ago" etc.
+ *
+ * @example
+ * ```HTML
+ * {{ order.orderPlacedAt | timeAgo }}
+ * ```
+ *
+ * @docsCategory pipes
+ */
+export class TimeAgoPipe {
+    constructor(i18nService) {
+        this.i18nService = i18nService;
+    }
+    transform(value, nowVal) {
+        const then = dayjs(value);
+        const now = dayjs(nowVal || new Date());
+        const secondsDiff = now.diff(then, 'second');
+        const durations = [
+            [60, _('datetime.ago-seconds')],
+            [3600, _('datetime.ago-minutes')],
+            [86400, _('datetime.ago-hours')],
+            [31536000, _('datetime.ago-days')],
+            [Number.MAX_SAFE_INTEGER, _('datetime.ago-years')],
+        ];
+        let lastUpperBound = 1;
+        for (const [upperBound, translationToken] of durations) {
+            if (secondsDiff < upperBound) {
+                const count = Math.max(0, Math.floor(secondsDiff / lastUpperBound));
+                return this.i18nService.translate(translationToken, { count });
+            }
+            lastUpperBound = upperBound;
+        }
+        return then.format();
+    }
+}
+TimeAgoPipe.decorators = [
+    { type: Pipe, args: [{
+                name: 'timeAgo',
+                pure: false,
+            },] }
+];
+TimeAgoPipe.ctorParameters = () => [
+    { type: I18nService }
+];
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGltZS1hZ28ucGlwZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9saWIvY29yZS9zcmMvc2hhcmVkL3BpcGVzL3RpbWUtYWdvLnBpcGUudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsT0FBTyxFQUFFLElBQUksRUFBaUIsTUFBTSxlQUFlLENBQUM7QUFDcEQsT0FBTyxFQUFFLE1BQU0sSUFBSSxDQUFDLEVBQUUsTUFBTSx5Q0FBeUMsQ0FBQztBQUN0RSxPQUFPLEtBQUssTUFBTSxPQUFPLENBQUM7QUFFMUIsT0FBTyxFQUFFLFdBQVcsRUFBRSxNQUFNLG1DQUFtQyxDQUFDO0FBRWhFOzs7Ozs7Ozs7O0dBVUc7QUFLSCxNQUFNLE9BQU8sV0FBVztJQUNwQixZQUFvQixXQUF3QjtRQUF4QixnQkFBVyxHQUFYLFdBQVcsQ0FBYTtJQUFHLENBQUM7SUFFaEQsU0FBUyxDQUFDLEtBQW9CLEVBQUUsTUFBc0I7UUFDbEQsTUFBTSxJQUFJLEdBQUcsS0FBSyxDQUFDLEtBQUssQ0FBQyxDQUFDO1FBQzFCLE1BQU0sR0FBRyxHQUFHLEtBQUssQ0FBQyxNQUFNLElBQUksSUFBSSxJQUFJLEVBQUUsQ0FBQyxDQUFDO1FBQ3hDLE1BQU0sV0FBVyxHQUFHLEdBQUcsQ0FBQyxJQUFJLENBQUMsSUFBSSxFQUFFLFFBQVEsQ0FBQyxDQUFDO1FBQzdDLE1BQU0sU0FBUyxHQUE0QjtZQUN2QyxDQUFDLEVBQUUsRUFBRSxDQUFDLENBQUMsc0JBQXNCLENBQUMsQ0FBQztZQUMvQixDQUFDLElBQUksRUFBRSxDQUFDLENBQUMsc0JBQXNCLENBQUMsQ0FBQztZQUNqQyxDQUFDLEtBQUssRUFBRSxDQUFDLENBQUMsb0JBQW9CLENBQUMsQ0FBQztZQUNoQyxDQUFDLFFBQVEsRUFBRSxDQUFDLENBQUMsbUJBQW1CLENBQUMsQ0FBQztZQUNsQyxDQUFDLE1BQU0sQ0FBQyxnQkFBZ0IsRUFBRSxDQUFDLENBQUMsb0JBQW9CLENBQUMsQ0FBQztTQUNyRCxDQUFDO1FBRUYsSUFBSSxjQUFjLEdBQUcsQ0FBQyxDQUFDO1FBQ3ZCLEtBQUssTUFBTSxDQUFDLFVBQVUsRUFBRSxnQkFBZ0IsQ0FBQyxJQUFJLFNBQVMsRUFBRTtZQUNwRCxJQUFJLFdBQVcsR0FBRyxVQUFVLEVBQUU7Z0JBQzFCLE1BQU0sS0FBSyxHQUFHLElBQUksQ0FBQyxHQUFHLENBQUMsQ0FBQyxFQUFFLElBQUksQ0FBQyxLQUFLLENBQUMsV0FBVyxHQUFHLGNBQWMsQ0FBQyxDQUFDLENBQUM7Z0JBQ3BFLE9BQU8sSUFBSSxDQUFDLFdBQVcsQ0FBQyxTQUFTLENBQUMsZ0JBQWdCLEVBQUUsRUFBRSxLQUFLLEVBQUUsQ0FBQyxDQUFDO2FBQ2xFO1lBQ0QsY0FBYyxHQUFHLFVBQVUsQ0FBQztTQUMvQjtRQUNELE9BQU8sSUFBSSxDQUFDLE1BQU0sRUFBRSxDQUFDO0lBQ3pCLENBQUM7OztZQTVCSixJQUFJLFNBQUM7Z0JBQ0YsSUFBSSxFQUFFLFNBQVM7Z0JBQ2YsSUFBSSxFQUFFLEtBQUs7YUFDZDs7O1lBaEJRLFdBQVciLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBQaXBlLCBQaXBlVHJhbnNmb3JtIH0gZnJvbSAnQGFuZ3VsYXIvY29yZSc7XG5pbXBvcnQgeyBtYXJrZXIgYXMgXyB9IGZyb20gJ0BiaWVzYmplcmcvbmd4LXRyYW5zbGF0ZS1leHRyYWN0LW1hcmtlcic7XG5pbXBvcnQgZGF5anMgZnJvbSAnZGF5anMnO1xuXG5pbXBvcnQgeyBJMThuU2VydmljZSB9IGZyb20gJy4uLy4uL3Byb3ZpZGVycy9pMThuL2kxOG4uc2VydmljZSc7XG5cbi8qKlxuICogQGRlc2NyaXB0aW9uXG4gKiBDb252ZXJ0cyBhIGRhdGUgaW50byB0aGUgZm9ybWF0IFwiMyBtaW51dGVzIGFnb1wiLCBcIjUgaG91cnMgYWdvXCIgZXRjLlxuICpcbiAqIEBleGFtcGxlXG4gKiBgYGBIVE1MXG4gKiB7eyBvcmRlci5vcmRlclBsYWNlZEF0IHwgdGltZUFnbyB9fVxuICogYGBgXG4gKlxuICogQGRvY3NDYXRlZ29yeSBwaXBlc1xuICovXG5AUGlwZSh7XG4gICAgbmFtZTogJ3RpbWVBZ28nLFxuICAgIHB1cmU6IGZhbHNlLFxufSlcbmV4cG9ydCBjbGFzcyBUaW1lQWdvUGlwZSBpbXBsZW1lbnRzIFBpcGVUcmFuc2Zvcm0ge1xuICAgIGNvbnN0cnVjdG9yKHByaXZhdGUgaTE4blNlcnZpY2U6IEkxOG5TZXJ2aWNlKSB7fVxuXG4gICAgdHJhbnNmb3JtKHZhbHVlOiBzdHJpbmcgfCBEYXRlLCBub3dWYWw/OiBzdHJpbmcgfCBEYXRlKTogc3RyaW5nIHtcbiAgICAgICAgY29uc3QgdGhlbiA9IGRheWpzKHZhbHVlKTtcbiAgICAgICAgY29uc3Qgbm93ID0gZGF5anMobm93VmFsIHx8IG5ldyBEYXRlKCkpO1xuICAgICAgICBjb25zdCBzZWNvbmRzRGlmZiA9IG5vdy5kaWZmKHRoZW4sICdzZWNvbmQnKTtcbiAgICAgICAgY29uc3QgZHVyYXRpb25zOiBBcnJheTxbbnVtYmVyLCBzdHJpbmddPiA9IFtcbiAgICAgICAgICAgIFs2MCwgXygnZGF0ZXRpbWUuYWdvLXNlY29uZHMnKV0sXG4gICAgICAgICAgICBbMzYwMCwgXygnZGF0ZXRpbWUuYWdvLW1pbnV0ZXMnKV0sXG4gICAgICAgICAgICBbODY0MDAsIF8oJ2RhdGV0aW1lLmFnby1ob3VycycpXSxcbiAgICAgICAgICAgIFszMTUzNjAwMCwgXygnZGF0ZXRpbWUuYWdvLWRheXMnKV0sXG4gICAgICAgICAgICBbTnVtYmVyLk1BWF9TQUZFX0lOVEVHRVIsIF8oJ2RhdGV0aW1lLmFnby15ZWFycycpXSxcbiAgICAgICAgXTtcblxuICAgICAgICBsZXQgbGFzdFVwcGVyQm91bmQgPSAxO1xuICAgICAgICBmb3IgKGNvbnN0IFt1cHBlckJvdW5kLCB0cmFuc2xhdGlvblRva2VuXSBvZiBkdXJhdGlvbnMpIHtcbiAgICAgICAgICAgIGlmIChzZWNvbmRzRGlmZiA8IHVwcGVyQm91bmQpIHtcbiAgICAgICAgICAgICAgICBjb25zdCBjb3VudCA9IE1hdGgubWF4KDAsIE1hdGguZmxvb3Ioc2Vjb25kc0RpZmYgLyBsYXN0VXBwZXJCb3VuZCkpO1xuICAgICAgICAgICAgICAgIHJldHVybiB0aGlzLmkxOG5TZXJ2aWNlLnRyYW5zbGF0ZSh0cmFuc2xhdGlvblRva2VuLCB7IGNvdW50IH0pO1xuICAgICAgICAgICAgfVxuICAgICAgICAgICAgbGFzdFVwcGVyQm91bmQgPSB1cHBlckJvdW5kO1xuICAgICAgICB9XG4gICAgICAgIHJldHVybiB0aGVuLmZvcm1hdCgpO1xuICAgIH1cbn1cbiJdfQ==

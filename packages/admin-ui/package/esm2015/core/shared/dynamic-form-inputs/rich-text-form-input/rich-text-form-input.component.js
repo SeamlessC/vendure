@@ -1,0 +1,20 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+/**
+ * @description
+ * Uses the {@link RichTextEditorComponent} as in input for `text` type fields.
+ *
+ * @docsCategory custom-input-components
+ * @docsPage default-inputs
+ */
+export class RichTextFormInputComponent {
+}
+RichTextFormInputComponent.id = 'rich-text-form-input';
+RichTextFormInputComponent.decorators = [
+    { type: Component, args: [{
+                selector: 'vdr-rich-text-form-input',
+                template: "<vdr-rich-text-editor\n    [readonly]=\"readonly\"\n    [formControl]=\"formControl\"\n></vdr-rich-text-editor>\n",
+                changeDetection: ChangeDetectionStrategy.OnPush,
+                styles: [":host textarea{resize:both;height:6rem;width:100%}\n"]
+            },] }
+];
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmljaC10ZXh0LWZvcm0taW5wdXQuY29tcG9uZW50LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vLi4vc3JjL2xpYi9jb3JlL3NyYy9zaGFyZWQvZHluYW1pYy1mb3JtLWlucHV0cy9yaWNoLXRleHQtZm9ybS1pbnB1dC9yaWNoLXRleHQtZm9ybS1pbnB1dC5jb21wb25lbnQudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsT0FBTyxFQUFFLHVCQUF1QixFQUFFLFNBQVMsRUFBRSxNQUFNLGVBQWUsQ0FBQztBQU1uRTs7Ozs7O0dBTUc7QUFPSCxNQUFNLE9BQU8sMEJBQTBCOztBQUNuQiw2QkFBRSxHQUEyQixzQkFBc0IsQ0FBQzs7WUFQdkUsU0FBUyxTQUFDO2dCQUNQLFFBQVEsRUFBRSwwQkFBMEI7Z0JBQ3BDLDZIQUFvRDtnQkFFcEQsZUFBZSxFQUFFLHVCQUF1QixDQUFDLE1BQU07O2FBQ2xEIiwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgQ2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3ksIENvbXBvbmVudCB9IGZyb20gJ0Bhbmd1bGFyL2NvcmUnO1xuaW1wb3J0IHsgRm9ybUNvbnRyb2wgfSBmcm9tICdAYW5ndWxhci9mb3Jtcyc7XG5pbXBvcnQgeyBEZWZhdWx0Rm9ybUNvbXBvbmVudENvbmZpZywgRGVmYXVsdEZvcm1Db21wb25lbnRJZCB9IGZyb20gJ0B2ZW5kdXJlL2NvbW1vbi9saWIvc2hhcmVkLXR5cGVzJztcblxuaW1wb3J0IHsgRm9ybUlucHV0Q29tcG9uZW50LCBJbnB1dENvbXBvbmVudENvbmZpZyB9IGZyb20gJy4uLy4uLy4uL2NvbW1vbi9jb21wb25lbnQtcmVnaXN0cnktdHlwZXMnO1xuXG4vKipcbiAqIEBkZXNjcmlwdGlvblxuICogVXNlcyB0aGUge0BsaW5rIFJpY2hUZXh0RWRpdG9yQ29tcG9uZW50fSBhcyBpbiBpbnB1dCBmb3IgYHRleHRgIHR5cGUgZmllbGRzLlxuICpcbiAqIEBkb2NzQ2F0ZWdvcnkgY3VzdG9tLWlucHV0LWNvbXBvbmVudHNcbiAqIEBkb2NzUGFnZSBkZWZhdWx0LWlucHV0c1xuICovXG5AQ29tcG9uZW50KHtcbiAgICBzZWxlY3RvcjogJ3Zkci1yaWNoLXRleHQtZm9ybS1pbnB1dCcsXG4gICAgdGVtcGxhdGVVcmw6ICcuL3JpY2gtdGV4dC1mb3JtLWlucHV0LmNvbXBvbmVudC5odG1sJyxcbiAgICBzdHlsZVVybHM6IFsnLi9yaWNoLXRleHQtZm9ybS1pbnB1dC5jb21wb25lbnQuc2NzcyddLFxuICAgIGNoYW5nZURldGVjdGlvbjogQ2hhbmdlRGV0ZWN0aW9uU3RyYXRlZ3kuT25QdXNoLFxufSlcbmV4cG9ydCBjbGFzcyBSaWNoVGV4dEZvcm1JbnB1dENvbXBvbmVudCBpbXBsZW1lbnRzIEZvcm1JbnB1dENvbXBvbmVudCB7XG4gICAgc3RhdGljIHJlYWRvbmx5IGlkOiBEZWZhdWx0Rm9ybUNvbXBvbmVudElkID0gJ3JpY2gtdGV4dC1mb3JtLWlucHV0JztcbiAgICByZWFkb25seTogYm9vbGVhbjtcbiAgICBmb3JtQ29udHJvbDogRm9ybUNvbnRyb2w7XG4gICAgY29uZmlnOiBEZWZhdWx0Rm9ybUNvbXBvbmVudENvbmZpZzwncmljaC10ZXh0LWZvcm0taW5wdXQnPjtcbn1cbiJdfQ==

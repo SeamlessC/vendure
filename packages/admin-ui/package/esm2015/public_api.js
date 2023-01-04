@@ -1,0 +1,5 @@
+/**
+ * This is a placeholder. Please import from one of the sub-packages, e.g `@vendure/admin-ui/core`
+ */
+export const placeholder = 'Vendure Admin UI';
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHVibGljX2FwaS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9saWIvcHVibGljX2FwaS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTs7R0FFRztBQUNILE1BQU0sQ0FBQyxNQUFNLFdBQVcsR0FBRyxrQkFBa0IsQ0FBQyIsInNvdXJjZXNDb250ZW50IjpbIi8qKlxuICogVGhpcyBpcyBhIHBsYWNlaG9sZGVyLiBQbGVhc2UgaW1wb3J0IGZyb20gb25lIG9mIHRoZSBzdWItcGFja2FnZXMsIGUuZyBgQHZlbmR1cmUvYWRtaW4tdWkvY29yZWBcbiAqL1xuZXhwb3J0IGNvbnN0IHBsYWNlaG9sZGVyID0gJ1ZlbmR1cmUgQWRtaW4gVUknO1xuIl19

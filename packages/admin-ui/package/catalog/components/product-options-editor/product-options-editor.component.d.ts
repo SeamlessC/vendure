@@ -1,0 +1,32 @@
+import { ChangeDetectorRef, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { BaseDetailComponent, CustomFieldConfig, DataService, GetProductVariantOptions, LanguageCode, NotificationService, Permission, ServerConfigService } from '@vendure/admin-ui/core';
+import { Observable } from 'rxjs';
+import { ProductDetailService } from '../../providers/product-detail/product-detail.service';
+export declare class ProductOptionsEditorComponent extends BaseDetailComponent<GetProductVariantOptions.Product> implements OnInit {
+    protected route: ActivatedRoute;
+    protected router: Router;
+    protected serverConfigService: ServerConfigService;
+    protected dataService: DataService;
+    private productDetailService;
+    private formBuilder;
+    private changeDetector;
+    private notificationService;
+    detailForm: FormGroup;
+    optionGroups$: Observable<GetProductVariantOptions.OptionGroups[]>;
+    languageCode$: Observable<LanguageCode>;
+    availableLanguages$: Observable<LanguageCode[]>;
+    optionGroupCustomFields: CustomFieldConfig[];
+    optionCustomFields: CustomFieldConfig[];
+    autoUpdateVariantNames: boolean;
+    readonly updatePermission: Permission[];
+    constructor(route: ActivatedRoute, router: Router, serverConfigService: ServerConfigService, dataService: DataService, productDetailService: ProductDetailService, formBuilder: FormBuilder, changeDetector: ChangeDetectorRef, notificationService: NotificationService);
+    ngOnInit(): void;
+    getOptionGroups(): FormGroup[];
+    getOptions(optionGroup: FormGroup): FormGroup[];
+    save(): void;
+    private getUpdatedOptionGroup;
+    private getUpdatedOption;
+    protected setFormValues(entity: GetProductVariantOptions.Product, languageCode: LanguageCode): void;
+}

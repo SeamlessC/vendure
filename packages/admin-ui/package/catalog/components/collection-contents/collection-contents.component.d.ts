@@ -1,0 +1,34 @@
+import { OnChanges, OnDestroy, OnInit, SimpleChanges, TemplateRef } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ConfigurableOperationInput, DataService, GetCollectionContents } from '@vendure/admin-ui/core';
+import { Observable } from 'rxjs';
+export declare class CollectionContentsComponent implements OnInit, OnChanges, OnDestroy {
+    private route;
+    private router;
+    private dataService;
+    collectionId: string;
+    parentId: string;
+    updatedFilters: ConfigurableOperationInput[] | undefined;
+    previewUpdatedFilters: boolean;
+    headerTemplate: TemplateRef<any>;
+    contents$: Observable<GetCollectionContents.Items[]>;
+    contentsTotalItems$: Observable<number>;
+    contentsItemsPerPage$: Observable<number>;
+    contentsCurrentPage$: Observable<number>;
+    filterTermControl: FormControl;
+    isLoading: boolean;
+    private collectionIdChange$;
+    private parentIdChange$;
+    private filterChanges$;
+    private refresh$;
+    private destroy$;
+    constructor(route: ActivatedRoute, router: Router, dataService: DataService);
+    ngOnInit(): void;
+    ngOnChanges(changes: SimpleChanges): void;
+    ngOnDestroy(): void;
+    setContentsPageNumber(page: number): void;
+    setContentsItemsPerPage(perPage: number): void;
+    refresh(): void;
+    private setParam;
+}

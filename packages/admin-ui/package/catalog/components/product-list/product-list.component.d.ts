@@ -1,0 +1,30 @@
+import { AfterViewInit, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { BaseListComponent, DataService, JobQueueService, LanguageCode, ModalService, NotificationService, SearchProducts, SelectionManager, ServerConfigService } from '@vendure/admin-ui/core';
+import { Observable } from 'rxjs';
+export declare class ProductListComponent extends BaseListComponent<SearchProducts.Query, SearchProducts.Items, SearchProducts.Variables> implements OnInit, AfterViewInit {
+    private dataService;
+    private modalService;
+    private notificationService;
+    private jobQueueService;
+    private serverConfigService;
+    searchTerm: string;
+    facetValueIds: string[];
+    groupByProduct: boolean;
+    selectedFacetValueIds$: Observable<string[]>;
+    facetValues$: Observable<SearchProducts.FacetValues[]>;
+    availableLanguages$: Observable<LanguageCode[]>;
+    contentLanguage$: Observable<LanguageCode>;
+    pendingSearchIndexUpdates: number;
+    selectionManager: SelectionManager<SearchProducts.Items>;
+    private productSearchInput;
+    constructor(dataService: DataService, modalService: ModalService, notificationService: NotificationService, jobQueueService: JobQueueService, serverConfigService: ServerConfigService, router: Router, route: ActivatedRoute);
+    ngOnInit(): void;
+    ngAfterViewInit(): void;
+    setSearchTerm(term: string): void;
+    setFacetValueIds(ids: string[]): void;
+    rebuildSearchIndex(): void;
+    runPendingSearchIndexUpdates(): void;
+    deleteProduct(productId: string): void;
+    setLanguage(code: LanguageCode): void;
+}

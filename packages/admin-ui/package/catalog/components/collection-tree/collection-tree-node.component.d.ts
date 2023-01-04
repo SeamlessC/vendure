@@ -1,0 +1,40 @@
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { ChangeDetectorRef, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { DataService, SelectionManager } from '@vendure/admin-ui/core';
+import { Observable } from 'rxjs';
+import { RootNode, TreeNode } from './array-to-tree';
+import { CollectionPartial, CollectionTreeComponent } from './collection-tree.component';
+export declare class CollectionTreeNodeComponent implements OnInit, OnChanges, OnDestroy {
+    private parent;
+    private root;
+    private dataService;
+    private router;
+    private route;
+    private changeDetectorRef;
+    depth: number;
+    parentName: string;
+    collectionTree: TreeNode<CollectionPartial>;
+    activeCollectionId: string;
+    expandAll: boolean;
+    selectionManager: SelectionManager<CollectionPartial>;
+    hasUpdatePermission$: Observable<boolean>;
+    hasDeletePermission$: Observable<boolean>;
+    moveListItems: Array<{
+        path: string;
+        id: string;
+    }>;
+    private subscription;
+    constructor(parent: CollectionTreeNodeComponent, root: CollectionTreeComponent, dataService: DataService, router: Router, route: ActivatedRoute, changeDetectorRef: ChangeDetectorRef);
+    ngOnInit(): void;
+    ngOnChanges(changes: SimpleChanges): void;
+    ngOnDestroy(): void;
+    trackByFn(index: number, item: CollectionPartial): string;
+    toggleExpanded(collection: TreeNode<CollectionPartial>): void;
+    getMoveListItems(collection: CollectionPartial): void;
+    move(collection: CollectionPartial, parentId: string): void;
+    moveUp(collection: CollectionPartial, currentIndex: number): void;
+    moveDown(collection: CollectionPartial, currentIndex: number): void;
+    drop(event: CdkDragDrop<CollectionPartial | RootNode<CollectionPartial>>): void;
+    delete(id: string): void;
+}

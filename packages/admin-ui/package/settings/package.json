@@ -1,0 +1,11 @@
+{
+  "main": "../bundles/vendure-admin-ui-settings.umd.js",
+  "module": "../fesm2015/vendure-admin-ui-settings.js",
+  "es2015": "../fesm2015/vendure-admin-ui-settings.js",
+  "esm2015": "../esm2015/settings/vendure-admin-ui-settings.js",
+  "fesm2015": "../fesm2015/vendure-admin-ui-settings.js",
+  "typings": "vendure-admin-ui-settings.d.ts",
+  "metadata": "vendure-admin-ui-settings.metadata.json",
+  "sideEffects": false,
+  "name": "@vendure/admin-ui/settings"
+}

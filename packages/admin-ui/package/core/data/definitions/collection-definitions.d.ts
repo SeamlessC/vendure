@@ -1,0 +1,13 @@
+export declare const GET_COLLECTION_FILTERS: import("graphql").DocumentNode;
+export declare const COLLECTION_FRAGMENT: import("graphql").DocumentNode;
+export declare const GET_COLLECTION_LIST: import("graphql").DocumentNode;
+export declare const GET_COLLECTION: import("graphql").DocumentNode;
+export declare const CREATE_COLLECTION: import("graphql").DocumentNode;
+export declare const UPDATE_COLLECTION: import("graphql").DocumentNode;
+export declare const MOVE_COLLECTION: import("graphql").DocumentNode;
+export declare const DELETE_COLLECTION: import("graphql").DocumentNode;
+export declare const DELETE_COLLECTIONS: import("graphql").DocumentNode;
+export declare const GET_COLLECTION_CONTENTS: import("graphql").DocumentNode;
+export declare const PREVIEW_COLLECTION_CONTENTS: import("graphql").DocumentNode;
+export declare const ASSIGN_COLLECTIONS_TO_CHANNEL: import("graphql").DocumentNode;
+export declare const REMOVE_COLLECTIONS_FROM_CHANNEL: import("graphql").DocumentNode;

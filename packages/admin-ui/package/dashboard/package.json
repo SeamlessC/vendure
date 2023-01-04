@@ -1,0 +1,11 @@
+{
+  "main": "../bundles/vendure-admin-ui-dashboard.umd.js",
+  "module": "../fesm2015/vendure-admin-ui-dashboard.js",
+  "es2015": "../fesm2015/vendure-admin-ui-dashboard.js",
+  "esm2015": "../esm2015/dashboard/vendure-admin-ui-dashboard.js",
+  "fesm2015": "../fesm2015/vendure-admin-ui-dashboard.js",
+  "typings": "vendure-admin-ui-dashboard.d.ts",
+  "metadata": "vendure-admin-ui-dashboard.metadata.json",
+  "sideEffects": false,
+  "name": "@vendure/admin-ui/dashboard"
+}

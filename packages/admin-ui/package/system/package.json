@@ -1,0 +1,11 @@
+{
+  "main": "../bundles/vendure-admin-ui-system.umd.js",
+  "module": "../fesm2015/vendure-admin-ui-system.js",
+  "es2015": "../fesm2015/vendure-admin-ui-system.js",
+  "esm2015": "../esm2015/system/vendure-admin-ui-system.js",
+  "fesm2015": "../fesm2015/vendure-admin-ui-system.js",
+  "typings": "vendure-admin-ui-system.d.ts",
+  "metadata": "vendure-admin-ui-system.metadata.json",
+  "sideEffects": false,
+  "name": "@vendure/admin-ui/system"
+}

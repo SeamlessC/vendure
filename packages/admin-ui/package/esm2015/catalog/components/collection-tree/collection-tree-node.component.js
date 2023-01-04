@@ -1,0 +1,126 @@
+import { moveItemInArray } from '@angular/cdk/drag-drop';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Optional, SkipSelf, } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { DataService, Permission } from '@vendure/admin-ui/core';
+import { map, shareReplay } from 'rxjs/operators';
+import { CollectionTreeComponent } from './collection-tree.component';
+export class CollectionTreeNodeComponent {
+    constructor(parent, root, dataService, router, route, changeDetectorRef) {
+        this.parent = parent;
+        this.root = root;
+        this.dataService = dataService;
+        this.router = router;
+        this.route = route;
+        this.changeDetectorRef = changeDetectorRef;
+        this.depth = 0;
+        this.expandAll = false;
+        this.moveListItems = [];
+        if (parent) {
+            this.depth = parent.depth + 1;
+        }
+    }
+    ngOnInit() {
+        var _a;
+        this.parentName = this.collectionTree.name || '<root>';
+        const permissions$ = this.dataService.client
+            .userStatus()
+            .mapStream(data => data.userStatus.permissions)
+            .pipe(shareReplay(1));
+        this.hasUpdatePermission$ = permissions$.pipe(map(perms => perms.includes(Permission.UpdateCatalog) || perms.includes(Permission.UpdateCollection)));
+        this.hasDeletePermission$ = permissions$.pipe(map(perms => perms.includes(Permission.DeleteCatalog) || perms.includes(Permission.DeleteCollection)));
+        this.subscription = (_a = this.selectionManager) === null || _a === void 0 ? void 0 : _a.selectionChanges$.subscribe(() => this.changeDetectorRef.markForCheck());
+    }
+    ngOnChanges(changes) {
+        const expandAllChange = changes['expandAll'];
+        if (expandAllChange) {
+            if (expandAllChange.previousValue === true && expandAllChange.currentValue === false) {
+                this.collectionTree.children.forEach(c => (c.expanded = false));
+            }
+        }
+    }
+    ngOnDestroy() {
+        var _a;
+        (_a = this.subscription) === null || _a === void 0 ? void 0 : _a.unsubscribe();
+    }
+    trackByFn(index, item) {
+        return item.id;
+    }
+    toggleExpanded(collection) {
+        var _a, _b;
+        collection.expanded = !collection.expanded;
+        let expandedIds = (_b = (_a = this.route.snapshot.queryParamMap.get('expanded')) === null || _a === void 0 ? void 0 : _a.split(',')) !== null && _b !== void 0 ? _b : [];
+        if (collection.expanded) {
+            expandedIds.push(collection.id);
+        }
+        else {
+            expandedIds = expandedIds.filter(id => id !== collection.id);
+        }
+        this.router.navigate(['./'], {
+            queryParams: {
+                expanded: expandedIds.filter(id => !!id).join(','),
+            },
+            queryParamsHandling: 'merge',
+            relativeTo: this.route,
+        });
+    }
+    getMoveListItems(collection) {
+        this.moveListItems = this.root.getMoveListItems(collection);
+    }
+    move(collection, parentId) {
+        this.root.onMove({
+            index: 0,
+            parentId,
+            collectionId: collection.id,
+        });
+    }
+    moveUp(collection, currentIndex) {
+        if (!collection.parent) {
+            return;
+        }
+        this.root.onMove({
+            index: currentIndex - 1,
+            parentId: collection.parent.id,
+            collectionId: collection.id,
+        });
+    }
+    moveDown(collection, currentIndex) {
+        if (!collection.parent) {
+            return;
+        }
+        this.root.onMove({
+            index: currentIndex + 1,
+            parentId: collection.parent.id,
+            collectionId: collection.id,
+        });
+    }
+    drop(event) {
+        moveItemInArray(this.collectionTree.children, event.previousIndex, event.currentIndex);
+        this.root.onDrop(event);
+    }
+    delete(id) {
+        this.root.onDelete(id);
+    }
+}
+CollectionTreeNodeComponent.decorators = [
+    { type: Component, args: [{
+                selector: 'vdr-collection-tree-node',
+                template: "<div\n    cdkDropList\n    class=\"tree-node\"\n    #dropList\n    [cdkDropListData]=\"collectionTree\"\n    [cdkDropListDisabled]=\"!(hasUpdatePermission$ | async)\"\n    (cdkDropListDropped)=\"drop($event)\"\n>\n    <div\n        class=\"collection\"\n        [class.private]=\"collection.isPrivate\"\n        *ngFor=\"let collection of collectionTree.children; index as i; trackBy: trackByFn\"\n        cdkDrag\n        [cdkDragData]=\"collection\"\n    >\n        <div\n            class=\"collection-detail\"\n            [ngClass]=\"'depth-' + depth\"\n            [class.active]=\"collection.id === activeCollectionId\"\n        >\n            <div>\n                <input\n                    type=\"checkbox\"\n                    clrCheckbox\n                    [checked]=\"selectionManager.isSelected(collection)\"\n                    (click)=\"selectionManager.toggleSelection(collection, $event)\"\n                />\n            </div>\n            <div class=\"name\">\n                <button\n                    class=\"icon-button folder-button\"\n                    [disabled]=\"expandAll\"\n                    *ngIf=\"collection.children?.length; else folderSpacer\"\n                    (click)=\"toggleExpanded(collection)\"\n                >\n                    <clr-icon shape=\"folder\" *ngIf=\"!collection.expanded && !expandAll\"></clr-icon>\n                    <clr-icon shape=\"folder-open\" *ngIf=\"collection.expanded || expandAll\"></clr-icon>\n                </button>\n                <ng-template #folderSpacer>\n                    <div class=\"folder-button-spacer\"></div>\n                </ng-template>\n                {{ collection.name }}\n            </div>\n            <div class=\"flex-spacer\"></div>\n            <vdr-chip *ngIf=\"collection.isPrivate\">{{ 'catalog.private' | translate }}</vdr-chip>\n            <a\n                class=\"btn btn-link btn-sm\"\n                [routerLink]=\"['./', { contents: collection.id }]\"\n                queryParamsHandling=\"preserve\"\n            >\n                <clr-icon shape=\"view-list\"></clr-icon>\n                {{ 'catalog.view-contents' | translate }}\n            </a>\n            <a class=\"btn btn-link btn-sm\" [routerLink]=\"['/catalog/collections/', collection.id]\">\n                <clr-icon shape=\"edit\"></clr-icon>\n                {{ 'common.edit' | translate }}\n            </a>\n            <div class=\"drag-handle\" cdkDragHandle *vdrIfPermissions=\"['UpdateCatalog', 'UpdateCollection']\">\n                <clr-icon shape=\"drag-handle\" size=\"24\"></clr-icon>\n            </div>\n            <vdr-dropdown>\n                <button class=\"icon-button\" vdrDropdownTrigger (click)=\"getMoveListItems(collection)\">\n                    <clr-icon shape=\"ellipsis-vertical\"></clr-icon>\n                </button>\n                <vdr-dropdown-menu vdrPosition=\"bottom-right\">\n                    <a\n                        class=\"dropdown-item\"\n                        [routerLink]=\"['./', 'create', { parentId: collection.id }]\"\n                        *vdrIfPermissions=\"['CreateCatalog', 'CreateCollection']\"\n                    >\n                        <clr-icon shape=\"plus\"></clr-icon>\n                        {{ 'catalog.create-new-collection' | translate }}\n                    </a>\n                    <div class=\"dropdown-divider\"></div>\n                    <button\n                        type=\"button\"\n                        vdrDropdownItem\n                        [disabled]=\"i === 0 || !(hasUpdatePermission$ | async)\"\n                        (click)=\"moveUp(collection, i)\"\n                    >\n                        <clr-icon shape=\"caret up\"></clr-icon>\n                        {{ 'catalog.move-up' | translate }}\n                    </button>\n                    <button\n                        type=\"button\"\n                        vdrDropdownItem\n                        [disabled]=\"\n                            i === collectionTree.children.length - 1 || !(hasUpdatePermission$ | async)\n                        \"\n                        (click)=\"moveDown(collection, i)\"\n                    >\n                        <clr-icon shape=\"caret down\"></clr-icon>\n                        {{ 'catalog.move-down' | translate }}\n                    </button>\n                    <h4 class=\"dropdown-header\">{{ 'catalog.move-to' | translate }}</h4>\n                    <button\n                        type=\"button\"\n                        vdrDropdownItem\n                        *ngFor=\"let item of moveListItems\"\n                        (click)=\"move(collection, item.id)\"\n                        [disabled]=\"!(hasUpdatePermission$ | async)\"\n                    >\n                        <div class=\"move-to-item\">\n                            <div class=\"move-icon\">\n                                <clr-icon shape=\"child-arrow\"></clr-icon>\n                            </div>\n                            <div class=\"path\">\n                                {{ item.path }}\n                            </div>\n                        </div>\n                    </button>\n                    <div class=\"dropdown-divider\"></div>\n                    <button\n                        class=\"button\"\n                        vdrDropdownItem\n                        (click)=\"delete(collection.id)\"\n                        [disabled]=\"!(hasDeletePermission$ | async)\"\n                    >\n                        <clr-icon shape=\"trash\" class=\"is-danger\"></clr-icon>\n                        {{ 'common.delete' | translate }}\n                    </button>\n                </vdr-dropdown-menu>\n            </vdr-dropdown>\n        </div>\n        <vdr-collection-tree-node\n            *ngIf=\"collection.expanded || expandAll\"\n            [expandAll]=\"expandAll\"\n            [collectionTree]=\"collection\"\n            [activeCollectionId]=\"activeCollectionId\"\n            [selectionManager]=\"selectionManager\"\n        ></vdr-collection-tree-node>\n    </div>\n</div>\n",
+                changeDetection: ChangeDetectionStrategy.OnPush,
+                styles: [":host{display:block}.collection{background-color:var(--clr-table-bgcolor);border-radius:var(--clr-global-borderradius);font-size:.65rem;transition:transform .25s cubic-bezier(0,0,.2,1);margin-bottom:2px;border-left:2px solid transparent;transition:border-left-color .2s}.collection.private{background-color:var(--color-component-bg-200)}.collection .collection-detail{padding:6px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--color-component-border-100)}.collection .collection-detail.active{background-color:var(--clr-global-selection-color)}.collection .collection-detail.depth-1{padding-left:36px}.collection .collection-detail.depth-2{padding-left:60px}.collection .collection-detail.depth-3{padding-left:84px}.collection .collection-detail.depth-4{padding-left:108px}.collection .collection-detail .folder-button-spacer{display:inline-block;width:28px}.tree-node{display:block;background-color:var(--clr-table-bgcolor);border-radius:var(--clr-global-borderradius);overflow:hidden}.tree-node.cdk-drop-list-dragging>.collection{border-left-color:var(--color-primary-300)}.drag-placeholder{min-height:120px;background-color:var(--color-component-bg-300);transition:transform .25s cubic-bezier(0,0,.2,1)}.cdk-drag-preview{box-sizing:border-box;border-radius:4px;box-shadow:0 5px 5px -3px #0003,0 8px 10px 1px #00000024,0 3px 14px 2px #0000001f}.cdk-drag-placeholder{opacity:0}.cdk-drag-animating{transition:transform .25s cubic-bezier(0,0,.2,1)}.example-list.cdk-drop-list-dragging .tree-node:not(.cdk-drag-placeholder){transition:transform .25s cubic-bezier(0,0,.2,1)}.move-to-item{display:flex;white-space:normal;align-items:baseline}.move-to-item .move-icon{flex:none;margin-right:3px}.move-to-item .path{line-height:18px}\n"]
+            },] }
+];
+CollectionTreeNodeComponent.ctorParameters = () => [
+    { type: CollectionTreeNodeComponent, decorators: [{ type: SkipSelf }, { type: Optional }] },
+    { type: CollectionTreeComponent },
+    { type: DataService },
+    { type: Router },
+    { type: ActivatedRoute },
+    { type: ChangeDetectorRef }
+];
+CollectionTreeNodeComponent.propDecorators = {
+    collectionTree: [{ type: Input }],
+    activeCollectionId: [{ type: Input }],
+    expandAll: [{ type: Input }],
+    selectionManager: [{ type: Input }]
+};
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29sbGVjdGlvbi10cmVlLW5vZGUuY29tcG9uZW50LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vLi4vc3JjL2xpYi9jYXRhbG9nL3NyYy9jb21wb25lbnRzL2NvbGxlY3Rpb24tdHJlZS9jb2xsZWN0aW9uLXRyZWUtbm9kZS5jb21wb25lbnQudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsT0FBTyxFQUFlLGVBQWUsRUFBRSxNQUFNLHdCQUF3QixDQUFDO0FBQ3RFLE9BQU8sRUFDSCx1QkFBdUIsRUFDdkIsaUJBQWlCLEVBQ2pCLFNBQVMsRUFDVCxLQUFLLEVBSUwsUUFBUSxFQUVSLFFBQVEsR0FDWCxNQUFNLGVBQWUsQ0FBQztBQUN2QixPQUFPLEVBQUUsY0FBYyxFQUFFLE1BQU0sRUFBRSxNQUFNLGlCQUFpQixDQUFDO0FBQ3pELE9BQU8sRUFBRSxXQUFXLEVBQUUsVUFBVSxFQUFvQixNQUFNLHdCQUF3QixDQUFDO0FBRW5GLE9BQU8sRUFBRSxHQUFHLEVBQUUsV0FBVyxFQUFFLE1BQU0sZ0JBQWdCLENBQUM7QUFHbEQsT0FBTyxFQUFxQix1QkFBdUIsRUFBRSxNQUFNLDZCQUE2QixDQUFDO0FBUXpGLE1BQU0sT0FBTywyQkFBMkI7SUFZcEMsWUFDb0MsTUFBbUMsRUFDM0QsSUFBNkIsRUFDN0IsV0FBd0IsRUFDeEIsTUFBYyxFQUNkLEtBQXFCLEVBQ3JCLGlCQUFvQztRQUxaLFdBQU0sR0FBTixNQUFNLENBQTZCO1FBQzNELFNBQUksR0FBSixJQUFJLENBQXlCO1FBQzdCLGdCQUFXLEdBQVgsV0FBVyxDQUFhO1FBQ3hCLFdBQU0sR0FBTixNQUFNLENBQVE7UUFDZCxVQUFLLEdBQUwsS0FBSyxDQUFnQjtRQUNyQixzQkFBaUIsR0FBakIsaUJBQWlCLENBQW1CO1FBakJoRCxVQUFLLEdBQUcsQ0FBQyxDQUFDO1FBSUQsY0FBUyxHQUFHLEtBQUssQ0FBQztRQUkzQixrQkFBYSxHQUF3QyxFQUFFLENBQUM7UUFXcEQs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bUU7UUFDcEUsZUFBZSxDQUFDLElBQUksQ0FBQyxjQUFjLENBQUMsUUFBUSxFQUFFLEtBQUssQ0FBQyxhQUFhLEVBQUUsS0FBSyxDQUFDLFlBQVksQ0FBQyxDQUFDO1FBQ3ZGLElBQUksQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLEtBQUssQ0FBQyxDQUFDO0lBQzVCLENBQUM7SUFFRCxNQUFNLENBQUMsRUFBVTtRQUNiLElBQUksQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLEVBQUUsQ0FBQyxDQUFDO0lBQzNCLENBQUM7OztZQWpJSixTQUFTLFNBQUM7Z0JBQ1AsUUFBUSxFQUFFLDBCQUEwQjtnQkFDcEMscWhNQUFvRDtnQkFFcEQsZUFBZSxFQUFFLHVCQUF1QixDQUFDLE1BQU07O2FBQ2xEOzs7WUFjK0MsMkJBQTJCLHVCQUFsRSxRQUFRLFlBQUksUUFBUTtZQXJCRCx1QkFBdUI7WUFMMUMsV0FBVztZQURLLE1BQU07WUFBdEIsY0FBYztZQVZuQixpQkFBaUI7Ozs2QkEyQmhCLEtBQUs7aUNBQ0wsS0FBSzt3QkFDTCxLQUFLOytCQUNMLEtBQUsiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBDZGtEcmFnRHJvcCwgbW92ZUl0ZW1JbkFycmF5IH0gZnJvbSAnQGFuZ3VsYXIvY2RrL2RyYWctZHJvcCc7XG5pbXBvcnQge1xuICAgIENoYW5nZURldGVjdGlvblN0cmF0ZWd5LFxuICAgIENoYW5nZURldGVjdG9yUmVmLFxuICAgIENvbXBvbmVudCxcbiAgICBJbnB1dCxcbiAgICBPbkNoYW5nZXMsXG4gICAgT25EZXN0cm95LFxuICAgIE9uSW5pdCxcbiAgICBPcHRpb25hbCxcbiAgICBTaW1wbGVDaGFuZ2VzLFxuICAgIFNraXBTZWxmLFxufSBmcm9tICdAYW5ndWxhci9jb3JlJztcbmltcG9ydCB7IEFjdGl2YXRlZFJvdXRlLCBSb3V0ZXIgfSBmcm9tICdAYW5ndWxhci9yb3V0ZXInO1xuaW1wb3J0IHsgRGF0YVNlcnZpY2UsIFBlcm1pc3Npb24sIFNlbGVjdGlvbk1hbmFnZXIgfSBmcm9tICdAdmVuZHVyZS9hZG1pbi11aS9jb3JlJztcbmltcG9ydCB7IE9ic2VydmFibGUsIFN1YnNjcmlwdGlvbiB9IGZyb20gJ3J4anMnO1xuaW1wb3J0IHsgbWFwLCBzaGFyZVJlcGxheSB9IGZyb20gJ3J4anMvb3BlcmF0b3JzJztcblxuaW1wb3J0IHsgUm9vdE5vZGUsIFRyZWVOb2RlIH0gZnJvbSAnLi9hcnJheS10by10cmVlJztcbmltcG9ydCB7IENvbGxlY3Rpb25QYXJ0aWFsLCBDb2xsZWN0aW9uVHJlZUNvbXBvbmVudCB9IGZyb20gJy4vY29sbGVjdGlvbi10cmVlLmNvbXBvbmVudCc7XG5cbkBDb21wb25lbnQoe1xuICAgIHNlbGVjdG9yOiAndmRyLWNvbGxlY3Rpb24tdHJlZS1ub2RlJyxcbiAgICB0ZW1wbGF0ZVVybDogJy4vY29sbGVjdGlvbi10cmVlLW5vZGUuY29tcG9uZW50Lmh0bWwnLFxuICAgIHN0eWxlVXJsczogWycuL2NvbGxlY3Rpb24tdHJlZS1ub2RlLmNvbXBvbmVudC5zY3NzJ10sXG4gICAgY2hhbmdlRGV0ZWN0aW9uOiBDaGFuZ2VEZXRlY3Rpb25TdHJhdGVneS5PblB1c2gsXG59KVxuZXhwb3J0IGNsYXNzIENvbGxlY3Rpb25UcmVlTm9kZUNvbXBvbmVudCBpbXBsZW1lbnRzIE9uSW5pdCwgT25DaGFuZ2VzLCBPbkRlc3Ryb3kge1xuICAgIGRlcHRoID0gMDtcbiAgICBwYXJlbnROYW1lOiBzdHJpbmc7XG4gICAgQElucHV0KCkgY29sbGVjdGlvblRyZWU6IFRyZWVOb2RlPENvbGxlY3Rpb25QYXJ0aWFsPjtcbiAgICBASW5wdXQoKSBhY3RpdmVDb2xsZWN0aW9uSWQ6IHN0cmluZztcbiAgICBASW5wdXQoKSBleHBhbmRBbGwgPSBmYWxzZTtcbiAgICBASW5wdXQoKSBzZWxlY3Rpb25NYW5hZ2VyOiBTZWxlY3Rpb25NYW5hZ2VyPENvbGxlY3Rpb25QYXJ0aWFsPjtcbiAgICBoYXNVcGRhdGVQZXJtaXNzaW9uJDogT2JzZXJ2YWJsZTxib29sZWFuPjtcbiAgICBoYXNEZWxldGVQZXJtaXNzaW9uJDogT2JzZXJ2YWJsZTxib29sZWFuPjtcbiAgICBtb3ZlTGlzdEl0ZW1zOiBBcnJheTx7IHBhdGg6IHN0cmluZzsgaWQ6IHN0cmluZyB9PiA9IFtdO1xuICAgIHByaXZhdGUgc3Vic2NyaXB0aW9uOiBTdWJzY3JpcHRpb247XG5cbiAgICBjb25zdHJ1Y3RvcihcbiAgICAgICAgQFNraXBTZWxmKCkgQE9wdGlvbmFsKCkgcHJpdmF0ZSBwYXJlbnQ6IENvbGxlY3Rpb25UcmVlTm9kZUNvbXBvbmVudCxcbiAgICAgICAgcHJpdmF0ZSByb290OiBDb2xsZWN0aW9uVHJlZUNvbXBvbmVudCxcbiAgICAgICAgcHJpdmF0ZSBkYXRhU2VydmljZTogRGF0YVNlcnZpY2UsXG4gICAgICAgIHByaXZhdGUgcm91dGVyOiBSb3V0ZXIsXG4gICAgICAgIHByaXZhdGUgcm91dGU6IEFjdGl2YXRlZFJvdXRlLFxuICAgICAgICBwcml2YXRlIGNoYW5nZURldGVjdG9yUmVmOiBDaGFuZ2VEZXRlY3RvclJlZixcbiAgICApIHtcbiAgICAgICAgaWYgKHBhcmVudCkge1xuICAgICAgICAgICAgdGhpcy5kZXB0aCA9IHBhcmVudC5kZXB0aCArIDE7XG4gICAgICAgIH1cbiAgICB9XG5cbiAgICBuZ09uSW5pdCgpIHtcbiAgICAgICAgdGhpcy5wYXJlbnROYW1lID0gdGhpcy5jb2xsZWN0aW9uVHJlZS5uYW1lIHx8ICc8cm9vdD4nO1xuICAgICAgICBjb25zdCBwZXJtaXNzaW9ucyQgPSB0aGlzLmRhdGFTZXJ2aWNlLmNsaWVudFxuICAgICAgICAgICAgLnVzZXJTdGF0dXMoKVxuICAgICAgICAgICAgLm1hcFN0cmVhbShkYXRhID0+IGRhdGEudXNlclN0YXR1cy5wZXJtaXNzaW9ucylcbiAgICAgICAgICAgIC5waXBlKHNoYXJlUmVwbGF5KDEpKTtcbiAgICAgICAgdGhpcy5oYXNVcGRhdGVQZXJtaXNzaW9uJCA9IHBlcm1pc3Npb25zJC5waXBlKFxuICAgICAgICAgICAgbWFwKFxuICAgICAgICAgICAgICAgIHBlcm1zID0+XG4gICAgICAgICAgICAgICAgICAgIHBlcm1zLmluY2x1ZGVzKFBlcm1pc3Npb24uVXBkYXRlQ2F0YWxvZykgfHwgcGVybXMuaW5jbHVkZXMoUGVybWlzc2lvbi5VcGRhdGVDb2xsZWN0aW9uKSxcbiAgICAgICAgICAgICksXG4gICAgICAgICk7XG4gICAgICAgIHRoaXMuaGFzRGVsZXRlUGVybWlzc2lvbiQgPSBwZXJtaXNzaW9ucyQucGlwZShcbiAgICAgICAgICAgIG1hcChcbiAgICAgICAgICAgICAgICBwZXJtcyA9PlxuICAgICAgICAgICAgICAgICAgICBwZXJtcy5pbmNsdWRlcyhQZXJtaXNzaW9uLkRlbGV0ZUNhdGFsb2cpIHx8IHBlcm1zLmluY2x1ZGVzKFBlcm1pc3Npb24uRGVsZXRlQ29sbGVjdGlvbiksXG4gICAgICAgICAgICApLFxuICAgICAgICApO1xuICAgICAgICB0aGlzLnN1YnNjcmlwdGlvbiA9IHRoaXMuc2VsZWN0aW9uTWFuYWdlcj8uc2VsZWN0aW9uQ2hhbmdlcyQuc3Vic2NyaWJlKCgpID0+XG4gICAgICAgICAgICB0aGlzLmNoYW5nZURldGVjdG9yUmVmLm1hcmtGb3JDaGVjaygpLFxuICAgICAgICApO1xuICAgIH1cblxuICAgIG5nT25DaGFuZ2VzKGNoYW5nZXM6IFNpbXBsZUNoYW5nZXMpIHtcbiAgICAgICAgY29uc3QgZXhwYW5kQWxsQ2hhbmdlID0gY2hhbmdlc1snZXhwYW5kQWxsJ107XG4gICAgICAgIGlmIChleHBhbmRBbGxDaGFuZ2UpIHtcbiAgICAgICAgICAgIGlmIChleHBhbmRBbGxDaGFuZ2UucHJldmlvdXNWYWx1ZSA9PT0gdHJ1ZSAmJiBleHBhbmRBbGxDaGFuZ2UuY3VycmVudFZhbHVlID09PSBmYWxzZSkge1xuICAgICAgICAgICAgICAgIHRoaXMuY29sbGVjdGlvblRyZWUuY2hpbGRyZW4uZm9yRWFjaChjID0+IChjLmV4cGFuZGVkID0gZmFsc2UpKTtcbiAgICAgICAgICAgIH1cbiAgICAgICAgfVxuICAgIH1cblxuICAgIG5nT25EZXN0cm95KCkge1xuICAgICAgICB0aGlzLnN1YnNjcmlwdGlvbj8udW5zdWJzY3JpYmUoKTtcbiAgICB9XG5cbiAgICB0cmFja0J5Rm4oaW5kZXg6IG51bWJlciwgaXRlbTogQ29sbGVjdGlvblBhcnRpYWwpIHtcbiAgICAgICAgcmV0dXJuIGl0ZW0uaWQ7XG4gICAgfVxuXG4gICAgdG9nZ2xlRXhwYW5kZWQoY29sbGVjdGlvbjogVHJlZU5vZGU8Q29sbGVjdGlvblBhcnRpYWw+KSB7XG4gICAgICAgIGNvbGxlY3Rpb24uZXhwYW5kZWQgPSAhY29sbGVjdGlvbi5leHBhbmRlZDtcbiAgICAgICAgbGV0IGV4cGFuZGVkSWRzID0gdGhpcy5yb3V0ZS5zbmFwc2hvdC5xdWVyeVBhcmFtTWFwLmdldCgnZXhwYW5kZWQnKT8uc3BsaXQoJywnKSA/PyBbXTtcbiAgICAgICAgaWYgKGNvbGxlY3Rpb24uZXhwYW5kZWQpIHtcbiAgICAgICAgICAgIGV4cGFuZGVkSWRzLnB1c2goY29sbGVjdGlvbi5pZCk7XG4gICAgICAgIH0gZWxzZSB7XG4gICAgICAgICAgICBleHBhbmRlZElkcyA9IGV4cGFuZGVkSWRzLmZpbHRlcihpZCA9PiBpZCAhPT0gY29sbGVjdGlvbi5pZCk7XG4gICAgICAgIH1cbiAgICAgICAgdGhpcy5yb3V0ZXIubmF2aWdhdGUoWycuLyddLCB7XG4gICAgICAgICAgICBxdWVyeVBhcmFtczoge1xuICAgICAgICAgICAgICAgIGV4cGFuZGVkOiBleHBhbmRlZElkcy5maWx0ZXIoaWQgPT4gISFpZCkuam9pbignLCcpLFxuICAgICAgICAgICAgfSxcbiAgICAgICAgICAgIHF1ZXJ5UGFyYW1zSGFuZGxpbmc6ICdtZXJnZScsXG4gICAgICAgICAgICByZWxhdGl2ZVRvOiB0aGlzLnJvdXRlLFxuICAgICAgICB9KTtcbiAgICB9XG5cbiAgICBnZXRNb3ZlTGlzdEl0ZW1zKGNvbGxlY3Rpb246IENvbGxlY3Rpb25QYXJ0aWFsKSB7XG4gICAgICAgIHRoaXMubW92ZUxpc3RJdGVtcyA9IHRoaXMucm9vdC5nZXRNb3ZlTGlzdEl0ZW1zKGNvbGxlY3Rpb24pO1xuICAgIH1cblxuICAgIG1vdmUoY29sbGVjdGlvbjogQ29sbGVjdGlvblBhcnRpYWwsIHBhcmVudElkOiBzdHJpbmcpIHtcbiAgICAgICAgdGhpcy5yb290Lm9uTW92ZSh7XG4gICAgICAgICAgICBpbmRleDogMCxcbiAgICAgICAgICAgIHBhcmVudElkLFxuICAgICAgICAgICAgY29sbGVjdGlvbklkOiBjb2xsZWN0aW9uLmlkLFxuICAgICAgICB9KTtcbiAgICB9XG5cbiAgICBtb3ZlVXAoY29sbGVjdGlvbjogQ29sbGVjdGlvblBhcnRpYWwsIGN1cnJlbnRJbmRleDogbnVtYmVyKSB7XG4gICAgICAgIGlmICghY29sbGVjdGlvbi5wYXJlbnQpIHtcbiAgICAgICAgICAgIHJldHVybjtcbiAgICAgICAgfVxuICAgICAgICB0aGlzLnJvb3Qub25Nb3ZlKHtcbiAgICAgICAgICAgIGluZGV4OiBjdXJyZW50SW5kZXggLSAxLFxuICAgICAgICAgICAgcGFyZW50SWQ6IGNvbGxlY3Rpb24ucGFyZW50LmlkLFxuICAgICAgICAgICAgY29sbGVjdGlvbklkOiBjb2xsZWN0aW9uLmlkLFxuICAgICAgICB9KTtcbiAgICB9XG5cbiAgICBtb3ZlRG93bihjb2xsZWN0aW9uOiBDb2xsZWN0aW9uUGFydGlhbCwgY3VycmVudEluZGV4OiBudW1iZXIpIHtcbiAgICAgICAgaWYgKCFjb2xsZWN0aW9uLnBhcmVudCkge1xuICAgICAgICAgICAgcmV0dXJuO1xuICAgICAgICB9XG4gICAgICAgIHRoaXMucm9vdC5vbk1vdmUoe1xuICAgICAgICAgICAgaW5kZXg6IGN1cnJlbnRJbmRleCArIDEsXG4gICAgICAgICAgICBwYXJlbnRJZDogY29sbGVjdGlvbi5wYXJlbnQuaWQsXG4gICAgICAgICAgICBjb2xsZWN0aW9uSWQ6IGNvbGxlY3Rpb24uaWQsXG4gICAgICAgIH0pO1xuICAgIH1cblxuICAgIGRyb3AoZXZlbnQ6IENka0RyYWdEcm9wPENvbGxlY3Rpb25QYXJ0aWFsIHwgUm9vdE5vZGU8Q29sbGVjdGlvblBhcnRpYWw+Pikge1xuICAgICAgICBtb3ZlSXRlbUluQXJyYXkodGhpcy5jb2xsZWN0aW9uVHJlZS5jaGlsZHJlbiwgZXZlbnQucHJldmlvdXNJbmRleCwgZXZlbnQuY3VycmVudEluZGV4KTtcbiAgICAgICAgdGhpcy5yb290Lm9uRHJvcChldmVudCk7XG4gICAgfVxuXG4gICAgZGVsZXRlKGlkOiBzdHJpbmcpIHtcbiAgICAgICAgdGhpcy5yb290Lm9uRGVsZXRlKGlkKTtcbiAgICB9XG59XG4iXX0=

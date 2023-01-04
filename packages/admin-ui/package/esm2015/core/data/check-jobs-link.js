@@ -1,0 +1,32 @@
+import { ApolloLink } from '@apollo/client/core';
+import { JobQueueService } from '../providers/job-queue/job-queue.service';
+/**
+ * This link checks each operation and if it is a mutation, it tells the JobQueueService
+ * to poll for active jobs. This is because certain mutations trigger background jobs
+ * which should be made known in the UI.
+ */
+export class CheckJobsLink extends ApolloLink {
+    /**
+     * We inject the Injector rather than the JobQueueService directly in order
+     * to avoid a circular dependency error.
+     */
+    constructor(injector) {
+        super((operation, forward) => {
+            if (this.isMutation(operation)) {
+                this.jobQueueService.checkForJobs();
+            }
+            return forward ? forward(operation) : null;
+        });
+        this.injector = injector;
+    }
+    get jobQueueService() {
+        if (!this._jobQueueService) {
+            this._jobQueueService = this.injector.get(JobQueueService);
+        }
+        return this._jobQueueService;
+    }
+    isMutation(operation) {
+        return !!operation.query.definitions.find(d => d.kind === 'OperationDefinition' && d.operation === 'mutation');
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY2hlY2stam9icy1saW5rLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vLi4vc3JjL2xpYi9jb3JlL3NyYy9kYXRhL2NoZWNrLWpvYnMtbGluay50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFDQSxPQUFPLEVBQUUsVUFBVSxFQUFhLE1BQU0scUJBQXFCLENBQUM7QUFFNUQsT0FBTyxFQUFFLGVBQWUsRUFBRSxNQUFNLDBDQUEwQyxDQUFDO0FBRTNFOzs7O0dBSUc7QUFDSCxNQUFNLE9BQU8sYUFBYyxTQUFRLFVBQVU7SUFTekM7OztPQUdHO0lBQ0gsWUFBb0IsUUFBa0I7UUFDbEMsS0FBSyxDQUFDLENBQUMsU0FBUyxFQUFFLE9BQU8sRUFBRSxFQUFFO1lBQ3pCLElBQUksSUFBSSxDQUFDLFVBQVUsQ0FBQyxTQUFTLENBQUMsRUFBRTtnQkFDNUIsSUFBSSxDQUFDLGVBQWUsQ0FBQyxZQUFZLEVBQUUsQ0FBQzthQUN2QztZQUNELE9BQU8sT0FBTyxDQUFDLENBQUMsQ0FBQyxPQUFPLENBQUMsU0FBUyxDQUFDLENBQUMsQ0FBQyxDQUFDLElBQUksQ0FBQztRQUMvQyxDQUFDLENBQUMsQ0FBQztRQU5hLGFBQVEsR0FBUixRQUFRLENBQVU7SUFPdEMsQ0FBQztJQWxCRCxJQUFJLGVBQWU7UUFDZixJQUFJLENBQUMsSUFBSSxDQUFDLGdCQUFnQixFQUFFO1lBQ3hCLElBQUksQ0FBQyxnQkFBZ0IsR0FBRyxJQUFJLENBQUMsUUFBUSxDQUFDLEdBQUcsQ0FBQyxlQUFlLENBQUMsQ0FBQztTQUM5RDtRQUNELE9BQU8sSUFBSSxDQUFDLGdCQUFnQixDQUFDO0lBQ2pDLENBQUM7SUFlTyxVQUFVLENBQUMsU0FBb0I7UUFDbkMsT0FBTyxDQUFDLENBQUMsU0FBUyxDQUFDLEtBQUssQ0FBQyxXQUFXLENBQUMsSUFBSSxDQUNyQyxDQUFDLENBQUMsRUFBRSxDQUFDLENBQUMsQ0FBQyxJQUFJLEtBQUsscUJBQXFCLElBQUksQ0FBQyxDQUFDLFNBQVMsS0FBSyxVQUFVLENBQ3RFLENBQUM7SUFDTixDQUFDO0NBQ0oiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBJbmplY3RvciB9IGZyb20gJ0Bhbmd1bGFyL2NvcmUnO1xuaW1wb3J0IHsgQXBvbGxvTGluaywgT3BlcmF0aW9uIH0gZnJvbSAnQGFwb2xsby9jbGllbnQvY29yZSc7XG5cbmltcG9ydCB7IEpvYlF1ZXVlU2VydmljZSB9IGZyb20gJy4uL3Byb3ZpZGVycy9qb2ItcXVldWUvam9iLXF1ZXVlLnNlcnZpY2UnO1xuXG4vKipcbiAqIFRoaXMgbGluayBjaGVja3MgZWFjaCBvcGVyYXRpb24gYW5kIGlmIGl0IGlzIGEgbXV0YXRpb24sIGl0IHRlbGxzIHRoZSBKb2JRdWV1ZVNlcnZpY2VcbiAqIHRvIHBvbGwgZm9yIGFjdGl2ZSBqb2JzLiBUaGlzIGlzIGJlY2F1c2UgY2VydGFpbiBtdXRhdGlvbnMgdHJpZ2dlciBiYWNrZ3JvdW5kIGpvYnNcbiAqIHdoaWNoIHNob3VsZCBiZSBtYWRlIGtub3duIGluIHRoZSBVSS5cbiAqL1xuZXhwb3J0IGNsYXNzIENoZWNrSm9ic0xpbmsgZXh0ZW5kcyBBcG9sbG9MaW5rIHtcbiAgICBwcml2YXRlIF9qb2JRdWV1ZVNlcnZpY2U6IEpvYlF1ZXVlU2VydmljZTtcbiAgICBnZXQgam9iUXVldWVTZXJ2aWNlKCk6IEpvYlF1ZXVlU2VydmljZSB7XG4gICAgICAgIGlmICghdGhpcy5fam9iUXVldWVTZXJ2aWNlKSB7XG4gICAgICAgICAgICB0aGlzLl9qb2JRdWV1ZVNlcnZpY2UgPSB0aGlzLmluamVjdG9yLmdldChKb2JRdWV1ZVNlcnZpY2UpO1xuICAgICAgICB9XG4gICAgICAgIHJldHVybiB0aGlzLl9qb2JRdWV1ZVNlcnZpY2U7XG4gICAgfVxuXG4gICAgLyoqXG4gICAgICogV2UgaW5qZWN0IHRoZSBJbmplY3RvciByYXRoZXIgdGhhbiB0aGUgSm9iUXVldWVTZXJ2aWNlIGRpcmVjdGx5IGluIG9yZGVyXG4gICAgICogdG8gYXZvaWQgYSBjaXJjdWxhciBkZXBlbmRlbmN5IGVycm9yLlxuICAgICAqL1xuICAgIGNvbnN0cnVjdG9yKHByaXZhdGUgaW5qZWN0b3I6IEluamVjdG9yKSB7XG4gICAgICAgIHN1cGVyKChvcGVyYXRpb24sIGZvcndhcmQpID0+IHtcbiAgICAgICAgICAgIGlmICh0aGlzLmlzTXV0YXRpb24ob3BlcmF0aW9uKSkge1xuICAgICAgICAgICAgICAgIHRoaXMuam9iUXVldWVTZXJ2aWNlLmNoZWNrRm9ySm9icygpO1xuICAgICAgICAgICAgfVxuICAgICAgICAgICAgcmV0dXJuIGZvcndhcmQgPyBmb3J3YXJkKG9wZXJhdGlvbikgOiBudWxsO1xuICAgICAgICB9KTtcbiAgICB9XG5cbiAgICBwcml2YXRlIGlzTXV0YXRpb24ob3BlcmF0aW9uOiBPcGVyYXRpb24pOiBib29sZWFuIHtcbiAgICAgICAgcmV0dXJuICEhb3BlcmF0aW9uLnF1ZXJ5LmRlZmluaXRpb25zLmZpbmQoXG4gICAgICAgICAgICBkID0+IGQua2luZCA9PT0gJ09wZXJhdGlvbkRlZmluaXRpb24nICYmIGQub3BlcmF0aW9uID09PSAnbXV0YXRpb24nLFxuICAgICAgICApO1xuICAgIH1cbn1cbiJdfQ==
