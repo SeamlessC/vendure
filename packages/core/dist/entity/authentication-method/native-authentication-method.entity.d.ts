@@ -1,4 +1,5 @@
 import { DeepPartial } from '@vendure/common/lib/shared-types';
+
 import { AuthenticationMethod } from './authentication-method.entity';
 /**
  * @description
@@ -13,13 +14,16 @@ export declare class NativeAuthenticationMethod extends AuthenticationMethod {
     identifier: string;
     passwordHash: string;
     verificationToken: string | null;
+    verificationTokenExpires: Date | null;
     passwordResetToken: string | null;
+    passwordResetTokenExpires: Date | null;
     /**
      * @description
      * A token issued when a User requests to change their identifier (typically
      * an email address)
      */
     identifierChangeToken: string | null;
+    identifierChangeTokenExpires: Date | null;
     /**
      * @description
      * When a request has been made to change the User's identifier, the new identifier
@@ -28,3 +32,7 @@ export declare class NativeAuthenticationMethod extends AuthenticationMethod {
      */
     pendingIdentifier: string | null;
 }
+export declare type tokenNames = keyof Pick<
+    NativeAuthenticationMethod,
+    'identifierChangeToken' | 'verificationToken' | 'passwordResetToken'
+>;

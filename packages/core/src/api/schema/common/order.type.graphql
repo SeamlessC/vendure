@@ -7,6 +7,7 @@ type Order implements Node {
     completed the checkout and the Order is no longer "active"
     """
     orderPlacedAt: DateTime
+    finalChannel: Channel
     "A unique code for the Order"
     code: String!
     state: String!

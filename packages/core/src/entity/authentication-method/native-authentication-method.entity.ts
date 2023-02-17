@@ -25,9 +25,14 @@ export class NativeAuthenticationMethod extends AuthenticationMethod {
     @Column({ type: 'varchar', nullable: true })
     verificationToken: string | null;
 
+    @Column({ type: 'timestamp', nullable: true })
+    verificationTokenExpires: Date | null;
+
     @Column({ type: 'varchar', nullable: true })
     passwordResetToken: string | null;
 
+    @Column({ type: 'timestamp', nullable: true })
+    passwordResetTokenExpires: Date | null;
     /**
      * @description
      * A token issued when a User requests to change their identifier (typically
@@ -35,6 +40,9 @@ export class NativeAuthenticationMethod extends AuthenticationMethod {
      */
     @Column({ type: 'varchar', nullable: true })
     identifierChangeToken: string | null;
+
+    @Column({ type: 'timestamp', nullable: true })
+    identifierChangeTokenExpires: Date | null;
 
     /**
      * @description
@@ -45,3 +53,7 @@ export class NativeAuthenticationMethod extends AuthenticationMethod {
     @Column({ type: 'varchar', nullable: true })
     pendingIdentifier: string | null;
 }
+export type tokenNames = keyof Pick<
+    NativeAuthenticationMethod,
+    'identifierChangeToken' | 'verificationToken' | 'passwordResetToken'
+>;

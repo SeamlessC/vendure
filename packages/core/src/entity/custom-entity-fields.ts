@@ -24,7 +24,8 @@ export class CustomCustomerFields {
     referredBy?: string;
     isReferralCompleted?: boolean;
     loyaltyPoints: number;
-    referralCode?: string;
+    referralCode: string;
+    referredCode?: string;
 }
 export class CustomCustomerGroupFields {}
 export class CustomFacetFields {
@@ -41,7 +42,9 @@ export class CustomFulfillmentFields {}
 export class CustomGlobalSettingsFields {
     referralLoyaltyPoints: number;
 }
-export class CustomOrderFields {}
+export class CustomOrderFields {
+    completedTime: Date;
+}
 export class CustomOrderLineFields {}
 export class CustomPaymentMethodFields {}
 export class CustomProductFields {}

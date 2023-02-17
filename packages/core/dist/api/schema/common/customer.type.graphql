@@ -5,7 +5,7 @@ type Customer implements Node {
     title: String
     firstName: String!
     lastName: String!
-    phoneNumber: String
+    phoneNumber: String!
     emailAddress: String!
     addresses: [Address!]
     orders(options: OrderListOptions): OrderList!

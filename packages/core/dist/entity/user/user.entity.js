@@ -44,7 +44,7 @@ __decorate([
     __metadata("design:type", Object)
 ], User.prototype, "deletedAt", void 0);
 __decorate([
-    typeorm_1.Column(),
+    typeorm_1.Column({ unique: true }),
     __metadata("design:type", String)
 ], User.prototype, "identifier", void 0);
 __decorate([

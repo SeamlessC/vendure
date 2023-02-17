@@ -460,8 +460,6 @@ var LanguageCode;
     LanguageCode["ar"] = "ar";
     /** Armenian */
     LanguageCode["hy"] = "hy";
-    /** Assamese */
-    LanguageCode["as"] = "as";
     /** Azerbaijani */
     LanguageCode["az"] = "az";
     /** Bambara */
@@ -562,8 +560,6 @@ var LanguageCode;
     LanguageCode["hi"] = "hi";
     /** Hungarian */
     LanguageCode["hu"] = "hu";
-    /** Icelandic */
-    LanguageCode["is"] = "is";
     /** Igbo */
     LanguageCode["ig"] = "ig";
     /** Indonesian */

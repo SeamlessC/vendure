@@ -367,6 +367,7 @@ var ErrorCode;
     ErrorCode["ALREADY_LOGGED_IN_ERROR"] = "ALREADY_LOGGED_IN_ERROR";
     ErrorCode["MISSING_PASSWORD_ERROR"] = "MISSING_PASSWORD_ERROR";
     ErrorCode["PASSWORD_VALIDATION_ERROR"] = "PASSWORD_VALIDATION_ERROR";
+    ErrorCode["OTPREQUEST_TIMEOUT_ERROR"] = "OTPREQUEST_TIMEOUT_ERROR";
     ErrorCode["PASSWORD_ALREADY_SET_ERROR"] = "PASSWORD_ALREADY_SET_ERROR";
     ErrorCode["VERIFICATION_TOKEN_INVALID_ERROR"] = "VERIFICATION_TOKEN_INVALID_ERROR";
     ErrorCode["VERIFICATION_TOKEN_EXPIRED_ERROR"] = "VERIFICATION_TOKEN_EXPIRED_ERROR";
@@ -432,8 +433,6 @@ var LanguageCode;
     LanguageCode["ar"] = "ar";
     /** Armenian */
     LanguageCode["hy"] = "hy";
-    /** Assamese */
-    LanguageCode["as"] = "as";
     /** Azerbaijani */
     LanguageCode["az"] = "az";
     /** Bambara */
@@ -534,8 +533,6 @@ var LanguageCode;
     LanguageCode["hi"] = "hi";
     /** Hungarian */
     LanguageCode["hu"] = "hu";
-    /** Icelandic */
-    LanguageCode["is"] = "is";
     /** Igbo */
     LanguageCode["ig"] = "ig";
     /** Indonesian */

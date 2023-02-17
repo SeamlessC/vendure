@@ -16,7 +16,7 @@ export class AdministratorEntityResolver {
         if (administrator.user) {
             return administrator.user;
         }
-        const user = await this.userService.getUserByEmailAddress(ctx, administrator.emailAddress);
+        const user = await this.userService.getUserByIdentifier(ctx, administrator.emailAddress);
         if (!user) {
             throw new EntityNotFoundError('User', '<not found>');
         }

@@ -1,10 +1,34 @@
-import { RegisterCustomerAccountResult, RegisterCustomerInput, UpdateCustomerInput as UpdateCustomerShopInput, VerifyCustomerAccountResult } from '@vendure/common/lib/generated-shop-types';
-import { AddNoteToCustomerInput, CreateAddressInput, CreateCustomerInput, CreateCustomerResult, DeletionResponse, UpdateAddressInput, UpdateCustomerInput, UpdateCustomerNoteInput, UpdateCustomerResult } from '@vendure/common/lib/generated-types';
+import {
+    RegisterCustomerAccountResult,
+    RegisterCustomerInput,
+    UpdateCustomerInput as UpdateCustomerShopInput,
+    VerifyCustomerAccountResult,
+} from '@vendure/common/lib/generated-shop-types';
+import {
+    AddNoteToCustomerInput,
+    CreateAddressInput,
+    CreateCustomerInput,
+    CreateCustomerResult,
+    DeletionResponse,
+    UpdateAddressInput,
+    UpdateCustomerInput,
+    UpdateCustomerNoteInput,
+    UpdateCustomerResult,
+} from '@vendure/common/lib/generated-types';
 import { ID, PaginatedList } from '@vendure/common/lib/shared-types';
+
 import { RequestContext } from '../../api/common/request-context';
 import { RelationPaths } from '../../api/index';
 import { ErrorResultUnion } from '../../common/error/error-result';
-import { EmailAddressConflictError, IdentifierChangeTokenExpiredError, IdentifierChangeTokenInvalidError, PasswordResetTokenExpiredError, PasswordResetTokenInvalidError, PasswordValidationError } from '../../common/error/generated-graphql-shop-errors';
+import {
+    EmailAddressConflictError,
+    IdentifierChangeTokenExpiredError,
+    IdentifierChangeTokenInvalidError,
+    OTPRequestTimeoutError,
+    PasswordResetTokenExpiredError,
+    PasswordResetTokenInvalidError,
+    PasswordValidationError,
+} from '../../common/error/generated-graphql-shop-errors';
 import { ListQueryOptions } from '../../common/types/common-types';
 import { ConfigService } from '../../config/config.service';
 import { TransactionalConnection } from '../../connection/transactional-connection';
@@ -18,6 +42,7 @@ import { EventBus } from '../../event-bus/event-bus';
 import { CustomFieldRelationService } from '../helpers/custom-field-relation/custom-field-relation.service';
 import { ListQueryBuilder } from '../helpers/list-query-builder/list-query-builder';
 import { TranslatorService } from '../helpers/translator/translator.service';
+
 import { ChannelService } from './channel.service';
 import { CountryService } from './country.service';
 import { HistoryService } from './history.service';
@@ -39,8 +64,23 @@ export declare class CustomerService {
     private channelService;
     private customFieldRelationService;
     private translator;
-    constructor(connection: TransactionalConnection, configService: ConfigService, userService: UserService, countryService: CountryService, listQueryBuilder: ListQueryBuilder, eventBus: EventBus, historyService: HistoryService, channelService: ChannelService, customFieldRelationService: CustomFieldRelationService, translator: TranslatorService);
-    findAll(ctx: RequestContext, options: ListQueryOptions<Customer> | undefined, relations?: RelationPaths<Customer>): Promise<PaginatedList<Customer>>;
+    constructor(
+        connection: TransactionalConnection,
+        configService: ConfigService,
+        userService: UserService,
+        countryService: CountryService,
+        listQueryBuilder: ListQueryBuilder,
+        eventBus: EventBus,
+        historyService: HistoryService,
+        channelService: ChannelService,
+        customFieldRelationService: CustomFieldRelationService,
+        translator: TranslatorService,
+    );
+    findAll(
+        ctx: RequestContext,
+        options: ListQueryOptions<Customer> | undefined,
+        relations?: RelationPaths<Customer>,
+    ): Promise<PaginatedList<Customer>>;
     findOne(ctx: RequestContext, id: ID, relations?: RelationPaths<Customer>): Promise<Customer | undefined>;
     /**
      * @description
@@ -48,20 +88,28 @@ export declare class CustomerService {
      * Setting `filterOnChannel` to `true` will limit the results to Customers which are assigned
      * to the current active Channel only.
      */
-    findOneByUserId(ctx: RequestContext, userId: ID, filterOnChannel?: boolean): Promise<Customer | undefined>;
+    findOneByUserId(
+        ctx: RequestContext,
+        userId: ID,
+        filterOnChannel?: boolean,
+    ): Promise<Customer | undefined>;
     /**
      * @description
      * Returns the Customer entity associated with the given userId, if one exists.
      * Setting `filterOnChannel` to `true` will limit the results to Customers which are assigned
      * to the current active Channel only.
      */
-    findOneByPhoneNumber(ctx: RequestContext, phoneNumber: string, filterOnChannel?: boolean): Promise<Customer | undefined>;
+    findOneByPhoneNumber(
+        ctx: RequestContext,
+        phoneNumber: string,
+        filterOnChannel?: boolean,
+    ): Promise<Customer | undefined>;
     /**
      * @description
      * Returns all {@link Address} entities associated with the specified Customer.
      */
     findAddressesByCustomerId(ctx: RequestContext, customerId: ID): Promise<Address[]>;
-    getCustomerByPhoneNumber(ctx: RequestContext, phoneNumber: string): Promise<Customer | undefined>;
+    getCustomerByReferralCode(ctx: RequestContext, referralCode: string): Promise<Customer | undefined>;
     /**
      * @description
      * Returns a list of all {@link CustomerGroup} entities.
@@ -78,11 +126,21 @@ export declare class CustomerService {
      *
      * This method is intended to be used in admin-created Customer flows.
      */
-    create(ctx: RequestContext, input: CreateCustomerInput, password?: string): Promise<ErrorResultUnion<CreateCustomerResult, Customer>>;
-    update(ctx: RequestContext, input: UpdateCustomerShopInput & {
-        id: ID;
-    }): Promise<Customer>;
-    update(ctx: RequestContext, input: UpdateCustomerInput): Promise<ErrorResultUnion<UpdateCustomerResult, Customer>>;
+    create(
+        ctx: RequestContext,
+        input: CreateCustomerInput,
+        password?: string,
+    ): Promise<ErrorResultUnion<CreateCustomerResult, Customer>>;
+    update(
+        ctx: RequestContext,
+        input: UpdateCustomerShopInput & {
+            id: ID;
+        },
+    ): Promise<Customer>;
+    update(
+        ctx: RequestContext,
+        input: UpdateCustomerInput,
+    ): Promise<ErrorResultUnion<UpdateCustomerResult, Customer>>;
     /**
      * @description
      * Registers a new Customer account with the {@link NativeAuthenticationStrategy} and starts
@@ -91,51 +149,81 @@ export declare class CustomerService {
      *
      * This method is intended to be used in storefront Customer-creation flows.
      */
-    registerCustomerAccount(ctx: RequestContext, input: RegisterCustomerInput): Promise<RegisterCustomerAccountResult | EmailAddressConflictError | PasswordValidationError>;
+    registerCustomerAccount(
+        ctx: RequestContext,
+        input: RegisterCustomerInput,
+    ): Promise<RegisterCustomerAccountResult | EmailAddressConflictError | PasswordValidationError>;
     /**
      * @description
      * Refreshes a stale email address verification token by generating a new one and
      * publishing a {@link AccountRegistrationEvent}.
      */
-    refreshVerificationToken(ctx: RequestContext, emailAddress: string): Promise<void>;
+    refreshVerificationToken(
+        ctx: RequestContext,
+        phoneNumber: string,
+    ): Promise<void | OTPRequestTimeoutError>;
+    getCustomerByPhoneNumber(ctx: RequestContext, phoneNumber?: string): Promise<Customer | undefined>;
     /**
      * @description
      * Given a valid verification token which has been published in an {@link AccountRegistrationEvent}, this
      * method is used to set the Customer as `verified` as part of the account registration flow.
      */
-    verifyCustomerEmailAddress(ctx: RequestContext, verificationToken: string, password?: string): Promise<ErrorResultUnion<VerifyCustomerAccountResult, Customer>>;
+    verifyCustomerEmailAddress(
+        ctx: RequestContext,
+        verificationToken: string,
+        phoneNumber: string,
+        password?: string,
+    ): Promise<ErrorResultUnion<VerifyCustomerAccountResult, Customer>>;
     /**
      * @description
      * Publishes a new {@link PasswordResetEvent} for the given email address. This event creates
      * a token which can be used in the `resetPassword()` method.
      */
-    requestPasswordReset(ctx: RequestContext, emailAddress: string): Promise<void>;
+    requestPasswordReset(ctx: RequestContext, phoneNumber: string): Promise<void | OTPRequestTimeoutError>;
     /**
      * @description
      * Given a valid password reset token created by a call to the `requestPasswordReset()` method,
      * this method will change the Customer's password to that given as the `password` argument.
      */
-    resetPassword(ctx: RequestContext, passwordResetToken: string, password: string): Promise<User | PasswordResetTokenExpiredError | PasswordResetTokenInvalidError | PasswordValidationError>;
+    resetPassword(
+        ctx: RequestContext,
+        phoneNumber: string,
+        passwordResetToken: string,
+        password: string,
+    ): Promise<
+        User | PasswordResetTokenExpiredError | PasswordResetTokenInvalidError | PasswordValidationError
+    >;
     /**
      * @description
      * Publishes a {@link IdentifierChangeRequestEvent} for the given User. This event contains a token
      * which is then used in the `updateEmailAddress()` method to change the email address of the User &
      * Customer.
      */
-    requestUpdateEmailAddress(ctx: RequestContext, userId: ID, newEmailAddress: string): Promise<boolean | EmailAddressConflictError>;
+    requestUpdateEmailAddress(
+        ctx: RequestContext,
+        userId: ID,
+        newEmailAddress: string,
+    ): Promise<boolean | EmailAddressConflictError>;
     /**
      * @description
      * Given a valid email update token published in a {@link IdentifierChangeRequestEvent}, this method
      * will update the Customer & User email address.
      */
-    updateEmailAddress(ctx: RequestContext, token: string): Promise<boolean | IdentifierChangeTokenInvalidError | IdentifierChangeTokenExpiredError>;
+    updateEmailAddress(
+        ctx: RequestContext,
+        token: string,
+    ): Promise<boolean | IdentifierChangeTokenInvalidError | IdentifierChangeTokenExpiredError>;
     /**
      * @description
      * For guest checkouts, we assume that a matching email address is the same customer.
      */
-    createOrUpdate(ctx: RequestContext, input: Partial<CreateCustomerInput> & {
-        emailAddress: string;
-    }, errorOnExistingUser?: boolean): Promise<Customer | EmailAddressConflictError>;
+    createOrUpdate(
+        ctx: RequestContext,
+        input: Partial<CreateCustomerInput> & {
+            emailAddress: string;
+        },
+        errorOnExistingUser?: boolean,
+    ): Promise<Customer | EmailAddressConflictError>;
     /**
      * @description
      * Creates a new {@link Address} for the given Customer.

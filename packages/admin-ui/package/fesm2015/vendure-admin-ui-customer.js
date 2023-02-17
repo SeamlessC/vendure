@@ -1098,7 +1098,7 @@ class CustomerResolver extends BaseEntityResolver {
             firstName: '',
             lastName: '',
             emailAddress: '',
-            phoneNumber: null,
+            phoneNumber: '',
             addresses: null,
             user: null,
         }, id => dataService.customer.getCustomer(id).mapStream(data => data.customer));

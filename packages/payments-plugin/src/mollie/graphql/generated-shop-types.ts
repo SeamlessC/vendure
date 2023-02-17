@@ -167,7 +167,9 @@ export type Channel = Node & {
 
 export type ChannelCustomFields = {
     __typename?: 'ChannelCustomFields';
+    openingTime?: Maybe<Scalars['DateTime']>;
     isOpen?: Maybe<Scalars['Boolean']>;
+    processingTime?: Maybe<Scalars['Int']>;
     latitude?: Maybe<Scalars['Float']>;
     longitude?: Maybe<Scalars['Float']>;
     name?: Maybe<Scalars['String']>;
@@ -392,14 +394,16 @@ export type CreateAddressInput = {
 };
 
 export type CreateCustomerCustomFieldsInput = {
-    referralCode?: Maybe<Scalars['String']>;
+    referredCode?: Maybe<Scalars['String']>;
+    dob?: Maybe<Scalars['DateTime']>;
+    gender?: Maybe<Scalars['String']>;
 };
 
 export type CreateCustomerInput = {
     title?: Maybe<Scalars['String']>;
     firstName: Scalars['String'];
     lastName: Scalars['String'];
-    phoneNumber?: Maybe<Scalars['String']>;
+    phoneNumber: Scalars['String'];
     emailAddress: Scalars['String'];
     customFields?: Maybe<CreateCustomerCustomFieldsInput>;
 };
@@ -772,7 +776,7 @@ export type Customer = Node & {
     title?: Maybe<Scalars['String']>;
     firstName: Scalars['String'];
     lastName: Scalars['String'];
-    phoneNumber?: Maybe<Scalars['String']>;
+    phoneNumber: Scalars['String'];
     emailAddress: Scalars['String'];
     addresses?: Maybe<Array<Address>>;
     orders: OrderList;
@@ -786,8 +790,11 @@ export type CustomerOrdersArgs = {
 
 export type CustomerCustomFields = {
     __typename?: 'CustomerCustomFields';
+    referredCode?: Maybe<Scalars['String']>;
     referralCode?: Maybe<Scalars['String']>;
     loyaltyPoints?: Maybe<Scalars['Int']>;
+    dob?: Maybe<Scalars['DateTime']>;
+    gender?: Maybe<Scalars['String']>;
 };
 
 export type CustomerFilterParameter = {
@@ -799,8 +806,11 @@ export type CustomerFilterParameter = {
     lastName?: Maybe<StringOperators>;
     phoneNumber?: Maybe<StringOperators>;
     emailAddress?: Maybe<StringOperators>;
+    referredCode?: Maybe<StringOperators>;
     referralCode?: Maybe<StringOperators>;
     loyaltyPoints?: Maybe<NumberOperators>;
+    dob?: Maybe<DateOperators>;
+    gender?: Maybe<StringOperators>;
 };
 
 export type CustomerGroup = Node & {
@@ -845,8 +855,11 @@ export type CustomerSortParameter = {
     lastName?: Maybe<SortOrder>;
     phoneNumber?: Maybe<SortOrder>;
     emailAddress?: Maybe<SortOrder>;
+    referredCode?: Maybe<SortOrder>;
     referralCode?: Maybe<SortOrder>;
     loyaltyPoints?: Maybe<SortOrder>;
+    dob?: Maybe<SortOrder>;
+    gender?: Maybe<SortOrder>;
 };
 
 /** Operators for filtering on a list of Date fields */
@@ -939,6 +952,7 @@ export enum ErrorCode {
     ALREADY_LOGGED_IN_ERROR = 'ALREADY_LOGGED_IN_ERROR',
     MISSING_PASSWORD_ERROR = 'MISSING_PASSWORD_ERROR',
     PASSWORD_VALIDATION_ERROR = 'PASSWORD_VALIDATION_ERROR',
+    OTPREQUEST_TIMEOUT_ERROR = 'OTPREQUEST_TIMEOUT_ERROR',
     PASSWORD_ALREADY_SET_ERROR = 'PASSWORD_ALREADY_SET_ERROR',
     VERIFICATION_TOKEN_INVALID_ERROR = 'VERIFICATION_TOKEN_INVALID_ERROR',
     VERIFICATION_TOKEN_EXPIRED_ERROR = 'VERIFICATION_TOKEN_EXPIRED_ERROR',
@@ -964,13 +978,7 @@ export type Facet = Node & {
     code: Scalars['String'];
     values: Array<FacetValue>;
     translations: Array<FacetTranslation>;
-    customFields?: Maybe<FacetCustomFields>;
-};
-
-export type FacetCustomFields = {
-    __typename?: 'FacetCustomFields';
-    color1?: Maybe<Scalars['String']>;
-    color2?: Maybe<Scalars['String']>;
+    customFields?: Maybe<Scalars['JSON']>;
 };
 
 export type FacetFilterParameter = {
@@ -980,8 +988,6 @@ export type FacetFilterParameter = {
     languageCode?: Maybe<StringOperators>;
     name?: Maybe<StringOperators>;
     code?: Maybe<StringOperators>;
-    color1?: Maybe<StringOperators>;
-    color2?: Maybe<StringOperators>;
 };
 
 export type FacetList = PaginatedList & {
@@ -1009,8 +1015,6 @@ export type FacetSortParameter = {
     updatedAt?: Maybe<SortOrder>;
     name?: Maybe<SortOrder>;
     code?: Maybe<SortOrder>;
-    color1?: Maybe<SortOrder>;
-    color2?: Maybe<SortOrder>;
 };
 
 export type FacetTranslation = {
@@ -1285,8 +1289,6 @@ export enum LanguageCode {
     ar = 'ar',
     /** Armenian */
     hy = 'hy',
-    /** Assamese */
-    as = 'as',
     /** Azerbaijani */
     az = 'az',
     /** Bambara */
@@ -1387,8 +1389,6 @@ export enum LanguageCode {
     hi = 'hi',
     /** Hungarian */
     hu = 'hu',
-    /** Icelandic */
-    is = 'is',
     /** Igbo */
     ig = 'ig',
     /** Indonesian */
@@ -1713,19 +1713,14 @@ export type Mutation = {
     removeCouponCode?: Maybe<Order>;
     /** Remove an OrderLine from the Order */
     removeOrderLine: RemoveOrderItemsResult;
-    /** Requests a password reset email to be sent */
-    requestPasswordReset?: Maybe<RequestPasswordResetResult>;
     /**
      * Request to update the emailAddress of the active Customer. If `authOptions.requireVerification` is enabled
      * (as is the default), then the `identifierChangeToken` will be assigned to the current User and
      * a IdentifierChangeRequestEvent will be raised. This can then be used e.g. by the EmailPlugin to email
      * that verification token to the Customer, which is then used to verify the change of email address.
      */
-    requestUpdateCustomerEmailAddress: RequestUpdateCustomerEmailAddressResult;
-    /** Resets a Customer's password based on the provided token */
+    requestPasswordReset?: Maybe<RequestPasswordResetResult>;
     resetPassword: ResetPasswordResult;
-    /** Set the Customer for the Order. Required only if the Customer is not currently logged in */
-    setCustomerForOrder: SetCustomerForOrderResult;
     /** Sets the billing address for this order */
     setOrderBillingAddress: ActiveOrderResult;
     /** Allows any custom fields to be set for the active order */
@@ -1740,11 +1735,6 @@ export type Mutation = {
     updateCustomer: Customer;
     /** Update an existing Address */
     updateCustomerAddress: Address;
-    /**
-     * Confirm the update of the emailAddress with the provided token, which has been generated by the
-     * `requestUpdateCustomerEmailAddress` mutation.
-     */
-    updateCustomerEmailAddress: UpdateCustomerEmailAddressResult;
     /** Update the password of the active Customer */
     updateCustomerPassword: UpdateCustomerPasswordResult;
     /**
@@ -1759,6 +1749,7 @@ export type Mutation = {
 export type MutationAddItemToOrderArgs = {
     productVariantId: Scalars['ID'];
     quantity: Scalars['Int'];
+    customFields?: Maybe<OrderLineCustomFieldsInput>;
 };
 
 export type MutationAddPaymentToOrderArgs = {
@@ -1768,6 +1759,7 @@ export type MutationAddPaymentToOrderArgs = {
 export type MutationAdjustOrderLineArgs = {
     orderLineId: Scalars['ID'];
     quantity: Scalars['Int'];
+    customFields?: Maybe<OrderLineCustomFieldsInput>;
 };
 
 export type MutationApplyCouponCodeArgs = {
@@ -1798,7 +1790,7 @@ export type MutationLoginArgs = {
 };
 
 export type MutationRefreshCustomerVerificationArgs = {
-    emailAddress: Scalars['String'];
+    phoneNumber: Scalars['String'];
 };
 
 export type MutationRegisterCustomerAccountArgs = {
@@ -1814,21 +1806,13 @@ export type MutationRemoveOrderLineArgs = {
 };
 
 export type MutationRequestPasswordResetArgs = {
-    emailAddress: Scalars['String'];
-};
-
-export type MutationRequestUpdateCustomerEmailAddressArgs = {
-    password: Scalars['String'];
-    newEmailAddress: Scalars['String'];
+    phoneNumber: Scalars['String'];
 };
 
 export type MutationResetPasswordArgs = {
+    phoneNumber: Scalars['String'];
     token: Scalars['String'];
     password: Scalars['String'];
-};
-
-export type MutationSetCustomerForOrderArgs = {
-    input: CreateCustomerInput;
 };
 
 export type MutationSetOrderBillingAddressArgs = {
@@ -1859,10 +1843,6 @@ export type MutationUpdateCustomerAddressArgs = {
     input: UpdateAddressInput;
 };
 
-export type MutationUpdateCustomerEmailAddressArgs = {
-    token: Scalars['String'];
-};
-
 export type MutationUpdateCustomerPasswordArgs = {
     currentPassword: Scalars['String'];
     newPassword: Scalars['String'];
@@ -1870,6 +1850,7 @@ export type MutationUpdateCustomerPasswordArgs = {
 
 export type MutationVerifyCustomerAccountArgs = {
     token: Scalars['String'];
+    phoneNumber: Scalars['String'];
     password?: Maybe<Scalars['String']>;
 };
 
@@ -1942,6 +1923,13 @@ export type NumberRange = {
     end: Scalars['Float'];
 };
 
+/** Returned when attempting to register or verify a customer account where the given password fails password validation. */
+export type OtpRequestTimeoutError = ErrorResult & {
+    __typename?: 'OTPRequestTimeoutError';
+    errorCode: ErrorCode;
+    message: Scalars['String'];
+};
+
 export type Order = Node & {
     __typename?: 'Order';
     id: Scalars['ID'];
@@ -1952,6 +1940,7 @@ export type Order = Node & {
      * completed the checkout and the Order is no longer "active"
      */
     orderPlacedAt?: Maybe<Scalars['DateTime']>;
+    finalChannel?: Maybe<Channel>;
     /** A unique code for the Order */
     code: Scalars['String'];
     state: Scalars['String'];
@@ -1996,7 +1985,7 @@ export type Order = Node & {
     /** A summary of the taxes being applied to this Order */
     taxSummary: Array<OrderTaxSummary>;
     history: HistoryEntryList;
-    customFields?: Maybe<Scalars['JSON']>;
+    customFields?: Maybe<OrderCustomFields>;
 };
 
 export type OrderHistoryArgs = {
@@ -2018,6 +2007,12 @@ export type OrderAddress = {
     customFields?: Maybe<AddressCustomFields>;
 };
 
+export type OrderCustomFields = {
+    __typename?: 'OrderCustomFields';
+    scheduledTime?: Maybe<Scalars['DateTime']>;
+    completedTime?: Maybe<Scalars['DateTime']>;
+};
+
 export type OrderFilterParameter = {
     id?: Maybe<IdOperators>;
     createdAt?: Maybe<DateOperators>;
@@ -2034,6 +2029,8 @@ export type OrderFilterParameter = {
     shippingWithTax?: Maybe<NumberOperators>;
     total?: Maybe<NumberOperators>;
     totalWithTax?: Maybe<NumberOperators>;
+    scheduledTime?: Maybe<DateOperators>;
+    completedTime?: Maybe<DateOperators>;
 };
 
 export type OrderItem = Node & {
@@ -2140,7 +2137,16 @@ export type OrderLine = Node & {
     taxLines: Array<TaxLine>;
     order: Order;
     fulfillments?: Maybe<Array<Fulfillment>>;
-    customFields?: Maybe<Scalars['JSON']>;
+    customFields?: Maybe<OrderLineCustomFields>;
+};
+
+export type OrderLineCustomFields = {
+    __typename?: 'OrderLineCustomFields';
+    isCone?: Maybe<Scalars['Boolean']>;
+};
+
+export type OrderLineCustomFieldsInput = {
+    isCone?: Maybe<Scalars['Boolean']>;
 };
 
 export type OrderList = PaginatedList & {
@@ -2190,6 +2196,8 @@ export type OrderSortParameter = {
     shippingWithTax?: Maybe<SortOrder>;
     total?: Maybe<SortOrder>;
     totalWithTax?: Maybe<SortOrder>;
+    scheduledTime?: Maybe<SortOrder>;
+    completedTime?: Maybe<SortOrder>;
 };
 
 /** Returned if there is an error in transitioning the Order state */
@@ -2755,7 +2763,13 @@ export type Promotion = Node & {
     enabled: Scalars['Boolean'];
     conditions: Array<ConfigurableOperation>;
     actions: Array<ConfigurableOperation>;
-    customFields?: Maybe<Scalars['JSON']>;
+    customFields?: Maybe<PromotionCustomFields>;
+};
+
+export type PromotionCustomFields = {
+    __typename?: 'PromotionCustomFields';
+    image?: Maybe<Asset>;
+    description?: Maybe<Scalars['String']>;
 };
 
 export type PromotionList = PaginatedList & {
@@ -2858,7 +2872,7 @@ export type QuerySearchArgs = {
     input: SearchInput;
 };
 
-export type RefreshCustomerVerificationResult = Success | NativeAuthStrategyError;
+export type RefreshCustomerVerificationResult = Success | NativeAuthStrategyError | OtpRequestTimeoutError;
 
 export type Refund = Node & {
     __typename?: 'Refund';
@@ -2882,10 +2896,13 @@ export type RegisterCustomerAccountResult =
     | Success
     | MissingPasswordError
     | PasswordValidationError
-    | NativeAuthStrategyError;
+    | NativeAuthStrategyError
+    | EmailAddressConflictError;
 
 export type RegisterCustomerCustomFieldsInput = {
-    referralCode?: Maybe<Scalars['String']>;
+    referredCode?: Maybe<Scalars['String']>;
+    dob?: Maybe<Scalars['DateTime']>;
+    gender?: Maybe<Scalars['String']>;
 };
 
 export type RegisterCustomerInput = {
@@ -2893,10 +2910,8 @@ export type RegisterCustomerInput = {
     title?: Maybe<Scalars['String']>;
     firstName?: Maybe<Scalars['String']>;
     lastName?: Maybe<Scalars['String']>;
-    phoneNumber?: Maybe<Scalars['String']>;
-    password?: Maybe<Scalars['String']>;
-    referredBy?: Maybe<Scalars['String']>;
-    referralCode?: Maybe<Scalars['String']>;
+    phoneNumber: Scalars['String'];
+    password: Scalars['String'];
     customFields?: Maybe<RegisterCustomerCustomFieldsInput>;
 };
 
@@ -2917,7 +2932,7 @@ export type RelationCustomFieldConfig = CustomField & {
 
 export type RemoveOrderItemsResult = Order | OrderModificationError;
 
-export type RequestPasswordResetResult = Success | NativeAuthStrategyError;
+export type RequestPasswordResetResult = Success | NativeAuthStrategyError | OtpRequestTimeoutError;
 
 export type RequestUpdateCustomerEmailAddressResult =
     | Success
@@ -3245,7 +3260,9 @@ export type UpdateAddressInput = {
 };
 
 export type UpdateCustomerCustomFieldsInput = {
-    referralCode?: Maybe<Scalars['String']>;
+    referredCode?: Maybe<Scalars['String']>;
+    dob?: Maybe<Scalars['DateTime']>;
+    gender?: Maybe<Scalars['String']>;
 };
 
 export type UpdateCustomerEmailAddressResult =
@@ -3258,7 +3275,6 @@ export type UpdateCustomerInput = {
     title?: Maybe<Scalars['String']>;
     firstName?: Maybe<Scalars['String']>;
     lastName?: Maybe<Scalars['String']>;
-    phoneNumber?: Maybe<Scalars['String']>;
     customFields?: Maybe<UpdateCustomerCustomFieldsInput>;
 };
 
@@ -3268,8 +3284,13 @@ export type UpdateCustomerPasswordResult =
     | PasswordValidationError
     | NativeAuthStrategyError;
 
+export type UpdateOrderCustomFieldsInput = {
+    scheduledTime?: Maybe<Scalars['DateTime']>;
+    completedTime?: Maybe<Scalars['DateTime']>;
+};
+
 export type UpdateOrderInput = {
-    customFields?: Maybe<Scalars['JSON']>;
+    customFields?: Maybe<UpdateOrderCustomFieldsInput>;
 };
 
 export type UpdateOrderItemsResult =
@@ -3329,5 +3350,11 @@ export type Zone = Node & {
     updatedAt: Scalars['DateTime'];
     name: Scalars['String'];
     members: Array<Country>;
-    customFields?: Maybe<Scalars['JSON']>;
+    customFields?: Maybe<ZoneCustomFields>;
+};
+
+export type ZoneCustomFields = {
+    __typename?: 'ZoneCustomFields';
+    loyaltyPointsLimit?: Maybe<Scalars['Int']>;
+    loyaltyPointsPercentage?: Maybe<Scalars['Float']>;
 };

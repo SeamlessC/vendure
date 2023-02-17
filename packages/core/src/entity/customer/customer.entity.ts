@@ -35,7 +35,7 @@ export class Customer extends VendureEntity implements ChannelAware, HasCustomFi
 
     @Column() lastName: string;
 
-    @Column({ nullable: true })
+    @Column({ unique: true })
     phoneNumber: string;
 
     @Column()

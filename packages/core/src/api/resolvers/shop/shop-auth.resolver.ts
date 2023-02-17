@@ -9,9 +9,9 @@ import {
     MutationRefreshCustomerVerificationArgs,
     MutationRegisterCustomerAccountArgs,
     MutationRequestPasswordResetArgs,
-    MutationRequestUpdateCustomerEmailAddressArgs,
+    // MutationRequestUpdateCustomerEmailAddressArgs,
     MutationResetPasswordArgs,
-    MutationUpdateCustomerEmailAddressArgs,
+    // MutationUpdateCustomerEmailAddressArgs,
     MutationUpdateCustomerPasswordArgs,
     MutationVerifyCustomerAccountArgs,
     NativeAuthenticationResult,
@@ -117,12 +117,7 @@ export class ShopAuthResolver extends BaseAuthResolver {
         }
         const result = await this.customerService.registerCustomerAccount(ctx, args.input);
         if (isGraphQlErrorResult(result)) {
-            if (result.errorCode === ErrorCode.EMAIL_ADDRESS_CONFLICT_ERROR) {
-                // We do not want to reveal the email address conflict,
-                // otherwise account enumeration attacks become possible.
-                return { success: true };
-            }
-            return result as MissingPasswordError;
+            return result;
         }
         return { success: true };
     }
@@ -144,6 +139,7 @@ export class ShopAuthResolver extends BaseAuthResolver {
         const customer = await this.customerService.verifyCustomerEmailAddress(
             ctx,
             token,
+            args.phoneNumber,
             password || undefined,
         );
         if (isGraphQlErrorResult(customer)) {
@@ -186,7 +182,10 @@ export class ShopAuthResolver extends BaseAuthResolver {
         if (nativeAuthStrategyError) {
             return nativeAuthStrategyError;
         }
-        await this.customerService.refreshVerificationToken(ctx, args.emailAddress);
+        const output = await this.customerService.refreshVerificationToken(ctx, args.phoneNumber);
+        if (isGraphQlErrorResult(output)) {
+            return output;
+        }
         return { success: true };
     }
 
@@ -201,7 +200,10 @@ export class ShopAuthResolver extends BaseAuthResolver {
         if (nativeAuthStrategyError) {
             return nativeAuthStrategyError;
         }
-        await this.customerService.requestPasswordReset(ctx, args.emailAddress);
+        const output = await this.customerService.requestPasswordReset(ctx, args.phoneNumber);
+        if (isGraphQlErrorResult(output)) {
+            return output;
+        }
         return { success: true };
     }
 
@@ -219,7 +221,7 @@ export class ShopAuthResolver extends BaseAuthResolver {
             return nativeAuthStrategyError;
         }
         const { token, password } = args;
-        const resetResult = await this.customerService.resetPassword(ctx, token, password);
+        const resetResult = await this.customerService.resetPassword(ctx, args.phoneNumber, token, password);
         if (isGraphQlErrorResult(resetResult)) {
             return resetResult;
         }
@@ -276,54 +278,54 @@ export class ShopAuthResolver extends BaseAuthResolver {
         return { success: result };
     }
 
-    @Transaction()
-    @Mutation()
-    @Allow(Permission.Owner)
-    async requestUpdateCustomerEmailAddress(
-        @Ctx() ctx: RequestContext,
-        @Args() args: MutationRequestUpdateCustomerEmailAddressArgs,
-    ): Promise<RequestUpdateCustomerEmailAddressResult> {
-        const nativeAuthStrategyError = this.requireNativeAuthStrategy();
-        if (nativeAuthStrategyError) {
-            return nativeAuthStrategyError;
-        }
-        if (!ctx.activeUserId) {
-            throw new ForbiddenError();
-        }
-        const verify = await this.authService.verifyUserPassword(ctx, ctx.activeUserId, args.password);
-        if (isGraphQlErrorResult(verify)) {
-            return verify as InvalidCredentialsError;
-        }
-        const result = await this.customerService.requestUpdateEmailAddress(
-            ctx,
-            ctx.activeUserId,
-            args.newEmailAddress,
-        );
-        if (isGraphQlErrorResult(result)) {
-            return result;
-        }
-        return {
-            success: result,
-        };
-    }
+    // @Transaction()
+    // @Mutation()
+    // @Allow(Permission.Owner)
+    // async requestUpdateCustomerEmailAddress(
+    //     @Ctx() ctx: RequestContext,
+    //     @Args() args: MutationRequestUpdateCustomerEmailAddressArgs,
+    // ): Promise<RequestUpdateCustomerEmailAddressResult> {
+    //     const nativeAuthStrategyError = this.requireNativeAuthStrategy();
+    //     if (nativeAuthStrategyError) {
+    //         return nativeAuthStrategyError;
+    //     }
+    //     if (!ctx.activeUserId) {
+    //         throw new ForbiddenError();
+    //     }
+    //     const verify = await this.authService.verifyUserPassword(ctx, ctx.activeUserId, args.password);
+    //     if (isGraphQlErrorResult(verify)) {
+    //         return verify as InvalidCredentialsError;
+    //     }
+    //     const result = await this.customerService.requestUpdateEmailAddress(
+    //         ctx,
+    //         ctx.activeUserId,
+    //         args.newEmailAddress,
+    //     );
+    //     if (isGraphQlErrorResult(result)) {
+    //         return result;
+    //     }
+    //     return {
+    //         success: result,
+    //     };
+    // }
 
-    @Transaction()
-    @Mutation()
-    @Allow(Permission.Owner)
-    async updateCustomerEmailAddress(
-        @Ctx() ctx: RequestContext,
-        @Args() args: MutationUpdateCustomerEmailAddressArgs,
-    ): Promise<UpdateCustomerEmailAddressResult> {
-        const nativeAuthStrategyError = this.requireNativeAuthStrategy();
-        if (nativeAuthStrategyError) {
-            return nativeAuthStrategyError;
-        }
-        const result = await this.customerService.updateEmailAddress(ctx, args.token);
-        if (isGraphQlErrorResult(result)) {
-            return result;
-        }
-        return { success: result };
-    }
+    // @Transaction()
+    // @Mutation()
+    // @Allow(Permission.Owner)
+    // async updateCustomerEmailAddress(
+    //     @Ctx() ctx: RequestContext,
+    //     @Args() args: MutationUpdateCustomerEmailAddressArgs,
+    // ): Promise<UpdateCustomerEmailAddressResult> {
+    //     const nativeAuthStrategyError = this.requireNativeAuthStrategy();
+    //     if (nativeAuthStrategyError) {
+    //         return nativeAuthStrategyError;
+    //     }
+    //     const result = await this.customerService.updateEmailAddress(ctx, args.token);
+    //     if (isGraphQlErrorResult(result)) {
+    //         return result;
+    //     }
+    //     return { success: result };
+    // }
 
     protected requireNativeAuthStrategy() {
         return super.requireNativeAuthStrategy() as NativeAuthStrategyError | undefined;

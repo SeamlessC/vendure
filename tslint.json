@@ -21,7 +21,7 @@
         ],
         "jsdoc-format": false,
         "no-inferrable-types": [true, "ignore-params"],
-        "max-line-length": [true, 150],
+        "max-line-length": false,
         "member-access": false,
         "member-ordering": false,
         "interface-name": false,

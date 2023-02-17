@@ -40,10 +40,10 @@ let UserService = class UserService {
             relations: ['roles', 'roles.channels', 'authenticationMethods'],
         });
     }
-    async getUserByEmailAddress(ctx, emailAddress) {
+    async getUserByIdentifier(ctx, identifier) {
         return this.connection.getRepository(ctx, user_entity_1.User).findOne({
             where: {
-                identifier: emailAddress,
+                identifier: identifier,
                 deletedAt: null,
             },
             relations: ['roles', 'roles.channels', 'authenticationMethods'],
@@ -81,8 +81,9 @@ let UserService = class UserService {
         }
         const authenticationMethod = new native_authentication_method_entity_1.NativeAuthenticationMethod();
         if (this.configService.authOptions.requireVerification) {
-            authenticationMethod.verificationToken =
-                this.verificationTokenGenerator.generateVerificationToken();
+            // authenticationMethod.verificationToken =
+            //     await this.verificationTokenGenerator.generateVerificationToken(user);
+            // authenticationMethod.verificationTokenExpires = new Date();
             user.verified = false;
         }
         else {
@@ -133,7 +134,14 @@ let UserService = class UserService {
      */
     async setVerificationToken(ctx, user) {
         const nativeAuthMethod = user.getNativeAuthenticationMethod();
-        nativeAuthMethod.verificationToken = this.verificationTokenGenerator.generateVerificationToken();
+        const tokenExpireTime = nativeAuthMethod.verificationTokenExpires;
+        if (tokenExpireTime) {
+            if (tokenExpireTime.getTime() + 1000 * 60 > new Date().getTime()) {
+                return new generated_graphql_shop_errors_1.OTPRequestTimeoutError();
+            }
+        }
+        nativeAuthMethod.verificationToken = await this.verificationTokenGenerator.generateVerificationToken(user);
+        nativeAuthMethod.verificationTokenExpires = new Date();
         user.verified = false;
         await this.connection.getRepository(ctx, native_authentication_method_entity_1.NativeAuthenticationMethod).save(nativeAuthMethod);
         return this.connection.getRepository(ctx, user_entity_1.User).save(user);
@@ -145,40 +153,23 @@ let UserService = class UserService {
      *
      * If valid, the User will be set to `verified: true`.
      */
-    async verifyUserByToken(ctx, verificationToken, password) {
-        const user = await this.connection
-            .getRepository(ctx, user_entity_1.User)
-            .createQueryBuilder('user')
-            .leftJoinAndSelect('user.authenticationMethods', 'authenticationMethod')
-            .addSelect('authenticationMethod.passwordHash')
-            .where('authenticationMethod.verificationToken = :verificationToken', { verificationToken })
-            .getOne();
+    async verifyUserByToken(ctx, verificationToken, phoneNumber, password) {
+        var _a;
+        const user = await this.getUserByIdentifier(ctx, phoneNumber);
         if (user) {
-            if (this.verificationTokenGenerator.verifyVerificationToken(verificationToken)) {
-                const nativeAuthMethod = user.getNativeAuthenticationMethod();
-                if (!password) {
-                    if (!nativeAuthMethod.passwordHash) {
-                        return new generated_graphql_shop_errors_1.MissingPasswordError();
-                    }
-                }
-                else {
-                    if (!!nativeAuthMethod.passwordHash) {
-                        return new generated_graphql_shop_errors_1.PasswordAlreadySetError();
-                    }
-                    const passwordValidationResult = await this.validatePassword(ctx, password);
-                    if (passwordValidationResult !== true) {
-                        return passwordValidationResult;
-                    }
-                    nativeAuthMethod.passwordHash = await this.passwordCipher.hash(password);
-                }
+            const nativeAuthMethod = user.getNativeAuthenticationMethod();
+            const output = this.verificationTokenGenerator.verifyVerificationToken(verificationToken, (_a = nativeAuthMethod.verificationToken) !== null && _a !== void 0 ? _a : '', nativeAuthMethod.verificationTokenExpires);
+            if (output === 1) {
                 nativeAuthMethod.verificationToken = null;
+                nativeAuthMethod.verificationTokenExpires = null;
                 user.verified = true;
                 await this.connection.getRepository(ctx, native_authentication_method_entity_1.NativeAuthenticationMethod).save(nativeAuthMethod);
                 return this.connection.getRepository(ctx, user_entity_1.User).save(user);
             }
-            else {
+            if (output === 0) {
                 return new generated_graphql_shop_errors_1.VerificationTokenExpiredError();
             }
+            return new generated_graphql_shop_errors_1.VerificationTokenInvalidError();
         }
         else {
             return new generated_graphql_shop_errors_1.VerificationTokenInvalidError();
@@ -189,13 +180,20 @@ let UserService = class UserService {
      * Sets the {@link NativeAuthenticationMethod} `passwordResetToken` as part of the User password reset
      * flow.
      */
-    async setPasswordResetToken(ctx, emailAddress) {
-        const user = await this.getUserByEmailAddress(ctx, emailAddress);
+    async setPasswordResetToken(ctx, phoneNumber) {
+        const user = await this.getUserByIdentifier(ctx, phoneNumber);
         if (!user) {
             return;
         }
         const nativeAuthMethod = user.getNativeAuthenticationMethod();
-        nativeAuthMethod.passwordResetToken = this.verificationTokenGenerator.generateVerificationToken();
+        const tokenExpireTime = nativeAuthMethod.passwordResetTokenExpires;
+        if (tokenExpireTime) {
+            if (tokenExpireTime.getTime() + 1000 * 60 > new Date().getTime()) {
+                return new generated_graphql_shop_errors_1.OTPRequestTimeoutError();
+            }
+        }
+        nativeAuthMethod.passwordResetToken = await this.verificationTokenGenerator.generateVerificationToken(user);
+        nativeAuthMethod.passwordResetTokenExpires = new Date();
         await this.connection.getRepository(ctx, native_authentication_method_entity_1.NativeAuthenticationMethod).save(nativeAuthMethod);
         return user;
     }
@@ -206,13 +204,9 @@ let UserService = class UserService {
      *
      * If valid, the User's credentials will be updated with the new password.
      */
-    async resetPasswordByToken(ctx, passwordResetToken, password) {
-        const user = await this.connection
-            .getRepository(ctx, user_entity_1.User)
-            .createQueryBuilder('user')
-            .leftJoinAndSelect('user.authenticationMethods', 'authenticationMethod')
-            .where('authenticationMethod.passwordResetToken = :passwordResetToken', { passwordResetToken })
-            .getOne();
+    async resetPasswordByToken(ctx, phoneNumber, passwordResetToken, password) {
+        var _a;
+        const user = await this.getUserByIdentifier(ctx, phoneNumber);
         if (!user) {
             return new generated_graphql_shop_errors_1.PasswordResetTokenInvalidError();
         }
@@ -220,10 +214,12 @@ let UserService = class UserService {
         if (passwordValidationResult !== true) {
             return passwordValidationResult;
         }
-        if (this.verificationTokenGenerator.verifyVerificationToken(passwordResetToken)) {
-            const nativeAuthMethod = user.getNativeAuthenticationMethod();
+        const nativeAuthMethod = user.getNativeAuthenticationMethod();
+        const output = this.verificationTokenGenerator.verifyVerificationToken(passwordResetToken, (_a = nativeAuthMethod.passwordResetToken) !== null && _a !== void 0 ? _a : '', nativeAuthMethod.passwordResetTokenExpires);
+        if (output === 1) {
             nativeAuthMethod.passwordHash = await this.passwordCipher.hash(password);
             nativeAuthMethod.passwordResetToken = null;
+            nativeAuthMethod.passwordResetTokenExpires = null;
             await this.connection.getRepository(ctx, native_authentication_method_entity_1.NativeAuthenticationMethod).save(nativeAuthMethod);
             if (user.verified === false && this.configService.authOptions.requireVerification) {
                 // This code path represents an edge-case in which the Customer creates an account,
@@ -235,9 +231,10 @@ let UserService = class UserService {
             }
             return this.connection.getRepository(ctx, user_entity_1.User).save(user);
         }
-        else {
+        if (output === 0) {
             return new generated_graphql_shop_errors_1.PasswordResetTokenExpiredError();
         }
+        return new generated_graphql_shop_errors_1.PasswordResetTokenInvalidError();
     }
     /**
      * @description
@@ -271,7 +268,9 @@ let UserService = class UserService {
      */
     async setIdentifierChangeToken(ctx, user) {
         const nativeAuthMethod = user.getNativeAuthenticationMethod();
-        nativeAuthMethod.identifierChangeToken = this.verificationTokenGenerator.generateVerificationToken();
+        nativeAuthMethod.identifierChangeToken =
+            await this.verificationTokenGenerator.generateVerificationToken(user);
+        nativeAuthMethod.identifierChangeTokenExpires = new Date();
         await this.connection.getRepository(ctx, native_authentication_method_entity_1.NativeAuthenticationMethod).save(nativeAuthMethod);
         return user;
     }
@@ -281,6 +280,7 @@ let UserService = class UserService {
      * new email address, with the token previously set using the `setIdentifierChangeToken()` method.
      */
     async changeIdentifierByToken(ctx, token) {
+        var _a;
         const user = await this.connection
             .getRepository(ctx, user_entity_1.User)
             .createQueryBuilder('user')
@@ -292,10 +292,10 @@ let UserService = class UserService {
         if (!user) {
             return new generated_graphql_shop_errors_1.IdentifierChangeTokenInvalidError();
         }
-        if (!this.verificationTokenGenerator.verifyVerificationToken(token)) {
+        const nativeAuthMethod = user.getNativeAuthenticationMethod();
+        if (!this.verificationTokenGenerator.verifyVerificationToken(token, (_a = nativeAuthMethod.identifierChangeToken) !== null && _a !== void 0 ? _a : '', nativeAuthMethod.identifierChangeTokenExpires)) {
             return new generated_graphql_shop_errors_1.IdentifierChangeTokenExpiredError();
         }
-        const nativeAuthMethod = user.getNativeAuthenticationMethod();
         const pendingIdentifier = nativeAuthMethod.pendingIdentifier;
         if (!pendingIdentifier) {
             throw new errors_1.InternalServerError('error.pending-identifier-missing');
@@ -304,6 +304,7 @@ let UserService = class UserService {
         user.identifier = pendingIdentifier;
         nativeAuthMethod.identifier = pendingIdentifier;
         nativeAuthMethod.identifierChangeToken = null;
+        nativeAuthMethod.identifierChangeTokenExpires = null;
         nativeAuthMethod.pendingIdentifier = null;
         await this.connection
             .getRepository(ctx, native_authentication_method_entity_1.NativeAuthenticationMethod)

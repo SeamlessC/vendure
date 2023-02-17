@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomerService = void 0;
 const common_1 = require("@nestjs/common");
 const generated_types_1 = require("@vendure/common/lib/generated-types");
+const nanoid_1 = require("nanoid");
 const error_result_1 = require("../../common/error/error-result");
 const errors_1 = require("../../common/error/errors");
 const generated_graphql_admin_errors_1 = require("../../common/error/generated-graphql-admin-errors");
@@ -104,6 +105,7 @@ let CustomerService = class CustomerService {
         if (filterOnChannel) {
             query = query.andWhere('channel.id = :channelId', { channelId: ctx.channelId });
         }
+        const x = query.getQueryAndParameters();
         return query.getOne();
     }
     /**
@@ -144,10 +146,12 @@ let CustomerService = class CustomerService {
             return addresses;
         });
     }
-    async getCustomerByPhoneNumber(ctx, phoneNumber) {
+    async getCustomerByReferralCode(ctx, referralCode) {
         return this.connection.getRepository(ctx, customer_entity_1.Customer).findOne({
             where: {
-                phoneNumber,
+                customFields: {
+                    referralCode: referralCode,
+                },
                 deletedAt: null,
             },
         });
@@ -182,9 +186,10 @@ let CustomerService = class CustomerService {
      * This method is intended to be used in admin-created Customer flows.
      */
     async create(ctx, input, password) {
-        var _a;
+        var _a, _b;
         input.emailAddress = utils_1.normalizeEmailAddress(input.emailAddress);
         const customer = new customer_entity_1.Customer(input);
+        customer.customFields.referralCode = nanoid_1.nanoid(6);
         const existingCustomerInChannel = await this.connection
             .getRepository(ctx, customer_entity_1.Customer)
             .createQueryBuilder('customer')
@@ -219,7 +224,7 @@ let CustomerService = class CustomerService {
             // Not sure when this situation would occur
             return new generated_graphql_admin_errors_1.EmailAddressConflictError();
         }
-        const customerUser = await this.userService.createCustomerUser(ctx, input.emailAddress, password);
+        const customerUser = await this.userService.createCustomerUser(ctx, (_a = input.phoneNumber) !== null && _a !== void 0 ? _a : '', password);
         if (error_result_1.isGraphQlErrorResult(customerUser)) {
             throw customerUser;
         }
@@ -227,7 +232,7 @@ let CustomerService = class CustomerService {
         if (password && password !== '') {
             const verificationToken = customer.user.getNativeAuthenticationMethod().verificationToken;
             if (verificationToken) {
-                const result = await this.userService.verifyUserByToken(ctx, verificationToken);
+                const result = await this.userService.verifyUserByToken(ctx, verificationToken, customerUser.identifier);
                 if (error_result_1.isGraphQlErrorResult(result)) {
                     // In theory this should never be reached, so we will just
                     // throw the result
@@ -252,7 +257,7 @@ let CustomerService = class CustomerService {
                 strategy: native_authentication_strategy_1.NATIVE_AUTH_STRATEGY_NAME,
             },
         });
-        if ((_a = customer.user) === null || _a === void 0 ? void 0 : _a.verified) {
+        if ((_b = customer.user) === null || _b === void 0 ? void 0 : _b.verified) {
             await this.historyService.createHistoryEntryForCustomer({
                 ctx,
                 customerId: createdCustomer.id,
@@ -266,18 +271,18 @@ let CustomerService = class CustomerService {
         return createdCustomer;
     }
     async update(ctx, input) {
-        const hasEmailAddress = (i) => Object.hasOwnProperty.call(i, 'emailAddress');
+        const hasPhoneNumber = (i) => Object.hasOwnProperty.call(i, 'phoneNumber');
         const customer = await this.connection.getEntityOrThrow(ctx, customer_entity_1.Customer, input.id, {
             channelId: ctx.channelId,
         });
-        if (hasEmailAddress(input)) {
-            if (input.emailAddress !== customer.emailAddress) {
+        if (hasPhoneNumber(input)) {
+            if (input.phoneNumber !== customer.phoneNumber) {
                 const existingCustomerInChannel = await this.connection
                     .getRepository(ctx, customer_entity_1.Customer)
                     .createQueryBuilder('customer')
                     .leftJoin('customer.channels', 'channel')
                     .where('channel.id = :channelId', { channelId: ctx.channelId })
-                    .andWhere('customer.emailAddress = :emailAddress', { emailAddress: input.emailAddress })
+                    .andWhere('customer.phoneNumber = :phoneNumber', { phoneNumber: input.phoneNumber })
                     .andWhere('customer.id != :customerId', { customerId: input.id })
                     .andWhere('customer.deletedAt is null')
                     .getOne();
@@ -285,12 +290,12 @@ let CustomerService = class CustomerService {
                     return new generated_graphql_admin_errors_1.EmailAddressConflictError();
                 }
                 if (customer.user) {
-                    const existingUserWithEmailAddress = await this.userService.getUserByEmailAddress(ctx, input.emailAddress);
+                    const existingUserWithEmailAddress = await this.userService.getUserByIdentifier(ctx, input.phoneNumber);
                     if (existingUserWithEmailAddress &&
                         !utils_1.idsAreEqual(customer.user.id, existingUserWithEmailAddress.id)) {
                         return new generated_graphql_admin_errors_1.EmailAddressConflictError();
                     }
-                    await this.userService.changeNativeIdentifier(ctx, customer.user.id, input.emailAddress);
+                    await this.userService.changeNativeIdentifier(ctx, customer.user.id, input.phoneNumber);
                 }
             }
         }
@@ -322,24 +327,25 @@ let CustomerService = class CustomerService {
                 return new generated_graphql_shop_errors_1.MissingPasswordError();
             }
         }
-        let user = await this.userService.getUserByEmailAddress(ctx, input.emailAddress);
+        let user = await this.userService.getUserByIdentifier(ctx, input.phoneNumber);
         const hasNativeAuthMethod = !!(user === null || user === void 0 ? void 0 : user.authenticationMethods.find(m => m instanceof native_authentication_method_entity_1.NativeAuthenticationMethod));
         if (user && user.verified) {
             if (hasNativeAuthMethod) {
                 // If the user has already been verified and has already
                 // registered with the native authentication strategy, do nothing.
-                return { success: true };
+                // return { success: true };
+                return new generated_graphql_shop_errors_1.EmailAddressConflictError();
             }
         }
         const customFields = input.customFields;
-        if (customFields === null || customFields === void 0 ? void 0 : customFields.referralCode) {
-            const referringUser = await this.getCustomerByPhoneNumber(ctx, customFields.referralCode);
+        if (customFields === null || customFields === void 0 ? void 0 : customFields.referredCode) {
+            const referringUser = await this.getCustomerByReferralCode(ctx, customFields.referredCode);
             if (referringUser) {
                 customFields.referredBy = referringUser.id.toString();
                 customFields.isReferralCompleted = false;
             }
         }
-        const customer = await this.createOrUpdate(ctx, Object.assign({ emailAddress: input.emailAddress, title: input.title || '', firstName: input.firstName || '', lastName: input.lastName || '', phoneNumber: input.phoneNumber || '' }, (customFields ? { customFields } : {})));
+        const customer = await this.createOrUpdate(ctx, Object.assign({ emailAddress: input.emailAddress, title: input.title || '', firstName: input.firstName || '', lastName: input.lastName || '', phoneNumber: input.phoneNumber }, (customFields ? { customFields } : {})));
         if (error_result_1.isGraphQlErrorResult(customer)) {
             return customer;
         }
@@ -352,7 +358,7 @@ let CustomerService = class CustomerService {
             },
         });
         if (!user) {
-            const customerUser = await this.userService.createCustomerUser(ctx, input.emailAddress, input.password || undefined);
+            const customerUser = await this.userService.createCustomerUser(ctx, input.phoneNumber, input.password || undefined);
             if (error_result_1.isGraphQlErrorResult(customerUser)) {
                 return customerUser;
             }
@@ -361,7 +367,7 @@ let CustomerService = class CustomerService {
             }
         }
         if (!hasNativeAuthMethod) {
-            const addAuthenticationResult = await this.userService.addNativeAuthenticationMethod(ctx, user, input.emailAddress, input.password || undefined);
+            const addAuthenticationResult = await this.userService.addNativeAuthenticationMethod(ctx, user, input.phoneNumber, input.password || undefined);
             if (error_result_1.isGraphQlErrorResult(addAuthenticationResult)) {
                 return addAuthenticationResult;
             }
@@ -370,7 +376,7 @@ let CustomerService = class CustomerService {
             }
         }
         if (!user.verified) {
-            user = await this.userService.setVerificationToken(ctx, user);
+            await this.userService.setVerificationToken(ctx, user);
         }
         customer.user = user;
         await this.connection.getRepository(ctx, user_entity_1.User).save(user, { reload: false });
@@ -395,20 +401,31 @@ let CustomerService = class CustomerService {
      * Refreshes a stale email address verification token by generating a new one and
      * publishing a {@link AccountRegistrationEvent}.
      */
-    async refreshVerificationToken(ctx, emailAddress) {
-        const user = await this.userService.getUserByEmailAddress(ctx, emailAddress);
+    async refreshVerificationToken(ctx, phoneNumber) {
+        const user = await this.userService.getUserByIdentifier(ctx, phoneNumber);
         if (user && !user.verified) {
-            await this.userService.setVerificationToken(ctx, user);
+            const output = await this.userService.setVerificationToken(ctx, user);
+            if (error_result_1.isGraphQlErrorResult(output)) {
+                return output;
+            }
             this.eventBus.publish(new account_registration_event_1.AccountRegistrationEvent(ctx, user));
         }
+    }
+    async getCustomerByPhoneNumber(ctx, phoneNumber) {
+        return this.connection.getRepository(ctx, customer_entity_1.Customer).findOne({
+            where: {
+                phoneNumber,
+                deletedAt: null,
+            },
+        });
     }
     /**
      * @description
      * Given a valid verification token which has been published in an {@link AccountRegistrationEvent}, this
      * method is used to set the Customer as `verified` as part of the account registration flow.
      */
-    async verifyCustomerEmailAddress(ctx, verificationToken, password) {
-        const result = await this.userService.verifyUserByToken(ctx, verificationToken, password);
+    async verifyCustomerEmailAddress(ctx, verificationToken, phoneNumber, password) {
+        const result = await this.userService.verifyUserByToken(ctx, verificationToken, phoneNumber, password);
         if (error_result_1.isGraphQlErrorResult(result)) {
             return result;
         }
@@ -436,9 +453,12 @@ let CustomerService = class CustomerService {
      * Publishes a new {@link PasswordResetEvent} for the given email address. This event creates
      * a token which can be used in the `resetPassword()` method.
      */
-    async requestPasswordReset(ctx, emailAddress) {
-        const user = await this.userService.setPasswordResetToken(ctx, emailAddress);
+    async requestPasswordReset(ctx, phoneNumber) {
+        const user = await this.userService.setPasswordResetToken(ctx, phoneNumber);
         if (user) {
+            if (error_result_1.isGraphQlErrorResult(user)) {
+                return user;
+            }
             this.eventBus.publish(new password_reset_event_1.PasswordResetEvent(ctx, user));
             const customer = await this.findOneByUserId(ctx, user.id);
             if (!customer) {
@@ -457,8 +477,8 @@ let CustomerService = class CustomerService {
      * Given a valid password reset token created by a call to the `requestPasswordReset()` method,
      * this method will change the Customer's password to that given as the `password` argument.
      */
-    async resetPassword(ctx, passwordResetToken, password) {
-        const result = await this.userService.resetPasswordByToken(ctx, passwordResetToken, password);
+    async resetPassword(ctx, phoneNumber, passwordResetToken, password) {
+        const result = await this.userService.resetPasswordByToken(ctx, phoneNumber, passwordResetToken, password);
         if (error_result_1.isGraphQlErrorResult(result)) {
             return result;
         }
@@ -482,7 +502,7 @@ let CustomerService = class CustomerService {
      * Customer.
      */
     async requestUpdateEmailAddress(ctx, userId, newEmailAddress) {
-        const userWithConflictingIdentifier = await this.userService.getUserByEmailAddress(ctx, newEmailAddress);
+        const userWithConflictingIdentifier = await this.userService.getUserByIdentifier(ctx, newEmailAddress);
         if (userWithConflictingIdentifier) {
             return new generated_graphql_shop_errors_1.EmailAddressConflictError();
         }

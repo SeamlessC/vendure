@@ -1569,7 +1569,7 @@
                 firstName: '',
                 lastName: '',
                 emailAddress: '',
-                phoneNumber: null,
+                phoneNumber: '',
                 addresses: null,
                 user: null,
             }, function (id) { return dataService.customer.getCustomer(id).mapStream(function (data) { return data.customer; }); }) || this;

@@ -20,7 +20,7 @@ export class CustomerResolver extends BaseEntityResolver<Customer.Fragment> {
                 firstName: '',
                 lastName: '',
                 emailAddress: '',
-                phoneNumber: null,
+                phoneNumber: '',
                 addresses: null,
                 user: null,
             },

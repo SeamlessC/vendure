@@ -208,6 +208,10 @@ __decorate([
     __metadata("design:type", Object)
 ], Order.prototype, "taxZoneId", void 0);
 __decorate([
+    typeorm_1.ManyToOne(type => channel_entity_1.Channel, { eager: true, nullable: true }),
+    __metadata("design:type", channel_entity_1.Channel)
+], Order.prototype, "finalChannel", void 0);
+__decorate([
     typeorm_1.ManyToMany(type => channel_entity_1.Channel),
     typeorm_1.JoinTable(),
     __metadata("design:type", Array)

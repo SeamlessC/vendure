@@ -4,6 +4,7 @@ import { AssetServerPlugin } from '@vendure/asset-server-plugin';
 import { ADMIN_API_PATH, API_PORT, SHOP_API_PATH } from '@vendure/common/lib/shared-constants';
 import {
     Asset,
+    Channel,
     DefaultJobQueuePlugin,
     DefaultLogger,
     DefaultSearchPlugin,
@@ -27,6 +28,7 @@ import { RestPlugin } from './payment-methods/payhere-listener.controller';
  */
 export const devConfig: VendureConfig = {
     apiOptions: {
+        shopListQueryLimit: 1000,
         port: API_PORT,
         adminApiPath: ADMIN_API_PATH,
         adminApiPlayground: {
@@ -46,7 +48,7 @@ export const devConfig: VendureConfig = {
     authOptions: {
         disableAuth: false,
         tokenMethod: ['bearer', 'cookie'] as const,
-        requireVerification: false,
+        requireVerification: true,
         customPermissions: [],
         cookieOptions: {
             secret: 'abc',
@@ -238,6 +240,28 @@ export const devConfig: VendureConfig = {
                     },
                 ],
             },
+            {
+                name: 'completedTime',
+                type: 'datetime',
+                nullable: true,
+                label: [
+                    {
+                        languageCode: LanguageCode.en,
+                        value: 'Completed Time',
+                    },
+                ],
+            },
+            // {
+            //     name: 'channel',
+            //     type: 'relation',
+            //     entity: Channel,
+            //     // may be omitted if the entity name matches the GraphQL type name,
+            //     // which is true for all built-in entities.
+            //     graphQLType: 'Channel',
+            //     // Whether to "eagerly" load the relation
+            //     // See https://typeorm.io/#/eager-and-lazy-relations
+            //     eager: true,
+            // },
         ],
         Customer: [
             {
@@ -253,9 +277,17 @@ export const devConfig: VendureConfig = {
                 nullable: true,
             },
             {
-                name: 'referralCode',
+                name: 'referredCode',
                 type: 'string',
                 nullable: true,
+            },
+            {
+                name: 'referralCode',
+                type: 'string',
+                readonly: true,
+                public: true,
+                nullable: false,
+                defaultValue: nanoid(6),
             },
             {
                 name: 'loyaltyPoints',
@@ -368,10 +400,22 @@ export const devConfig: VendureConfig = {
         //     bufferUpdates: true,
         // }),
         EmailPlugin.init({
-            devMode: true,
-            route: 'mailbox',
             handlers: defaultEmailHandlers,
             templatePath: path.join(__dirname, '../email-plugin/templates'),
+            // transport: {
+            //     type: 'smtp',
+            //     host: 'smtp.gmail.com',
+            //     port: 587,
+            //     // secure:true,
+            //     auth: {
+            //         user: 'vikumbandara@gmail.com',
+            //         pass: 'Vikumvltra31415x',
+            //     },
+            // },
+            devMode: true,
+            route: 'mailbox',
+            // handlers: defaultEmailHandlers,
+            // templatePath: path.join(__dirname, '../email-plugin/templates'),
             outputPath: path.join(__dirname, 'test-emails'),
             globalTemplateVars: {
                 verifyEmailAddressUrl: 'http://localhost:4201/verify',

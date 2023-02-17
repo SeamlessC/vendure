@@ -26,6 +26,7 @@
         "test": "lerna run test --stream --no-bail",
         "e2e": "lerna run e2e --stream --no-bail",
         "build": "lerna run build",
+        "corebuild": "lerna run build --scope @vendure/core",
         "check-imports": "ts-node scripts/check-imports.ts",
         "check-core-type-defs": "ts-node scripts/check-core-type-defs.ts",
         "check-angular-versions": "ts-node scripts/check-angular-versions.ts",

@@ -857,6 +857,7 @@ export class OrderService {
         shippingMethodId: ID,
     ): Promise<ErrorResultUnion<SetOrderShippingMethodResult, Order>> {
         const order = await this.getOrderOrThrow(ctx, orderId);
+        order.finalChannel = ctx.channel;
         const validationError = this.assertAddingItemsState(order);
         if (validationError) {
             return validationError;
@@ -916,24 +917,24 @@ export class OrderService {
             if (referringCustomer) {
                 const pointsToAdd = (await this.globalSettingsService.getSettings(ctx)).customFields
                     .referralLoyaltyPoints;
-                const output = await this.customerService.update(ctx, {
+                order.customer = await this.customerService.update(ctx, {
                     id: order.customer.id,
-                    firstName: 'blah blah',
                     customFields: {
                         isReferralCompleted: true,
-                        loyaltyPoints: referringCustomer.customFields.loyaltyPoints + pointsToAdd,
+                        loyaltyPoints: order.customer.customFields.loyaltyPoints + pointsToAdd,
                     } as any,
                 });
                 await this.customerService.update(ctx, {
                     id: referringCustomer.id,
                     customFields: {
-                        loyaltyPoints: order.customer.customFields.loyaltyPoints + pointsToAdd, // Where should it come from?
+                        loyaltyPoints: referringCustomer.customFields.loyaltyPoints + pointsToAdd, // Where should it come from?
                     } as any,
                 });
             }
         }
         if (state === 'Completed' && order.customer) {
-            await this.customerService.update(ctx, {
+            order.customFields.completedTime = new Date();
+            order.customer = await this.customerService.update(ctx, {
                 id: order.customer.id,
                 customFields: {
                     loyaltyPoints:
@@ -946,7 +947,6 @@ export class OrderService {
 
         order.payments = await this.getOrderPayments(ctx, orderId);
         const fromState = order.state;
-        console.log(fromState, state);
         try {
             await this.orderStateMachine.transition(ctx, order, state);
         } catch (e: any) {

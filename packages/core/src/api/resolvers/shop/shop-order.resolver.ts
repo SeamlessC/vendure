@@ -9,7 +9,7 @@ import {
     MutationAdjustOrderLineArgs,
     MutationApplyCouponCodeArgs,
     MutationRemoveOrderLineArgs,
-    MutationSetCustomerForOrderArgs,
+    // MutationSetCustomerForOrderArgs,
     MutationSetOrderBillingAddressArgs,
     MutationSetOrderCustomFieldsArgs,
     MutationSetOrderShippingAddressArgs,
@@ -355,26 +355,26 @@ export class ShopOrderResolver {
         return new NoActiveOrderError();
     }
 
-    @Transaction()
-    @Mutation()
-    @Allow(Permission.Owner)
-    async setCustomerForOrder(
-        @Ctx() ctx: RequestContext,
-        @Args() args: MutationSetCustomerForOrderArgs,
-    ): Promise<ErrorResultUnion<SetCustomerForOrderResult, Order>> {
-        if (ctx.authorizedAsOwnerOnly) {
-            if (ctx.activeUserId) {
-                return new AlreadyLoggedInError();
-            }
-            const sessionOrder = await this.activeOrderService.getOrderFromContext(ctx);
-            if (sessionOrder) {
-                const customer = await this.customerService.createOrUpdate(ctx, args.input, true);
-                if (isGraphQlErrorResult(customer)) {
-                    return customer;
-                }
-                return this.orderService.addCustomerToOrder(ctx, sessionOrder.id, customer);
-            }
-        }
-        return new NoActiveOrderError();
-    }
+    // @Transaction()
+    // @Mutation()
+    // @Allow(Permission.Owner)
+    // async setCustomerForOrder(
+    //     @Ctx() ctx: RequestContext,
+    //     @Args() args: MutationSetCustomerForOrderArgs,
+    // ): Promise<ErrorResultUnion<SetCustomerForOrderResult, Order>> {
+    //     if (ctx.authorizedAsOwnerOnly) {
+    //         if (ctx.activeUserId) {
+    //             return new AlreadyLoggedInError();
+    //         }
+    //         const sessionOrder = await this.activeOrderService.getOrderFromContext(ctx);
+    //         if (sessionOrder) {
+    //             const customer = await this.customerService.createOrUpdate(ctx, args.input, true);
+    //             if (isGraphQlErrorResult(customer)) {
+    //                 return customer;
+    //             }
+    //             return this.orderService.addCustomerToOrder(ctx, sessionOrder.id, customer);
+    //         }
+    //     }
+    //     return new NoActiveOrderError();
+    // }
 }

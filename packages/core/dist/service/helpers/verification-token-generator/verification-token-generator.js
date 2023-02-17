@@ -14,8 +14,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VerificationTokenGenerator = void 0;
 const common_1 = require("@nestjs/common");
-const ms_1 = __importDefault(require("ms"));
-const generate_public_id_1 = require("../../../common/generate-public-id");
+const axios_1 = __importDefault(require("axios"));
+const secrets_1 = require("./secrets");
+const common_2 = require("../../../common");
 const config_service_1 = require("../../../config/config.service");
 /**
  * This class is responsible for generating and verifying the tokens issued when new accounts are registered
@@ -29,23 +30,70 @@ let VerificationTokenGenerator = class VerificationTokenGenerator {
      * Generates a verification token which encodes the time of generation and concatenates it with a
      * random id.
      */
-    generateVerificationToken() {
-        const now = new Date();
-        const base64Now = Buffer.from(now.toJSON()).toString('base64');
-        const id = generate_public_id_1.generatePublicId();
-        return `${base64Now}_${id}`;
+    async generateVerificationToken(user) {
+        // const phoneNo=user.
+        const otp = Math.floor(Math.random() * (987654 - 123456 + 1) + 123456).toString();
+        try {
+            const response = await axios_1.default.post('https://connect.mrnotify.lk/trigger/send', { msisdn: user.identifier, message: `Your OTP code is ${otp}` }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    ApiKey: secrets_1.MRNOTIFYSECRET,
+                },
+            });
+            if (!(response.status === 200 || response.status === 201)) {
+                console.error(response);
+                throw new common_2.InternalServerError('error.otp-server-error');
+            }
+        }
+        catch (error) {
+            console.error(error);
+            throw new common_2.InternalServerError('error.otp-server-error');
+        }
+        return otp;
     }
     /**
      * Checks the age of the verification token to see if it falls within the token duration
      * as specified in the VendureConfig.
+     * Returns 1 if the token is valid, 0 if it is expired, -1 if it is invalid.
      */
-    verifyVerificationToken(token) {
-        const duration = ms_1.default(this.configService.authOptions.verificationTokenDuration);
-        const [generatedOn] = token.split('_');
-        const dateString = Buffer.from(generatedOn, 'base64').toString();
-        const date = new Date(dateString);
-        const elapsed = +new Date() - +date;
-        return elapsed < duration;
+    verifyVerificationToken(token, tokenToVerify, expiryDate) {
+        if (expiryDate === null) {
+            return 0;
+        }
+        const with5Mins = expiryDate.getTime() + 300000;
+        const currentTime = new Date().getTime();
+        if (with5Mins < currentTime) {
+            return 0;
+        }
+        if (token.trim() === '') {
+            return -1;
+        }
+        if (tokenToVerify.trim() === token.trim()) {
+            return 1;
+        }
+        return -1;
+        // let tokenToVerify = null;
+        // if(type==="identifierChangeToken"){
+        //     tokenToVerify = authMethod.identifierChangeToken;
+        // }
+        // else if(type==="passwordResetToken"){
+        //     tokenToVerify = authMethod.passwordResetToken;
+        // }
+        // else if(type==="verificationToken"){
+        //     tokenToVerify = authMethod.verificationToken;
+        // }
+        // if(!tokenToVerify){
+        //     return false;
+        // }
+        // if(tokenToVerify===token){
+        //     return true;
+        // }
+        // const duration = ms(this.configService.authOptions.verificationTokenDuration as string);
+        // const [generatedOn] = token.split('_');
+        // const dateString = Buffer.from(generatedOn, 'base64').toString();
+        // const date = new Date(dateString);
+        // const elapsed = +new Date() - +date;
+        // return elapsed < duration;
     }
 };
 VerificationTokenGenerator = __decorate([

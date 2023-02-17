@@ -38,13 +38,25 @@ __decorate([
     __metadata("design:type", Object)
 ], NativeAuthenticationMethod.prototype, "verificationToken", void 0);
 __decorate([
+    typeorm_1.Column({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Object)
+], NativeAuthenticationMethod.prototype, "verificationTokenExpires", void 0);
+__decorate([
     typeorm_1.Column({ type: 'varchar', nullable: true }),
     __metadata("design:type", Object)
 ], NativeAuthenticationMethod.prototype, "passwordResetToken", void 0);
 __decorate([
+    typeorm_1.Column({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Object)
+], NativeAuthenticationMethod.prototype, "passwordResetTokenExpires", void 0);
+__decorate([
     typeorm_1.Column({ type: 'varchar', nullable: true }),
     __metadata("design:type", Object)
 ], NativeAuthenticationMethod.prototype, "identifierChangeToken", void 0);
+__decorate([
+    typeorm_1.Column({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Object)
+], NativeAuthenticationMethod.prototype, "identifierChangeTokenExpires", void 0);
 __decorate([
     typeorm_1.Column({ type: 'varchar', nullable: true }),
     __metadata("design:type", Object)

@@ -20,8 +20,6 @@ enum LanguageCode {
     ar
     "Armenian"
     hy
-    "Assamese"
-    as
     "Azerbaijani"
     az
     "Bambara"
@@ -122,8 +120,6 @@ enum LanguageCode {
     hi
     "Hungarian"
     hu
-    "Icelandic"
-    is
     "Igbo"
     ig
     "Indonesian"

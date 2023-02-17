@@ -186,6 +186,16 @@ export class NotVerifiedError extends ErrorResult {
   }
 }
 
+export class OTPRequestTimeoutError extends ErrorResult {
+  readonly __typename = 'OTPRequestTimeoutError';
+  readonly errorCode = 'OTPREQUEST_TIMEOUT_ERROR' as any;
+  readonly message = 'OTPREQUEST_TIMEOUT_ERROR';
+  constructor(
+  ) {
+    super();
+  }
+}
+
 export class OrderLimitError extends ErrorResult {
   readonly __typename = 'OrderLimitError';
   readonly errorCode = 'ORDER_LIMIT_ERROR' as any;
@@ -324,7 +334,7 @@ export class VerificationTokenInvalidError extends ErrorResult {
 }
 
 
-const errorTypeNames = new Set(['AlreadyLoggedInError', 'CouponCodeExpiredError', 'CouponCodeInvalidError', 'CouponCodeLimitError', 'EmailAddressConflictError', 'IdentifierChangeTokenExpiredError', 'IdentifierChangeTokenInvalidError', 'IneligiblePaymentMethodError', 'IneligibleShippingMethodError', 'InsufficientStockError', 'InvalidCredentialsError', 'MissingPasswordError', 'NativeAuthStrategyError', 'NegativeQuantityError', 'NoActiveOrderError', 'NotVerifiedError', 'OrderLimitError', 'OrderModificationError', 'OrderPaymentStateError', 'OrderStateTransitionError', 'PasswordAlreadySetError', 'PasswordResetTokenExpiredError', 'PasswordResetTokenInvalidError', 'PasswordValidationError', 'PaymentDeclinedError', 'PaymentFailedError', 'ShopClosedError', 'VerificationTokenExpiredError', 'VerificationTokenInvalidError']);
+const errorTypeNames = new Set(['AlreadyLoggedInError', 'CouponCodeExpiredError', 'CouponCodeInvalidError', 'CouponCodeLimitError', 'EmailAddressConflictError', 'IdentifierChangeTokenExpiredError', 'IdentifierChangeTokenInvalidError', 'IneligiblePaymentMethodError', 'IneligibleShippingMethodError', 'InsufficientStockError', 'InvalidCredentialsError', 'MissingPasswordError', 'NativeAuthStrategyError', 'NegativeQuantityError', 'NoActiveOrderError', 'NotVerifiedError', 'OTPRequestTimeoutError', 'OrderLimitError', 'OrderModificationError', 'OrderPaymentStateError', 'OrderStateTransitionError', 'PasswordAlreadySetError', 'PasswordResetTokenExpiredError', 'PasswordResetTokenInvalidError', 'PasswordValidationError', 'PaymentDeclinedError', 'PaymentFailedError', 'ShopClosedError', 'VerificationTokenExpiredError', 'VerificationTokenInvalidError']);
 function isGraphQLError(input: any): input is import('@vendure/common/lib/generated-types').ErrorResult {
   return input instanceof ErrorResult || errorTypeNames.has(input.__typename);
 }
@@ -365,11 +375,6 @@ export const shopErrorOperationTypeResolvers = {
       return isGraphQLError(value) ? (value as any).__typename : 'Order';
     },
   },
-  SetCustomerForOrderResult: {
-    __resolveType(value: any) {
-      return isGraphQLError(value) ? (value as any).__typename : 'Order';
-    },
-  },
   NativeAuthenticationResult: {
     __resolveType(value: any) {
       return isGraphQLError(value) ? (value as any).__typename : 'CurrentUser';
@@ -396,16 +401,6 @@ export const shopErrorOperationTypeResolvers = {
     },
   },
   UpdateCustomerPasswordResult: {
-    __resolveType(value: any) {
-      return isGraphQLError(value) ? (value as any).__typename : 'Success';
-    },
-  },
-  RequestUpdateCustomerEmailAddressResult: {
-    __resolveType(value: any) {
-      return isGraphQLError(value) ? (value as any).__typename : 'Success';
-    },
-  },
-  UpdateCustomerEmailAddressResult: {
     __resolveType(value: any) {
       return isGraphQLError(value) ? (value as any).__typename : 'Success';
     },

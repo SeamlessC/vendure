@@ -196,22 +196,6 @@ let ShopOrderResolver = class ShopOrderResolver {
         }
         return new generated_graphql_shop_errors_1.NoActiveOrderError();
     }
-    async setCustomerForOrder(ctx, args) {
-        if (ctx.authorizedAsOwnerOnly) {
-            if (ctx.activeUserId) {
-                return new generated_graphql_shop_errors_1.AlreadyLoggedInError();
-            }
-            const sessionOrder = await this.activeOrderService.getOrderFromContext(ctx);
-            if (sessionOrder) {
-                const customer = await this.customerService.createOrUpdate(ctx, args.input, true);
-                if (error_result_1.isGraphQlErrorResult(customer)) {
-                    return customer;
-                }
-                return this.orderService.addCustomerToOrder(ctx, sessionOrder.id, customer);
-            }
-        }
-        return new generated_graphql_shop_errors_1.NoActiveOrderError();
-    }
 };
 __decorate([
     graphql_1.Query(),
@@ -393,16 +377,6 @@ __decorate([
     __metadata("design:paramtypes", [request_context_1.RequestContext, Object]),
     __metadata("design:returntype", Promise)
 ], ShopOrderResolver.prototype, "addPaymentToOrder", null);
-__decorate([
-    transaction_decorator_1.Transaction(),
-    graphql_1.Mutation(),
-    allow_decorator_1.Allow(generated_shop_types_1.Permission.Owner),
-    __param(0, request_context_decorator_1.Ctx()),
-    __param(1, graphql_1.Args()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [request_context_1.RequestContext, Object]),
-    __metadata("design:returntype", Promise)
-], ShopOrderResolver.prototype, "setCustomerForOrder", null);
 ShopOrderResolver = __decorate([
     graphql_1.Resolver(),
     common_1.UseGuards(shop_closed_guard_1.ShopClosedGuard),

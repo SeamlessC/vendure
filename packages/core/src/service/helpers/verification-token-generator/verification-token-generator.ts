@@ -1,8 +1,17 @@
 import { Injectable } from '@nestjs/common';
+import axios from 'axios';
 import ms from 'ms';
 
+import { ErrorResult, InternalServerError } from '../../../common';
+import {
+    VerificationTokenExpiredError,
+    VerificationTokenInvalidError,
+} from '../../../common/error/generated-graphql-shop-errors';
 import { generatePublicId } from '../../../common/generate-public-id';
 import { ConfigService } from '../../../config/config.service';
+import { NativeAuthenticationMethod, tokenNames, User } from '../../../entity';
+
+import { MRNOTIFYSECRET } from './secrets';
 
 /**
  * This class is responsible for generating and verifying the tokens issued when new accounts are registered
@@ -16,23 +25,73 @@ export class VerificationTokenGenerator {
      * Generates a verification token which encodes the time of generation and concatenates it with a
      * random id.
      */
-    generateVerificationToken() {
-        const now = new Date();
-        const base64Now = Buffer.from(now.toJSON()).toString('base64');
-        const id = generatePublicId();
-        return `${base64Now}_${id}`;
+    async generateVerificationToken(user: User) {
+        // const phoneNo=user.
+        const otp = Math.floor(Math.random() * (987654 - 123456 + 1) + 123456).toString();
+        try {
+            const response = await axios.post(
+                'https://connect.mrnotify.lk/trigger/send',
+                { msisdn: user.identifier, message: `Your OTP code is ${otp}` },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ApiKey: MRNOTIFYSECRET,
+                    },
+                },
+            );
+            if (!(response.status === 200 || response.status === 201)) {
+                console.error(response);
+                throw new InternalServerError('error.otp-server-error');
+            }
+        } catch (error) {
+            console.error(error);
+            throw new InternalServerError('error.otp-server-error');
+        }
+        return otp;
     }
 
     /**
      * Checks the age of the verification token to see if it falls within the token duration
      * as specified in the VendureConfig.
+     * Returns 1 if the token is valid, 0 if it is expired, -1 if it is invalid.
      */
-    verifyVerificationToken(token: string): boolean {
-        const duration = ms(this.configService.authOptions.verificationTokenDuration as string);
-        const [generatedOn] = token.split('_');
-        const dateString = Buffer.from(generatedOn, 'base64').toString();
-        const date = new Date(dateString);
-        const elapsed = +new Date() - +date;
-        return elapsed < duration;
+    verifyVerificationToken(token: string, tokenToVerify: string, expiryDate: Date | null): 0 | 1 | -1 {
+        if (expiryDate === null) {
+            return 0;
+        }
+        const with5Mins = expiryDate.getTime() + 300000;
+        const currentTime = new Date().getTime();
+        if (with5Mins < currentTime) {
+            return 0;
+        }
+        if (token.trim() === '') {
+            return -1;
+        }
+        if (tokenToVerify.trim() === token.trim()) {
+            return 1;
+        }
+        return -1;
+        // let tokenToVerify = null;
+        // if(type==="identifierChangeToken"){
+        //     tokenToVerify = authMethod.identifierChangeToken;
+        // }
+        // else if(type==="passwordResetToken"){
+        //     tokenToVerify = authMethod.passwordResetToken;
+        // }
+        // else if(type==="verificationToken"){
+        //     tokenToVerify = authMethod.verificationToken;
+        // }
+        // if(!tokenToVerify){
+        //     return false;
+        // }
+        // if(tokenToVerify===token){
+        //     return true;
+        // }
+        // const duration = ms(this.configService.authOptions.verificationTokenDuration as string);
+        // const [generatedOn] = token.split('_');
+        // const dateString = Buffer.from(generatedOn, 'base64').toString();
+        // const date = new Date(dateString);
+        // const elapsed = +new Date() - +date;
+        // return elapsed < duration;
     }
 }

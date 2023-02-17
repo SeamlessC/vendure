@@ -1,1 +1,871 @@
-!function(r,t){"object"==typeof exports&&"undefined"!=typeof module?t(exports):"function"==typeof define&&define.amd?define(["exports"],t):t((r="undefined"!=typeof globalThis?globalThis:r||self).VendureUiClient={})}(this,(function(r){"use strict";var t=function(r,n){return(t=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(r,t){r.__proto__=t}||function(r,t){for(var n in t)t.hasOwnProperty(n)&&(r[n]=t[n])})(r,n)};function n(r,n){function e(){this.constructor=r}t(r,n),r.prototype=null===n?Object.create(n):(e.prototype=n.prototype,new e)}function e(r){return"function"==typeof r}var o=!1,i={Promise:void 0,set useDeprecatedSynchronousErrorHandling(r){r&&(new Error).stack;o=r},get useDeprecatedSynchronousErrorHandling(){return o}};function s(r){setTimeout((function(){throw r}),0)}var u={closed:!0,next:function(r){},error:function(r){if(i.useDeprecatedSynchronousErrorHandling)throw r;s(r)},complete:function(){}},c=function(){return Array.isArray||function(r){return r&&"number"==typeof r.length}}();var a=function(){function r(r){return Error.call(this),this.message=r?r.length+" errors occurred during unsubscription:\n"+r.map((function(r,t){return t+1+") "+r.toString()})).join("\n  "):"",this.name="UnsubscriptionError",this.errors=r,this}return r.prototype=Object.create(Error.prototype),r}(),h=function(){function r(r){this.closed=!1,this._parentOrParents=null,this._subscriptions=null,r&&(this._ctorUnsubscribe=!0,this._unsubscribe=r)}return r.prototype.unsubscribe=function(){var t;if(!this.closed){var n,o=this,i=o._parentOrParents,s=o._ctorUnsubscribe,u=o._unsubscribe,h=o._subscriptions;if(this.closed=!0,this._parentOrParents=null,this._subscriptions=null,i instanceof r)i.remove(this);else if(null!==i)for(var f=0;f<i.length;++f){i[f].remove(this)}if(e(u)){s&&(this._unsubscribe=void 0);try{u.call(this)}catch(r){t=r instanceof a?p(r.errors):[r]}}if(c(h)){f=-1;for(var l=h.length;++f<l;){var b=h[f];if(null!==(n=b)&&"object"==typeof n)try{b.unsubscribe()}catch(r){t=t||[],r instanceof a?t=t.concat(p(r.errors)):t.push(r)}}}if(t)throw new a(t)}},r.prototype.add=function(t){var n=t;if(!t)return r.EMPTY;switch(typeof t){case"function":n=new r(t);case"object":if(n===this||n.closed||"function"!=typeof n.unsubscribe)return n;if(this.closed)return n.unsubscribe(),n;if(!(n instanceof r)){var e=n;(n=new r)._subscriptions=[e]}break;default:throw new Error("unrecognized teardown "+t+" added to Subscription.")}var o=n._parentOrParents;if(null===o)n._parentOrParents=this;else if(o instanceof r){if(o===this)return n;n._parentOrParents=[o,this]}else{if(-1!==o.indexOf(this))return n;o.push(this)}var i=this._subscriptions;return null===i?this._subscriptions=[n]:i.push(n),n},r.prototype.remove=function(r){var t=this._subscriptions;if(t){var n=t.indexOf(r);-1!==n&&t.splice(n,1)}},r.EMPTY=function(r){return r.closed=!0,r}(new r),r}();function p(r){return r.reduce((function(r,t){return r.concat(t instanceof a?t.errors:t)}),[])}var f=function(){return"function"==typeof Symbol?Symbol("rxSubscriber"):"@@rxSubscriber_"+Math.random()}(),l=function(r){function t(n,e,o){var i=r.call(this)||this;switch(i.syncErrorValue=null,i.syncErrorThrown=!1,i.syncErrorThrowable=!1,i.isStopped=!1,arguments.length){case 0:i.destination=u;break;case 1:if(!n){i.destination=u;break}if("object"==typeof n){n instanceof t?(i.syncErrorThrowable=n.syncErrorThrowable,i.destination=n,n.add(i)):(i.syncErrorThrowable=!0,i.destination=new b(i,n));break}default:i.syncErrorThrowable=!0,i.destination=new b(i,n,e,o)}return i}return n(t,r),t.prototype[f]=function(){return this},t.create=function(r,n,e){var o=new t(r,n,e);return o.syncErrorThrowable=!1,o},t.prototype.next=function(r){this.isStopped||this._next(r)},t.prototype.error=function(r){this.isStopped||(this.isStopped=!0,this._error(r))},t.prototype.complete=function(){this.isStopped||(this.isStopped=!0,this._complete())},t.prototype.unsubscribe=function(){this.closed||(this.isStopped=!0,r.prototype.unsubscribe.call(this))},t.prototype._next=function(r){this.destination.next(r)},t.prototype._error=function(r){this.destination.error(r),this.unsubscribe()},t.prototype._complete=function(){this.destination.complete(),this.unsubscribe()},t.prototype._unsubscribeAndRecycle=function(){var r=this._parentOrParents;return this._parentOrParents=null,this.unsubscribe(),this.closed=!1,this.isStopped=!1,this._parentOrParents=r,this},t}(h),b=function(r){function t(t,n,o,i){var s,c=r.call(this)||this;c._parentSubscriber=t;var a=c;return e(n)?s=n:n&&(s=n.next,o=n.error,i=n.complete,n!==u&&(e((a=Object.create(n)).unsubscribe)&&c.add(a.unsubscribe.bind(a)),a.unsubscribe=c.unsubscribe.bind(c))),c._context=a,c._next=s,c._error=o,c._complete=i,c}return n(t,r),t.prototype.next=function(r){if(!this.isStopped&&this._next){var t=this._parentSubscriber;i.useDeprecatedSynchronousErrorHandling&&t.syncErrorThrowable?this.__tryOrSetError(t,this._next,r)&&this.unsubscribe():this.__tryOrUnsub(this._next,r)}},t.prototype.error=function(r){if(!this.isStopped){var t=this._parentSubscriber,n=i.useDeprecatedSynchronousErrorHandling;if(this._error)n&&t.syncErrorThrowable?(this.__tryOrSetError(t,this._error,r),this.unsubscribe()):(this.__tryOrUnsub(this._error,r),this.unsubscribe());else if(t.syncErrorThrowable)n?(t.syncErrorValue=r,t.syncErrorThrown=!0):s(r),this.unsubscribe();else{if(this.unsubscribe(),n)throw r;s(r)}}},t.prototype.complete=function(){var r=this;if(!this.isStopped){var t=this._parentSubscriber;if(this._complete){var n=function(){return r._complete.call(r._context)};i.useDeprecatedSynchronousErrorHandling&&t.syncErrorThrowable?(this.__tryOrSetError(t,n),this.unsubscribe()):(this.__tryOrUnsub(n),this.unsubscribe())}else this.unsubscribe()}},t.prototype.__tryOrUnsub=function(r,t){try{r.call(this._context,t)}catch(r){if(this.unsubscribe(),i.useDeprecatedSynchronousErrorHandling)throw r;s(r)}},t.prototype.__tryOrSetError=function(r,t,n){if(!i.useDeprecatedSynchronousErrorHandling)throw new Error("bad call");try{t.call(this._context,n)}catch(t){return i.useDeprecatedSynchronousErrorHandling?(r.syncErrorValue=t,r.syncErrorThrown=!0,!0):(s(t),!0)}return!1},t.prototype._unsubscribe=function(){var r=this._parentSubscriber;this._context=null,this._parentSubscriber=null,r.unsubscribe()},t}(l);var d=function(){return"function"==typeof Symbol&&Symbol.observable||"@@observable"}();function y(r){return r}function _(r){return 0===r.length?y:1===r.length?r[0]:function(t){return r.reduce((function(r,t){return t(r)}),t)}}var v=function(){function r(r){this._isScalar=!1,r&&(this._subscribe=r)}return r.prototype.lift=function(t){var n=new r;return n.source=this,n.operator=t,n},r.prototype.subscribe=function(r,t,n){var e=this.operator,o=function(r,t,n){if(r){if(r instanceof l)return r;if(r[f])return r[f]()}return r||t||n?new l(r,t,n):new l(u)}(r,t,n);if(e?o.add(e.call(o,this.source)):o.add(this.source||i.useDeprecatedSynchronousErrorHandling&&!o.syncErrorThrowable?this._subscribe(o):this._trySubscribe(o)),i.useDeprecatedSynchronousErrorHandling&&o.syncErrorThrowable&&(o.syncErrorThrowable=!1,o.syncErrorThrown))throw o.syncErrorValue;return o},r.prototype._trySubscribe=function(r){try{return this._subscribe(r)}catch(t){i.useDeprecatedSynchronousErrorHandling&&(r.syncErrorThrown=!0,r.syncErrorValue=t),!function(r){for(;r;){var t=r,n=t.closed,e=t.destination,o=t.isStopped;if(n||o)return!1;r=e&&e instanceof l?e:null}return!0}(r)?console.warn(t):r.error(t)}},r.prototype.forEach=function(r,t){var n=this;return new(t=w(t))((function(t,e){var o;o=n.subscribe((function(t){try{r(t)}catch(r){e(r),o&&o.unsubscribe()}}),e,t)}))},r.prototype._subscribe=function(r){var t=this.source;return t&&t.subscribe(r)},r.prototype[d]=function(){return this},r.prototype.pipe=function(){for(var r=[],t=0;t<arguments.length;t++)r[t]=arguments[t];return 0===r.length?this:_(r)(this)},r.prototype.toPromise=function(r){var t=this;return new(r=w(r))((function(r,n){var e;t.subscribe((function(r){return e=r}),(function(r){return n(r)}),(function(){return r(e)}))}))},r.create=function(t){return new r(t)},r}();function w(r){if(r||(r=i.Promise||Promise),!r)throw new Error("no Promise impl found");return r}var E=new v((function(r){return r.complete()}));function m(r){return r?function(r){return new v((function(t){return r.schedule((function(){return t.complete()}))}))}(r):E}var g=function(){function r(){return Error.call(this),this.message="argument out of range",this.name="ArgumentOutOfRangeError",this}return r.prototype=Object.create(Error.prototype),r}();function S(r){return function(t){return 0===r?m():t.lift(new O(r))}}var O=function(){function r(r){if(this.total=r,this.total<0)throw new g}return r.prototype.call=function(r,t){return t.subscribe(new x(r,this.total))},r}(),x=function(r){function t(t,n){var e=r.call(this,t)||this;return e.total=n,e.count=0,e}return n(t,r),t.prototype._next=function(r){var t=this.total,n=++this.count;n<=t&&(this.destination.next(r),n===t&&(this.destination.complete(),this.unsubscribe()))},t}(l),P="http://localhost:3000";function T(r,t){var n=r+"__"+Math.random().toString(36).substr(3),e={requestId:n,type:r,data:t};return new v((function(r){var t=window.opener||window.parent,o=function(){t.postMessage({requestId:n,type:"cancellation",data:null},P)};return window.addEventListener("message",(function(t){var e=t.data;if(e&&e.requestId===n){if(e.complete)return r.complete(),void o();if(e.error)return r.error(e.data),void o();r.next(e.data)}})),t.postMessage(e,P),o}))}r.getActivatedRoute=function(){return T("active-route",{}).toPromise()},r.graphQlMutation=function(r,t){var n=T("graphql-mutation",{document:r,variables:t});return{then:function(){for(var r,t=[],e=0;e<arguments.length;e++)t[e]=arguments[e];return(r=n.pipe(S(1)).toPromise()).then.apply(r,t)},stream:n}},r.graphQlQuery=function(r,t,n){var e=T("graphql-query",{document:r,variables:t,fetchPolicy:n});return{then:function(){for(var r,t=[],n=0;n<arguments.length;n++)t[n]=arguments[n];return(r=e.pipe(S(1)).toPromise()).then.apply(r,t)},stream:e}},r.notify=function(r){T("notification",r).toPromise()},r.setTargetOrigin=function(r){P=r},Object.defineProperty(r,"__esModule",{value:!0})}));
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.VendureUiClient = {}));
+}(this, (function (exports) { 'use strict';
+
+    /*! *****************************************************************************
+    Copyright (c) Microsoft Corporation.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+    /* global Reflect, Promise */
+
+    var extendStatics = function(d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+
+    function __extends(d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    }
+
+    /** PURE_IMPORTS_START  PURE_IMPORTS_END */
+    function isFunction(x) {
+        return typeof x === 'function';
+    }
+
+    /** PURE_IMPORTS_START  PURE_IMPORTS_END */
+    var _enable_super_gross_mode_that_will_cause_bad_things = false;
+    var config = {
+        Promise: undefined,
+        set useDeprecatedSynchronousErrorHandling(value) {
+            if (value) {
+                var error = /*@__PURE__*/ new Error();
+                /*@__PURE__*/ console.warn('DEPRECATED! RxJS was set to use deprecated synchronous error handling behavior by code at: \n' + error.stack);
+            }
+            _enable_super_gross_mode_that_will_cause_bad_things = value;
+        },
+        get useDeprecatedSynchronousErrorHandling() {
+            return _enable_super_gross_mode_that_will_cause_bad_things;
+        },
+    };
+
+    /** PURE_IMPORTS_START  PURE_IMPORTS_END */
+    function hostReportError(err) {
+        setTimeout(function () { throw err; }, 0);
+    }
+
+    /** PURE_IMPORTS_START _config,_util_hostReportError PURE_IMPORTS_END */
+    var empty$1 = {
+        closed: true,
+        next: function (value) { },
+        error: function (err) {
+            if (config.useDeprecatedSynchronousErrorHandling) {
+                throw err;
+            }
+            else {
+                hostReportError(err);
+            }
+        },
+        complete: function () { }
+    };
+
+    /** PURE_IMPORTS_START  PURE_IMPORTS_END */
+    var isArray = /*@__PURE__*/ (function () { return Array.isArray || (function (x) { return x && typeof x.length === 'number'; }); })();
+
+    /** PURE_IMPORTS_START  PURE_IMPORTS_END */
+    function isObject(x) {
+        return x !== null && typeof x === 'object';
+    }
+
+    /** PURE_IMPORTS_START  PURE_IMPORTS_END */
+    var UnsubscriptionErrorImpl = /*@__PURE__*/ (function () {
+        function UnsubscriptionErrorImpl(errors) {
+            Error.call(this);
+            this.message = errors ?
+                errors.length + " errors occurred during unsubscription:\n" + errors.map(function (err, i) { return i + 1 + ") " + err.toString(); }).join('\n  ') : '';
+            this.name = 'UnsubscriptionError';
+            this.errors = errors;
+            return this;
+        }
+        UnsubscriptionErrorImpl.prototype = /*@__PURE__*/ Object.create(Error.prototype);
+        return UnsubscriptionErrorImpl;
+    })();
+    var UnsubscriptionError = UnsubscriptionErrorImpl;
+
+    /** PURE_IMPORTS_START _util_isArray,_util_isObject,_util_isFunction,_util_UnsubscriptionError PURE_IMPORTS_END */
+    var Subscription = /*@__PURE__*/ (function () {
+        function Subscription(unsubscribe) {
+            this.closed = false;
+            this._parentOrParents = null;
+            this._subscriptions = null;
+            if (unsubscribe) {
+                this._ctorUnsubscribe = true;
+                this._unsubscribe = unsubscribe;
+            }
+        }
+        Subscription.prototype.unsubscribe = function () {
+            var errors;
+            if (this.closed) {
+                return;
+            }
+            var _a = this, _parentOrParents = _a._parentOrParents, _ctorUnsubscribe = _a._ctorUnsubscribe, _unsubscribe = _a._unsubscribe, _subscriptions = _a._subscriptions;
+            this.closed = true;
+            this._parentOrParents = null;
+            this._subscriptions = null;
+            if (_parentOrParents instanceof Subscription) {
+                _parentOrParents.remove(this);
+            }
+            else if (_parentOrParents !== null) {
+                for (var index = 0; index < _parentOrParents.length; ++index) {
+                    var parent_1 = _parentOrParents[index];
+                    parent_1.remove(this);
+                }
+            }
+            if (isFunction(_unsubscribe)) {
+                if (_ctorUnsubscribe) {
+                    this._unsubscribe = undefined;
+                }
+                try {
+                    _unsubscribe.call(this);
+                }
+                catch (e) {
+                    errors = e instanceof UnsubscriptionError ? flattenUnsubscriptionErrors(e.errors) : [e];
+                }
+            }
+            if (isArray(_subscriptions)) {
+                var index = -1;
+                var len = _subscriptions.length;
+                while (++index < len) {
+                    var sub = _subscriptions[index];
+                    if (isObject(sub)) {
+                        try {
+                            sub.unsubscribe();
+                        }
+                        catch (e) {
+                            errors = errors || [];
+                            if (e instanceof UnsubscriptionError) {
+                                errors = errors.concat(flattenUnsubscriptionErrors(e.errors));
+                            }
+                            else {
+                                errors.push(e);
+                            }
+                        }
+                    }
+                }
+            }
+            if (errors) {
+                throw new UnsubscriptionError(errors);
+            }
+        };
+        Subscription.prototype.add = function (teardown) {
+            var subscription = teardown;
+            if (!teardown) {
+                return Subscription.EMPTY;
+            }
+            switch (typeof teardown) {
+                case 'function':
+                    subscription = new Subscription(teardown);
+                case 'object':
+                    if (subscription === this || subscription.closed || typeof subscription.unsubscribe !== 'function') {
+                        return subscription;
+                    }
+                    else if (this.closed) {
+                        subscription.unsubscribe();
+                        return subscription;
+                    }
+                    else if (!(subscription instanceof Subscription)) {
+                        var tmp = subscription;
+                        subscription = new Subscription();
+                        subscription._subscriptions = [tmp];
+                    }
+                    break;
+                default: {
+                    throw new Error('unrecognized teardown ' + teardown + ' added to Subscription.');
+                }
+            }
+            var _parentOrParents = subscription._parentOrParents;
+            if (_parentOrParents === null) {
+                subscription._parentOrParents = this;
+            }
+            else if (_parentOrParents instanceof Subscription) {
+                if (_parentOrParents === this) {
+                    return subscription;
+                }
+                subscription._parentOrParents = [_parentOrParents, this];
+            }
+            else if (_parentOrParents.indexOf(this) === -1) {
+                _parentOrParents.push(this);
+            }
+            else {
+                return subscription;
+            }
+            var subscriptions = this._subscriptions;
+            if (subscriptions === null) {
+                this._subscriptions = [subscription];
+            }
+            else {
+                subscriptions.push(subscription);
+            }
+            return subscription;
+        };
+        Subscription.prototype.remove = function (subscription) {
+            var subscriptions = this._subscriptions;
+            if (subscriptions) {
+                var subscriptionIndex = subscriptions.indexOf(subscription);
+                if (subscriptionIndex !== -1) {
+                    subscriptions.splice(subscriptionIndex, 1);
+                }
+            }
+        };
+        Subscription.EMPTY = (function (empty) {
+            empty.closed = true;
+            return empty;
+        }(new Subscription()));
+        return Subscription;
+    }());
+    function flattenUnsubscriptionErrors(errors) {
+        return errors.reduce(function (errs, err) { return errs.concat((err instanceof UnsubscriptionError) ? err.errors : err); }, []);
+    }
+
+    /** PURE_IMPORTS_START  PURE_IMPORTS_END */
+    var rxSubscriber = /*@__PURE__*/ (function () {
+        return typeof Symbol === 'function'
+            ? /*@__PURE__*/ Symbol('rxSubscriber')
+            : '@@rxSubscriber_' + /*@__PURE__*/ Math.random();
+    })();
+
+    /** PURE_IMPORTS_START tslib,_util_isFunction,_Observer,_Subscription,_internal_symbol_rxSubscriber,_config,_util_hostReportError PURE_IMPORTS_END */
+    var Subscriber = /*@__PURE__*/ (function (_super) {
+        __extends(Subscriber, _super);
+        function Subscriber(destinationOrNext, error, complete) {
+            var _this = _super.call(this) || this;
+            _this.syncErrorValue = null;
+            _this.syncErrorThrown = false;
+            _this.syncErrorThrowable = false;
+            _this.isStopped = false;
+            switch (arguments.length) {
+                case 0:
+                    _this.destination = empty$1;
+                    break;
+                case 1:
+                    if (!destinationOrNext) {
+                        _this.destination = empty$1;
+                        break;
+                    }
+                    if (typeof destinationOrNext === 'object') {
+                        if (destinationOrNext instanceof Subscriber) {
+                            _this.syncErrorThrowable = destinationOrNext.syncErrorThrowable;
+                            _this.destination = destinationOrNext;
+                            destinationOrNext.add(_this);
+                        }
+                        else {
+                            _this.syncErrorThrowable = true;
+                            _this.destination = new SafeSubscriber(_this, destinationOrNext);
+                        }
+                        break;
+                    }
+                default:
+                    _this.syncErrorThrowable = true;
+                    _this.destination = new SafeSubscriber(_this, destinationOrNext, error, complete);
+                    break;
+            }
+            return _this;
+        }
+        Subscriber.prototype[rxSubscriber] = function () { return this; };
+        Subscriber.create = function (next, error, complete) {
+            var subscriber = new Subscriber(next, error, complete);
+            subscriber.syncErrorThrowable = false;
+            return subscriber;
+        };
+        Subscriber.prototype.next = function (value) {
+            if (!this.isStopped) {
+                this._next(value);
+            }
+        };
+        Subscriber.prototype.error = function (err) {
+            if (!this.isStopped) {
+                this.isStopped = true;
+                this._error(err);
+            }
+        };
+        Subscriber.prototype.complete = function () {
+            if (!this.isStopped) {
+                this.isStopped = true;
+                this._complete();
+            }
+        };
+        Subscriber.prototype.unsubscribe = function () {
+            if (this.closed) {
+                return;
+            }
+            this.isStopped = true;
+            _super.prototype.unsubscribe.call(this);
+        };
+        Subscriber.prototype._next = function (value) {
+            this.destination.next(value);
+        };
+        Subscriber.prototype._error = function (err) {
+            this.destination.error(err);
+            this.unsubscribe();
+        };
+        Subscriber.prototype._complete = function () {
+            this.destination.complete();
+            this.unsubscribe();
+        };
+        Subscriber.prototype._unsubscribeAndRecycle = function () {
+            var _parentOrParents = this._parentOrParents;
+            this._parentOrParents = null;
+            this.unsubscribe();
+            this.closed = false;
+            this.isStopped = false;
+            this._parentOrParents = _parentOrParents;
+            return this;
+        };
+        return Subscriber;
+    }(Subscription));
+    var SafeSubscriber = /*@__PURE__*/ (function (_super) {
+        __extends(SafeSubscriber, _super);
+        function SafeSubscriber(_parentSubscriber, observerOrNext, error, complete) {
+            var _this = _super.call(this) || this;
+            _this._parentSubscriber = _parentSubscriber;
+            var next;
+            var context = _this;
+            if (isFunction(observerOrNext)) {
+                next = observerOrNext;
+            }
+            else if (observerOrNext) {
+                next = observerOrNext.next;
+                error = observerOrNext.error;
+                complete = observerOrNext.complete;
+                if (observerOrNext !== empty$1) {
+                    context = Object.create(observerOrNext);
+                    if (isFunction(context.unsubscribe)) {
+                        _this.add(context.unsubscribe.bind(context));
+                    }
+                    context.unsubscribe = _this.unsubscribe.bind(_this);
+                }
+            }
+            _this._context = context;
+            _this._next = next;
+            _this._error = error;
+            _this._complete = complete;
+            return _this;
+        }
+        SafeSubscriber.prototype.next = function (value) {
+            if (!this.isStopped && this._next) {
+                var _parentSubscriber = this._parentSubscriber;
+                if (!config.useDeprecatedSynchronousErrorHandling || !_parentSubscriber.syncErrorThrowable) {
+                    this.__tryOrUnsub(this._next, value);
+                }
+                else if (this.__tryOrSetError(_parentSubscriber, this._next, value)) {
+                    this.unsubscribe();
+                }
+            }
+        };
+        SafeSubscriber.prototype.error = function (err) {
+            if (!this.isStopped) {
+                var _parentSubscriber = this._parentSubscriber;
+                var useDeprecatedSynchronousErrorHandling = config.useDeprecatedSynchronousErrorHandling;
+                if (this._error) {
+                    if (!useDeprecatedSynchronousErrorHandling || !_parentSubscriber.syncErrorThrowable) {
+                        this.__tryOrUnsub(this._error, err);
+                        this.unsubscribe();
+                    }
+                    else {
+                        this.__tryOrSetError(_parentSubscriber, this._error, err);
+                        this.unsubscribe();
+                    }
+                }
+                else if (!_parentSubscriber.syncErrorThrowable) {
+                    this.unsubscribe();
+                    if (useDeprecatedSynchronousErrorHandling) {
+                        throw err;
+                    }
+                    hostReportError(err);
+                }
+                else {
+                    if (useDeprecatedSynchronousErrorHandling) {
+                        _parentSubscriber.syncErrorValue = err;
+                        _parentSubscriber.syncErrorThrown = true;
+                    }
+                    else {
+                        hostReportError(err);
+                    }
+                    this.unsubscribe();
+                }
+            }
+        };
+        SafeSubscriber.prototype.complete = function () {
+            var _this = this;
+            if (!this.isStopped) {
+                var _parentSubscriber = this._parentSubscriber;
+                if (this._complete) {
+                    var wrappedComplete = function () { return _this._complete.call(_this._context); };
+                    if (!config.useDeprecatedSynchronousErrorHandling || !_parentSubscriber.syncErrorThrowable) {
+                        this.__tryOrUnsub(wrappedComplete);
+                        this.unsubscribe();
+                    }
+                    else {
+                        this.__tryOrSetError(_parentSubscriber, wrappedComplete);
+                        this.unsubscribe();
+                    }
+                }
+                else {
+                    this.unsubscribe();
+                }
+            }
+        };
+        SafeSubscriber.prototype.__tryOrUnsub = function (fn, value) {
+            try {
+                fn.call(this._context, value);
+            }
+            catch (err) {
+                this.unsubscribe();
+                if (config.useDeprecatedSynchronousErrorHandling) {
+                    throw err;
+                }
+                else {
+                    hostReportError(err);
+                }
+            }
+        };
+        SafeSubscriber.prototype.__tryOrSetError = function (parent, fn, value) {
+            if (!config.useDeprecatedSynchronousErrorHandling) {
+                throw new Error('bad call');
+            }
+            try {
+                fn.call(this._context, value);
+            }
+            catch (err) {
+                if (config.useDeprecatedSynchronousErrorHandling) {
+                    parent.syncErrorValue = err;
+                    parent.syncErrorThrown = true;
+                    return true;
+                }
+                else {
+                    hostReportError(err);
+                    return true;
+                }
+            }
+            return false;
+        };
+        SafeSubscriber.prototype._unsubscribe = function () {
+            var _parentSubscriber = this._parentSubscriber;
+            this._context = null;
+            this._parentSubscriber = null;
+            _parentSubscriber.unsubscribe();
+        };
+        return SafeSubscriber;
+    }(Subscriber));
+
+    /** PURE_IMPORTS_START _Subscriber PURE_IMPORTS_END */
+    function canReportError(observer) {
+        while (observer) {
+            var _a = observer, closed_1 = _a.closed, destination = _a.destination, isStopped = _a.isStopped;
+            if (closed_1 || isStopped) {
+                return false;
+            }
+            else if (destination && destination instanceof Subscriber) {
+                observer = destination;
+            }
+            else {
+                observer = null;
+            }
+        }
+        return true;
+    }
+
+    /** PURE_IMPORTS_START _Subscriber,_symbol_rxSubscriber,_Observer PURE_IMPORTS_END */
+    function toSubscriber(nextOrObserver, error, complete) {
+        if (nextOrObserver) {
+            if (nextOrObserver instanceof Subscriber) {
+                return nextOrObserver;
+            }
+            if (nextOrObserver[rxSubscriber]) {
+                return nextOrObserver[rxSubscriber]();
+            }
+        }
+        if (!nextOrObserver && !error && !complete) {
+            return new Subscriber(empty$1);
+        }
+        return new Subscriber(nextOrObserver, error, complete);
+    }
+
+    /** PURE_IMPORTS_START  PURE_IMPORTS_END */
+    var observable = /*@__PURE__*/ (function () { return typeof Symbol === 'function' && Symbol.observable || '@@observable'; })();
+
+    /** PURE_IMPORTS_START  PURE_IMPORTS_END */
+    function identity(x) {
+        return x;
+    }
+
+    /** PURE_IMPORTS_START _identity PURE_IMPORTS_END */
+    function pipeFromArray(fns) {
+        if (fns.length === 0) {
+            return identity;
+        }
+        if (fns.length === 1) {
+            return fns[0];
+        }
+        return function piped(input) {
+            return fns.reduce(function (prev, fn) { return fn(prev); }, input);
+        };
+    }
+
+    /** PURE_IMPORTS_START _util_canReportError,_util_toSubscriber,_symbol_observable,_util_pipe,_config PURE_IMPORTS_END */
+    var Observable = /*@__PURE__*/ (function () {
+        function Observable(subscribe) {
+            this._isScalar = false;
+            if (subscribe) {
+                this._subscribe = subscribe;
+            }
+        }
+        Observable.prototype.lift = function (operator) {
+            var observable = new Observable();
+            observable.source = this;
+            observable.operator = operator;
+            return observable;
+        };
+        Observable.prototype.subscribe = function (observerOrNext, error, complete) {
+            var operator = this.operator;
+            var sink = toSubscriber(observerOrNext, error, complete);
+            if (operator) {
+                sink.add(operator.call(sink, this.source));
+            }
+            else {
+                sink.add(this.source || (config.useDeprecatedSynchronousErrorHandling && !sink.syncErrorThrowable) ?
+                    this._subscribe(sink) :
+                    this._trySubscribe(sink));
+            }
+            if (config.useDeprecatedSynchronousErrorHandling) {
+                if (sink.syncErrorThrowable) {
+                    sink.syncErrorThrowable = false;
+                    if (sink.syncErrorThrown) {
+                        throw sink.syncErrorValue;
+                    }
+                }
+            }
+            return sink;
+        };
+        Observable.prototype._trySubscribe = function (sink) {
+            try {
+                return this._subscribe(sink);
+            }
+            catch (err) {
+                if (config.useDeprecatedSynchronousErrorHandling) {
+                    sink.syncErrorThrown = true;
+                    sink.syncErrorValue = err;
+                }
+                if (canReportError(sink)) {
+                    sink.error(err);
+                }
+                else {
+                    console.warn(err);
+                }
+            }
+        };
+        Observable.prototype.forEach = function (next, promiseCtor) {
+            var _this = this;
+            promiseCtor = getPromiseCtor(promiseCtor);
+            return new promiseCtor(function (resolve, reject) {
+                var subscription;
+                subscription = _this.subscribe(function (value) {
+                    try {
+                        next(value);
+                    }
+                    catch (err) {
+                        reject(err);
+                        if (subscription) {
+                            subscription.unsubscribe();
+                        }
+                    }
+                }, reject, resolve);
+            });
+        };
+        Observable.prototype._subscribe = function (subscriber) {
+            var source = this.source;
+            return source && source.subscribe(subscriber);
+        };
+        Observable.prototype[observable] = function () {
+            return this;
+        };
+        Observable.prototype.pipe = function () {
+            var operations = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                operations[_i] = arguments[_i];
+            }
+            if (operations.length === 0) {
+                return this;
+            }
+            return pipeFromArray(operations)(this);
+        };
+        Observable.prototype.toPromise = function (promiseCtor) {
+            var _this = this;
+            promiseCtor = getPromiseCtor(promiseCtor);
+            return new promiseCtor(function (resolve, reject) {
+                var value;
+                _this.subscribe(function (x) { return value = x; }, function (err) { return reject(err); }, function () { return resolve(value); });
+            });
+        };
+        Observable.create = function (subscribe) {
+            return new Observable(subscribe);
+        };
+        return Observable;
+    }());
+    function getPromiseCtor(promiseCtor) {
+        if (!promiseCtor) {
+            promiseCtor = config.Promise || Promise;
+        }
+        if (!promiseCtor) {
+            throw new Error('no Promise impl found');
+        }
+        return promiseCtor;
+    }
+
+    /** PURE_IMPORTS_START _Observable PURE_IMPORTS_END */
+    var EMPTY = /*@__PURE__*/ new Observable(function (subscriber) { return subscriber.complete(); });
+    function empty(scheduler) {
+        return scheduler ? emptyScheduled(scheduler) : EMPTY;
+    }
+    function emptyScheduled(scheduler) {
+        return new Observable(function (subscriber) { return scheduler.schedule(function () { return subscriber.complete(); }); });
+    }
+
+    /** PURE_IMPORTS_START  PURE_IMPORTS_END */
+    var ArgumentOutOfRangeErrorImpl = /*@__PURE__*/ (function () {
+        function ArgumentOutOfRangeErrorImpl() {
+            Error.call(this);
+            this.message = 'argument out of range';
+            this.name = 'ArgumentOutOfRangeError';
+            return this;
+        }
+        ArgumentOutOfRangeErrorImpl.prototype = /*@__PURE__*/ Object.create(Error.prototype);
+        return ArgumentOutOfRangeErrorImpl;
+    })();
+    var ArgumentOutOfRangeError = ArgumentOutOfRangeErrorImpl;
+
+    /** PURE_IMPORTS_START tslib,_Subscriber,_util_ArgumentOutOfRangeError,_observable_empty PURE_IMPORTS_END */
+    function take(count) {
+        return function (source) {
+            if (count === 0) {
+                return empty();
+            }
+            else {
+                return source.lift(new TakeOperator(count));
+            }
+        };
+    }
+    var TakeOperator = /*@__PURE__*/ (function () {
+        function TakeOperator(total) {
+            this.total = total;
+            if (this.total < 0) {
+                throw new ArgumentOutOfRangeError;
+            }
+        }
+        TakeOperator.prototype.call = function (subscriber, source) {
+            return source.subscribe(new TakeSubscriber(subscriber, this.total));
+        };
+        return TakeOperator;
+    }());
+    var TakeSubscriber = /*@__PURE__*/ (function (_super) {
+        __extends(TakeSubscriber, _super);
+        function TakeSubscriber(destination, total) {
+            var _this = _super.call(this, destination) || this;
+            _this.total = total;
+            _this.count = 0;
+            return _this;
+        }
+        TakeSubscriber.prototype._next = function (value) {
+            var total = this.total;
+            var count = ++this.count;
+            if (count <= total) {
+                this.destination.next(value);
+                if (count === total) {
+                    this.destination.complete();
+                    this.unsubscribe();
+                }
+            }
+        };
+        return TakeSubscriber;
+    }(Subscriber));
+
+    var targetOrigin = 'http://localhost:3000';
+    /**
+     * @description
+     * Set the [window.postMessage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage)
+     * `targetOrigin`. The Vendure ui-devkit uses the postMessage API to
+     * enable cross-frame and cross-origin communication between the ui extension code and the Admin UI
+     * app. The `targetOrigin` is a security feature intended to provide control over where messages are sent.
+     *
+     * @docsCategory ui-devkit
+     * @docsPage UiDevkitClient
+     */
+    function setTargetOrigin(value) {
+        targetOrigin = value;
+    }
+    /**
+     * @description
+     * Retrieves information about the current route of the host application, since it is not possible
+     * to otherwise get this information from within the child iframe.
+     *
+     * @example
+     * ```TypeScript
+     * import { getActivatedRoute } from '\@vendure/ui-devkit';
+     *
+     * const route = await getActivatedRoute();
+     * const slug = route.params.slug;
+     * ```
+     * @docsCategory ui-devkit
+     * @docsPage UiDevkitClient
+     */
+    function getActivatedRoute() {
+        return sendMessage('active-route', {}).toPromise();
+    }
+    /**
+     * @description
+     * Perform a GraphQL query and returns either an Observable or a Promise of the result.
+     *
+     * @example
+     * ```TypeScript
+     * import { graphQlQuery } from '\@vendure/ui-devkit';
+     *
+     * const productList = await graphQlQuery(`
+     *   query GetProducts($skip: Int, $take: Int) {
+     *       products(options: { skip: $skip, take: $take }) {
+     *           items { id, name, enabled },
+     *           totalItems
+     *       }
+     *   }`, {
+     *     skip: 0,
+     *     take: 10,
+     *   }).then(data => data.products);
+     * ```
+     *
+     * @docsCategory ui-devkit
+     * @docsPage UiDevkitClient
+     */
+    function graphQlQuery(document, variables, fetchPolicy) {
+        var result$ = sendMessage('graphql-query', { document: document, variables: variables, fetchPolicy: fetchPolicy });
+        return {
+            then: function () {
+                var _a;
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i] = arguments[_i];
+                }
+                return (_a = result$
+                    .pipe(take(1))
+                    .toPromise())
+                    .then.apply(_a, args);
+            },
+            stream: result$,
+        };
+    }
+    /**
+     * @description
+     * Perform a GraphQL mutation and returns either an Observable or a Promise of the result.
+     *
+     * @example
+     * ```TypeScript
+     * import { graphQlMutation } from '\@vendure/ui-devkit';
+     *
+     * const disableProduct = (id: string) => {
+     *   return graphQlMutation(`
+     *     mutation DisableProduct($id: ID!) {
+     *       updateProduct(input: { id: $id, enabled: false }) {
+     *         id
+     *         enabled
+     *       }
+     *     }`, { id })
+     *     .then(data => data.updateProduct)
+     * }
+     * ```
+     *
+     * @docsCategory ui-devkit
+     * @docsPage UiDevkitClient
+     */
+    function graphQlMutation(document, variables) {
+        var result$ = sendMessage('graphql-mutation', { document: document, variables: variables });
+        return {
+            then: function () {
+                var _a;
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i] = arguments[_i];
+                }
+                return (_a = result$
+                    .pipe(take(1))
+                    .toPromise())
+                    .then.apply(_a, args);
+            },
+            stream: result$,
+        };
+    }
+    /**
+     * @description
+     * Display a toast notification.
+     *
+     * @example
+     * ```TypeScript
+     * import { notify } from '\@vendure/ui-devkit';
+     *
+     * notify({
+     *   message: 'Updated Product',
+     *   type: 'success'
+     * });
+     * ```
+     *
+     * @docsCategory ui-devkit
+     * @docsPage UiDevkitClient
+     */
+    function notify(options) {
+        sendMessage('notification', options).toPromise();
+    }
+    function sendMessage(type, data) {
+        var requestId = type + '__' + Math.random().toString(36).substr(3);
+        var message = {
+            requestId: requestId,
+            type: type,
+            data: data,
+        };
+        return new Observable(function (subscriber) {
+            var hostWindow = window.opener || window.parent;
+            var handleReply = function (event) {
+                var response = event.data;
+                if (response && response.requestId === requestId) {
+                    if (response.complete) {
+                        subscriber.complete();
+                        tearDown();
+                        return;
+                    }
+                    if (response.error) {
+                        subscriber.error(response.data);
+                        tearDown();
+                        return;
+                    }
+                    subscriber.next(response.data);
+                }
+            };
+            var tearDown = function () {
+                hostWindow.postMessage({ requestId: requestId, type: 'cancellation', data: null }, targetOrigin);
+            };
+            window.addEventListener('message', handleReply);
+            hostWindow.postMessage(message, targetOrigin);
+            return tearDown;
+        });
+    }
+
+    exports.getActivatedRoute = getActivatedRoute;
+    exports.graphQlMutation = graphQlMutation;
+    exports.graphQlQuery = graphQlQuery;
+    exports.notify = notify;
+    exports.setTargetOrigin = setTargetOrigin;
+
+    Object.defineProperty(exports, '__esModule', { value: true });
+
+})));

@@ -56,7 +56,7 @@ export class CustomerEntityResolver {
             return customer.user;
         }
 
-        return this.userService.getUserByEmailAddress(ctx, customer.emailAddress);
+        return this.userService.getUserByIdentifier(ctx, customer.phoneNumber);
     }
 }
 

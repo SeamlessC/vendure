@@ -26,13 +26,10 @@ export class User extends VendureEntity implements HasCustomFields, SoftDeletabl
     @Column({ type: Date, nullable: true })
     deletedAt: Date | null;
 
-    @Column()
+    @Column({ unique: true })
     identifier: string;
 
-    @OneToMany(
-        type => AuthenticationMethod,
-        method => method.user,
-    )
+    @OneToMany(type => AuthenticationMethod, method => method.user)
     authenticationMethods: AuthenticationMethod[];
 
     @Column({ default: false })

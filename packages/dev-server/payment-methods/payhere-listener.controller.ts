@@ -21,7 +21,7 @@ import { PaymentStateMachine } from '@vendure/core/dist/service/helpers/payment-
 import md5 from 'crypto-js/md5';
 import { print } from 'graphql';
 
-import { PAYHERE_SECRET } from './payhere-secret';
+import { PAYHERE_SECRET } from '../secrets';
 
 export class PayhereResponseDTO {
     merchant_id: string;
@@ -88,7 +88,7 @@ export class PayhereController {
                 status_code,
                 merchant_id,
             },
-            method: 'payhere',
+            method: 'card',
         };
 
         const payment = await this.connection.getRepository(ctx, Payment).save(new Payment(result as any));

@@ -28,19 +28,19 @@ const specFileToIgnore = [
     'entity-hydrator.e2e-spec',
     'relations-decorator.e2e-spec',
 ];
-const E2E_ADMIN_QUERY_FILES = path.join(
-    __dirname,
-    `../../packages/core/e2e/**/!(${specFileToIgnore.join('|')}).ts`,
-);
-const E2E_SHOP_QUERY_FILES = [path.join(__dirname, '../../packages/core/e2e/graphql/shop-definitions.ts')];
-const E2E_ELASTICSEARCH_PLUGIN_QUERY_FILES = path.join(
-    __dirname,
-    '../../packages/elasticsearch-plugin/e2e/**/*.ts',
-);
-const E2E_ASSET_SERVER_PLUGIN_QUERY_FILES = path.join(
-    __dirname,
-    '../../packages/asset-server-plugin/e2e/**/*.ts',
-);
+// const E2E_ADMIN_QUERY_FILES = path.join(
+//     __dirname,
+//     `../../packages/core/e2e/**/!(${specFileToIgnore.join('|')}).ts`,
+// );
+// const E2E_SHOP_QUERY_FILES = [path.join(__dirname, '../../packages/core/e2e/graphql/shop-definitions.ts')];
+// const E2E_ELASTICSEARCH_PLUGIN_QUERY_FILES = path.join(
+//     __dirname,
+//     '../../packages/elasticsearch-plugin/e2e/**/*.ts',
+// );
+// const E2E_ASSET_SERVER_PLUGIN_QUERY_FILES = path.join(
+//     __dirname,
+//     '../../packages/asset-server-plugin/e2e/**/*.ts',
+// );
 const ADMIN_SCHEMA_OUTPUT_FILE = path.join(__dirname, '../../schema-admin.json');
 const SHOP_SCHEMA_OUTPUT_FILE = path.join(__dirname, '../../schema-shop.json');
 
@@ -92,36 +92,7 @@ Promise.all([
                     schema: [SHOP_SCHEMA_OUTPUT_FILE],
                     plugins: [disableTsLintPlugin, graphQlErrorsPlugin],
                 },
-                [path.join(__dirname, '../../packages/core/e2e/graphql/generated-e2e-admin-types.ts')]: {
-                    schema: [ADMIN_SCHEMA_OUTPUT_FILE],
-                    documents: E2E_ADMIN_QUERY_FILES,
-                    plugins: clientPlugins,
-                    config: e2eConfig,
-                },
-                [path.join(__dirname, '../../packages/core/e2e/graphql/generated-e2e-shop-types.ts')]: {
-                    schema: [SHOP_SCHEMA_OUTPUT_FILE],
-                    documents: E2E_SHOP_QUERY_FILES,
-                    plugins: clientPlugins,
-                    config: e2eConfig,
-                },
-                [path.join(
-                    __dirname,
-                    '../../packages/elasticsearch-plugin/e2e/graphql/generated-e2e-elasticsearch-plugin-types.ts',
-                )]: {
-                    schema: [ADMIN_SCHEMA_OUTPUT_FILE],
-                    documents: E2E_ELASTICSEARCH_PLUGIN_QUERY_FILES,
-                    plugins: clientPlugins,
-                    config: e2eConfig,
-                },
-                [path.join(
-                    __dirname,
-                    '../../packages/asset-server-plugin/e2e/graphql/generated-e2e-asset-server-plugin-types.ts',
-                )]: {
-                    schema: [ADMIN_SCHEMA_OUTPUT_FILE],
-                    documents: E2E_ASSET_SERVER_PLUGIN_QUERY_FILES,
-                    plugins: clientPlugins,
-                    config: e2eConfig,
-                },
+
                 [path.join(__dirname, '../../packages/admin-ui/src/lib/core/src/common/generated-types.ts')]:
                     {
                         schema: [ADMIN_SCHEMA_OUTPUT_FILE, path.join(__dirname, 'client-schema.ts')],

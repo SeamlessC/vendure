@@ -21,6 +21,7 @@ import {
     UpdateCustomerResult,
 } from '@vendure/common/lib/generated-types';
 import { ID, PaginatedList } from '@vendure/common/lib/shared-types';
+import { nanoid } from 'nanoid';
 
 import { RequestContext } from '../../api/common/request-context';
 import { RelationPaths } from '../../api/index';
@@ -32,6 +33,7 @@ import {
     IdentifierChangeTokenExpiredError,
     IdentifierChangeTokenInvalidError,
     MissingPasswordError,
+    OTPRequestTimeoutError,
     PasswordResetTokenExpiredError,
     PasswordResetTokenInvalidError,
     PasswordValidationError,
@@ -141,6 +143,7 @@ export class CustomerService {
         if (filterOnChannel) {
             query = query.andWhere('channel.id = :channelId', { channelId: ctx.channelId });
         }
+        const x = query.getQueryAndParameters();
         return query.getOne();
     }
 
@@ -188,10 +191,15 @@ export class CustomerService {
             });
     }
 
-    async getCustomerByPhoneNumber(ctx: RequestContext, phoneNumber: string): Promise<Customer | undefined> {
+    async getCustomerByReferralCode(
+        ctx: RequestContext,
+        referralCode: string,
+    ): Promise<Customer | undefined> {
         return this.connection.getRepository(ctx, Customer).findOne({
             where: {
-                phoneNumber,
+                customFields: {
+                    referralCode,
+                },
                 deletedAt: null,
             },
         });
@@ -238,7 +246,7 @@ export class CustomerService {
     ): Promise<ErrorResultUnion<CreateCustomerResult, Customer>> {
         input.emailAddress = normalizeEmailAddress(input.emailAddress);
         const customer = new Customer(input);
-
+        customer.customFields.referralCode = nanoid(6);
         const existingCustomerInChannel = await this.connection
             .getRepository(ctx, Customer)
             .createQueryBuilder('customer')
@@ -275,7 +283,11 @@ export class CustomerService {
             // Not sure when this situation would occur
             return new EmailAddressConflictAdminError();
         }
-        const customerUser = await this.userService.createCustomerUser(ctx, input.emailAddress, password);
+        const customerUser = await this.userService.createCustomerUser(
+            ctx,
+            input.phoneNumber ?? '',
+            password,
+        );
         if (isGraphQlErrorResult(customerUser)) {
             throw customerUser;
         }
@@ -284,7 +296,11 @@ export class CustomerService {
         if (password && password !== '') {
             const verificationToken = customer.user.getNativeAuthenticationMethod().verificationToken;
             if (verificationToken) {
-                const result = await this.userService.verifyUserByToken(ctx, verificationToken);
+                const result = await this.userService.verifyUserByToken(
+                    ctx,
+                    verificationToken,
+                    customerUser.identifier,
+                );
                 if (isGraphQlErrorResult(result)) {
                     // In theory this should never be reached, so we will just
                     // throw the result
@@ -331,21 +347,21 @@ export class CustomerService {
         ctx: RequestContext,
         input: UpdateCustomerInput | (UpdateCustomerShopInput & { id: ID }),
     ): Promise<ErrorResultUnion<UpdateCustomerResult, Customer>> {
-        const hasEmailAddress = (i: any): i is UpdateCustomerInput & { emailAddress: string } =>
-            Object.hasOwnProperty.call(i, 'emailAddress');
+        const hasPhoneNumber = (i: any): i is UpdateCustomerInput & { phoneNumber: string } =>
+            Object.hasOwnProperty.call(i, 'phoneNumber');
 
         const customer = await this.connection.getEntityOrThrow(ctx, Customer, input.id, {
             channelId: ctx.channelId,
         });
 
-        if (hasEmailAddress(input)) {
-            if (input.emailAddress !== customer.emailAddress) {
+        if (hasPhoneNumber(input)) {
+            if (input.phoneNumber !== customer.phoneNumber) {
                 const existingCustomerInChannel = await this.connection
                     .getRepository(ctx, Customer)
                     .createQueryBuilder('customer')
                     .leftJoin('customer.channels', 'channel')
                     .where('channel.id = :channelId', { channelId: ctx.channelId })
-                    .andWhere('customer.emailAddress = :emailAddress', { emailAddress: input.emailAddress })
+                    .andWhere('customer.phoneNumber = :phoneNumber', { phoneNumber: input.phoneNumber })
                     .andWhere('customer.id != :customerId', { customerId: input.id })
                     .andWhere('customer.deletedAt is null')
                     .getOne();
@@ -355,9 +371,9 @@ export class CustomerService {
                 }
 
                 if (customer.user) {
-                    const existingUserWithEmailAddress = await this.userService.getUserByEmailAddress(
+                    const existingUserWithEmailAddress = await this.userService.getUserByIdentifier(
                         ctx,
-                        input.emailAddress,
+                        input.phoneNumber,
                     );
 
                     if (
@@ -367,7 +383,7 @@ export class CustomerService {
                         return new EmailAddressConflictAdminError();
                     }
 
-                    await this.userService.changeNativeIdentifier(ctx, customer.user.id, input.emailAddress);
+                    await this.userService.changeNativeIdentifier(ctx, customer.user.id, input.phoneNumber);
                 }
             }
         }
@@ -404,7 +420,7 @@ export class CustomerService {
                 return new MissingPasswordError();
             }
         }
-        let user = await this.userService.getUserByEmailAddress(ctx, input.emailAddress);
+        let user = await this.userService.getUserByIdentifier(ctx, input.phoneNumber);
         const hasNativeAuthMethod = !!user?.authenticationMethods.find(
             m => m instanceof NativeAuthenticationMethod,
         );
@@ -412,12 +428,13 @@ export class CustomerService {
             if (hasNativeAuthMethod) {
                 // If the user has already been verified and has already
                 // registered with the native authentication strategy, do nothing.
-                return { success: true };
+                // return { success: true };
+                return new EmailAddressConflictError();
             }
         }
         const customFields: CustomCustomerFields = (input as any).customFields;
-        if (customFields?.referralCode) {
-            const referringUser = await this.getCustomerByPhoneNumber(ctx, customFields.referralCode);
+        if (customFields?.referredCode) {
+            const referringUser = await this.getCustomerByReferralCode(ctx, customFields.referredCode);
             if (referringUser) {
                 customFields.referredBy = referringUser.id.toString();
                 customFields.isReferralCompleted = false;
@@ -428,7 +445,7 @@ export class CustomerService {
             title: input.title || '',
             firstName: input.firstName || '',
             lastName: input.lastName || '',
-            phoneNumber: input.phoneNumber || '',
+            phoneNumber: input.phoneNumber,
             ...(customFields ? { customFields } : {}),
         });
         if (isGraphQlErrorResult(customer)) {
@@ -445,7 +462,7 @@ export class CustomerService {
         if (!user) {
             const customerUser = await this.userService.createCustomerUser(
                 ctx,
-                input.emailAddress,
+                input.phoneNumber,
                 input.password || undefined,
             );
             if (isGraphQlErrorResult(customerUser)) {
@@ -458,7 +475,7 @@ export class CustomerService {
             const addAuthenticationResult = await this.userService.addNativeAuthenticationMethod(
                 ctx,
                 user,
-                input.emailAddress,
+                input.phoneNumber,
                 input.password || undefined,
             );
             if (isGraphQlErrorResult(addAuthenticationResult)) {
@@ -468,7 +485,7 @@ export class CustomerService {
             }
         }
         if (!user.verified) {
-            user = await this.userService.setVerificationToken(ctx, user);
+            await this.userService.setVerificationToken(ctx, user);
         }
 
         customer.user = user;
@@ -494,14 +511,27 @@ export class CustomerService {
      * Refreshes a stale email address verification token by generating a new one and
      * publishing a {@link AccountRegistrationEvent}.
      */
-    async refreshVerificationToken(ctx: RequestContext, emailAddress: string): Promise<void> {
-        const user = await this.userService.getUserByEmailAddress(ctx, emailAddress);
+    async refreshVerificationToken(
+        ctx: RequestContext,
+        phoneNumber: string,
+    ): Promise<void | OTPRequestTimeoutError> {
+        const user = await this.userService.getUserByIdentifier(ctx, phoneNumber);
         if (user && !user.verified) {
-            await this.userService.setVerificationToken(ctx, user);
+            const output = await this.userService.setVerificationToken(ctx, user);
+            if (isGraphQlErrorResult(output)) {
+                return output;
+            }
             this.eventBus.publish(new AccountRegistrationEvent(ctx, user));
         }
     }
-
+    async getCustomerByPhoneNumber(ctx: RequestContext, phoneNumber?: string): Promise<Customer | undefined> {
+        return this.connection.getRepository(ctx, Customer).findOne({
+            where: {
+                phoneNumber,
+                deletedAt: null,
+            },
+        });
+    }
     /**
      * @description
      * Given a valid verification token which has been published in an {@link AccountRegistrationEvent}, this
@@ -510,9 +540,15 @@ export class CustomerService {
     async verifyCustomerEmailAddress(
         ctx: RequestContext,
         verificationToken: string,
+        phoneNumber: string,
         password?: string,
     ): Promise<ErrorResultUnion<VerifyCustomerAccountResult, Customer>> {
-        const result = await this.userService.verifyUserByToken(ctx, verificationToken, password);
+        const result = await this.userService.verifyUserByToken(
+            ctx,
+            verificationToken,
+            phoneNumber,
+            password,
+        );
         if (isGraphQlErrorResult(result)) {
             return result;
         }
@@ -541,9 +577,15 @@ export class CustomerService {
      * Publishes a new {@link PasswordResetEvent} for the given email address. This event creates
      * a token which can be used in the `resetPassword()` method.
      */
-    async requestPasswordReset(ctx: RequestContext, emailAddress: string): Promise<void> {
-        const user = await this.userService.setPasswordResetToken(ctx, emailAddress);
+    async requestPasswordReset(
+        ctx: RequestContext,
+        phoneNumber: string,
+    ): Promise<void | OTPRequestTimeoutError> {
+        const user = await this.userService.setPasswordResetToken(ctx, phoneNumber);
         if (user) {
+            if (isGraphQlErrorResult(user)) {
+                return user;
+            }
             this.eventBus.publish(new PasswordResetEvent(ctx, user));
             const customer = await this.findOneByUserId(ctx, user.id);
             if (!customer) {
@@ -565,12 +607,18 @@ export class CustomerService {
      */
     async resetPassword(
         ctx: RequestContext,
+        phoneNumber: string,
         passwordResetToken: string,
         password: string,
     ): Promise<
         User | PasswordResetTokenExpiredError | PasswordResetTokenInvalidError | PasswordValidationError
     > {
-        const result = await this.userService.resetPasswordByToken(ctx, passwordResetToken, password);
+        const result = await this.userService.resetPasswordByToken(
+            ctx,
+            phoneNumber,
+            passwordResetToken,
+            password,
+        );
         if (isGraphQlErrorResult(result)) {
             return result;
         }
@@ -599,7 +647,7 @@ export class CustomerService {
         userId: ID,
         newEmailAddress: string,
     ): Promise<boolean | EmailAddressConflictError> {
-        const userWithConflictingIdentifier = await this.userService.getUserByEmailAddress(
+        const userWithConflictingIdentifier = await this.userService.getUserByIdentifier(
             ctx,
             newEmailAddress,
         );

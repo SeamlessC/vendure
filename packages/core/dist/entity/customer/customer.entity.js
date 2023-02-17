@@ -48,7 +48,7 @@ __decorate([
     __metadata("design:type", String)
 ], Customer.prototype, "lastName", void 0);
 __decorate([
-    typeorm_1.Column({ nullable: true }),
+    typeorm_1.Column({ unique: true }),
     __metadata("design:type", String)
 ], Customer.prototype, "phoneNumber", void 0);
 __decorate([
