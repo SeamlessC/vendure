@@ -16,6 +16,7 @@ import {
 import { defaultEmailHandlers, EmailPlugin } from '@vendure/email-plugin';
 import path from 'path';
 import { ConnectionOptions } from 'typeorm';
+import { GoogleStoragePlugin, GoogleStorageStrategy } from 'vendure-plugin-google-storage-assets';
 
 import { CustomerChannelsPlugin } from './customer-channels/cutomer-channels.module';
 import { nanoid } from './nanoid';
@@ -387,9 +388,32 @@ export const devConfig: VendureConfig = {
         CustomerChannelsPlugin,
         RestPlugin,
         AssetServerPlugin.init({
+            storageStrategyFactory: () =>
+                new GoogleStorageStrategy({
+                    bucketName: 'crepe-runner-app-assets',
+                    /**
+                     * Use to pre-generate thumbnail sized images.
+                     * Thumbnails are available on product.featured_asset.thumbnail via GraphQL
+                     */
+                    thumbnails: {
+                        width: 250,
+                        height: 250,
+                    },
+                    /**
+                     * You can set this to 'false' to make the Vendure admin ui also consume images directly
+                     * from the Google Cloud Storage CDN,
+                     * instead of via the Vendure asset server
+                     */
+                    useAssetServerForAdminUi: false,
+                }),
             route: 'assets',
-            assetUploadDir: path.join(__dirname, 'assets'),
+            assetUploadDir: '/tmp/vendure/assets',
         }),
+        GoogleStoragePlugin,
+        // AssetServerPlugin.init({
+        //     route: 'assets',
+        //     assetUploadDir: path.join(__dirname, 'assets'),
+        // }),
         DefaultSearchPlugin.init({ bufferUpdates: true, indexStockStatus: false }),
         // BullMQJobQueuePlugin.init({}),
         DefaultJobQueuePlugin.init({}),
@@ -412,6 +436,7 @@ export const devConfig: VendureConfig = {
             //         pass: 'Vikumvltra31415x',
             //     },
             // },
+
             devMode: true,
             route: 'mailbox',
             // handlers: defaultEmailHandlers,
