@@ -686,9 +686,27 @@ let OrderService = class OrderService {
      * Transitions the Order to the given state.
      */
     async transitionToState(ctx, orderId, state) {
+        var _a, _b;
         // console.log(ctx, orderId, state);
         const order = await this.getOrderOrThrow(ctx, orderId);
         // check if this is the transition after which the loyalty points should apply
+        if (state === 'Processing') {
+            await this.createFulfillment(ctx, {
+                handler: {
+                    code: 'manual-fulfillment',
+                    arguments: [
+                        {
+                            name: 'method',
+                            value: (_b = (_a = order.shippingLines[0].shippingMethod) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : 'default',
+                        },
+                    ],
+                },
+                lines: order.lines.map(line => ({
+                    orderLineId: line.id,
+                    quantity: line.quantity,
+                })),
+            });
+        }
         if (order.customer &&
             !order.customer.customFields.isReferralCompleted &&
             state === 'Completed' &&
@@ -726,7 +744,7 @@ let OrderService = class OrderService {
         order.payments = await this.getOrderPayments(ctx, orderId);
         const fromState = order.state;
         try {
-            await this.orderStateMachine.transition(ctx, order, state);
+            await this.orderStateMachine.transition(ctx, order, state, (await this.getOrderFulfillments(ctx, order)).map(fulfillment => fulfillment.id));
         }
         catch (e) {
             console.log(e);

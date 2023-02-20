@@ -904,6 +904,24 @@ export class OrderService {
         // console.log(ctx, orderId, state);
         const order = await this.getOrderOrThrow(ctx, orderId);
         // check if this is the transition after which the loyalty points should apply
+        if (state === 'Processing') {
+            await this.createFulfillment(ctx, {
+                handler: {
+                    code: 'manual-fulfillment',
+                    arguments: [
+                        {
+                            name: 'method',
+                            value: order.shippingLines[0].shippingMethod?.name ?? 'default',
+                        },
+                    ],
+                },
+                lines: order.lines.map(line => ({
+                    orderLineId: line.id,
+                    quantity: line.quantity,
+                })),
+            });
+        }
+
         if (
             order.customer &&
             !order.customer.customFields.isReferralCompleted &&
@@ -948,7 +966,12 @@ export class OrderService {
         order.payments = await this.getOrderPayments(ctx, orderId);
         const fromState = order.state;
         try {
-            await this.orderStateMachine.transition(ctx, order, state);
+            await this.orderStateMachine.transition(
+                ctx,
+                order,
+                state,
+                (await this.getOrderFulfillments(ctx, order)).map(fulfillment => fulfillment.id),
+            );
         } catch (e: any) {
             console.log(e);
             const transitionError = ctx.translate(e.message, { fromState, toState: state });

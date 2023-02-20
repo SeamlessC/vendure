@@ -67,6 +67,18 @@ export const devConfig: VendureConfig = {
     customFields: {
         Channel: [
             {
+                name: 'isShopActive',
+                type: 'boolean',
+                defaultValue: false,
+                public: false,
+                label: [
+                    {
+                        languageCode: LanguageCode.en,
+                        value: 'Shop is Active',
+                    },
+                ],
+            },
+            {
                 name: 'openingTime',
                 type: 'datetime',
                 public: true,
@@ -80,6 +92,21 @@ export const devConfig: VendureConfig = {
                     component: 'time-form-input',
                 },
             },
+            {
+                name: 'defaultOpeningTime',
+                type: 'datetime',
+                public: true,
+                label: [
+                    {
+                        languageCode: LanguageCode.en,
+                        value: 'Opening Time',
+                    },
+                ],
+                ui: {
+                    component: 'time-form-input',
+                },
+            },
+
             {
                 name: 'isOpen',
                 type: 'boolean',

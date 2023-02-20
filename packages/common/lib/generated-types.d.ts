@@ -362,6 +362,8 @@ export declare type Channel = Node & {
 export declare type ChannelCustomFields = {
     __typename?: 'ChannelCustomFields';
     openingTime?: Maybe<Scalars['DateTime']>;
+    defaultOpeningTime?: Maybe<Scalars['DateTime']>;
+    isShopActive?: Maybe<Scalars['Boolean']>;
     isOpen?: Maybe<Scalars['Boolean']>;
     processingTime?: Maybe<Scalars['Int']>;
     latitude?: Maybe<Scalars['Float']>;
@@ -629,6 +631,8 @@ export declare type CreateAssetInput = {
 export declare type CreateAssetResult = Asset | MimeTypeError;
 export declare type CreateChannelCustomFieldsInput = {
     openingTime?: Maybe<Scalars['DateTime']>;
+    defaultOpeningTime?: Maybe<Scalars['DateTime']>;
+    isShopActive?: Maybe<Scalars['Boolean']>;
     isOpen?: Maybe<Scalars['Boolean']>;
     processingTime?: Maybe<Scalars['Int']>;
     latitude?: Maybe<Scalars['Float']>;
@@ -4802,6 +4806,8 @@ export declare type UpdateAssetInput = {
 };
 export declare type UpdateChannelCustomFieldsInput = {
     openingTime?: Maybe<Scalars['DateTime']>;
+    defaultOpeningTime?: Maybe<Scalars['DateTime']>;
+    isShopActive?: Maybe<Scalars['Boolean']>;
     isOpen?: Maybe<Scalars['Boolean']>;
     processingTime?: Maybe<Scalars['Int']>;
     latitude?: Maybe<Scalars['Float']>;

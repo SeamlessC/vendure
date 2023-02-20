@@ -30,6 +30,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MollieService = void 0;
 const api_client_1 = __importStar(require("@mollie/api-client"));
@@ -207,10 +208,7 @@ let MollieService = class MollieService {
 MollieService = __decorate([
     common_1.Injectable(),
     __param(1, common_1.Inject(constants_1.PLUGIN_INIT_OPTIONS)),
-    __metadata("design:paramtypes", [core_1.PaymentMethodService, Object, core_1.ActiveOrderService,
-        core_1.OrderService,
-        core_1.ChannelService,
-        core_1.EntityHydrator])
+    __metadata("design:paramtypes", [typeof (_a = typeof core_1.PaymentMethodService !== "undefined" && core_1.PaymentMethodService) === "function" ? _a : Object, Object, typeof (_b = typeof core_1.ActiveOrderService !== "undefined" && core_1.ActiveOrderService) === "function" ? _b : Object, typeof (_c = typeof core_1.OrderService !== "undefined" && core_1.OrderService) === "function" ? _c : Object, typeof (_d = typeof core_1.ChannelService !== "undefined" && core_1.ChannelService) === "function" ? _d : Object, typeof (_e = typeof core_1.EntityHydrator !== "undefined" && core_1.EntityHydrator) === "function" ? _e : Object])
 ], MollieService);
 exports.MollieService = MollieService;
 //# sourceMappingURL=mollie.service.js.map

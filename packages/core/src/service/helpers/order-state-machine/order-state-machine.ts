@@ -12,12 +12,14 @@ import { validateTransitionDefinition } from '../../../common/finite-state-machi
 import { awaitPromiseOrObservable } from '../../../common/utils';
 import { ConfigService } from '../../../config/config.service';
 import { TransactionalConnection } from '../../../connection/transactional-connection';
+import { Fulfillment } from '../../../entity';
 import { OrderModification } from '../../../entity/order-modification/order-modification.entity';
 import { Order } from '../../../entity/order/order.entity';
 import { Payment } from '../../../entity/payment/payment.entity';
 import { ProductVariant } from '../../../entity/product-variant/product-variant.entity';
 import { OrderPlacedEvent } from '../../../event-bus/events/order-placed-event';
 import { EventBus } from '../../../event-bus/index';
+import { FulfillmentService } from '../../services/fulfillment.service';
 import { HistoryService } from '../../services/history.service';
 import { PromotionService } from '../../services/promotion.service';
 import { StockMovementService } from '../../services/stock-movement.service';
@@ -42,6 +44,7 @@ export class OrderStateMachine {
         private connection: TransactionalConnection,
         private configService: ConfigService,
         private stockMovementService: StockMovementService,
+        private fulfillmentService: FulfillmentService,
         private historyService: HistoryService,
         private promotionService: PromotionService,
         private eventBus: EventBus,
@@ -62,9 +65,9 @@ export class OrderStateMachine {
         return fsm.getNextStates();
     }
 
-    async transition(ctx: RequestContext, order: Order, state: OrderState) {
+    async transition(ctx: RequestContext, order: Order, state: OrderState, fulfillmentIds?: ID[]) {
         const fsm = new FSM(this.config, order.state);
-        await fsm.transitionTo(state, { ctx, order });
+        await fsm.transitionTo(state, { ctx, order, fulfillmentIds });
         order.state = fsm.currentState;
     }
 
@@ -131,7 +134,7 @@ export class OrderStateMachine {
      * Specific business logic to be executed after Order state transition completes.
      */
     private async onTransitionEnd(fromState: OrderState, toState: OrderState, data: OrderTransitionData) {
-        const { ctx, order } = data;
+        const { ctx, order, fulfillmentIds } = data;
         const { stockAllocationStrategy, orderPlacedStrategy } = this.configService.orderOptions;
         if (order.active) {
             const shouldSetAsPlaced = orderPlacedStrategy.shouldSetAsPlaced(ctx, fromState, toState, order);
@@ -150,7 +153,21 @@ export class OrderStateMachine {
         if (shouldAllocateStock) {
             await this.stockMovementService.createAllocationsForOrder(ctx, order);
         }
+
+        if (toState === 'ReadyForPickup' || toState === 'Delivering') {
+            fulfillmentIds?.map(
+                async id => await this.fulfillmentService.transitionToState(ctx, id, 'Shipped'),
+            );
+        }
+
+        if (toState === 'Completed') {
+            fulfillmentIds?.map(
+                async id => await this.fulfillmentService.transitionToState(ctx, id, 'Delivered'),
+            );
+        }
+
         if (toState === 'Cancelled') {
+            await this.fulfillmentService.transitionToState(ctx, order.id, 'Cancelled');
             order.active = false;
         }
         await this.historyService.createHistoryEntryForOrder({

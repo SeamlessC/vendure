@@ -21,7 +21,10 @@ class CustomerChannelsResolver {
                     pricesIncludeTax: true,
                 } as unknown as Channel;
             })
-            .filter(value => value.code !== '__default_channel__');
+            .filter(
+                value =>
+                    value.code !== '__default_channel__' && (value.customFields.isShopActive as any) !== 0,
+            );
         return strippedChannels;
     }
 }

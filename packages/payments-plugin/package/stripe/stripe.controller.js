@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StripeController = void 0;
 const common_1 = require("@nestjs/common");
@@ -117,10 +118,7 @@ __decorate([
 ], StripeController.prototype, "webhook", null);
 StripeController = __decorate([
     common_1.Controller('payments'),
-    __metadata("design:paramtypes", [core_1.TransactionalConnection,
-        core_1.OrderService,
-        stripe_service_1.StripeService,
-        core_1.RequestContextService])
+    __metadata("design:paramtypes", [typeof (_a = typeof core_1.TransactionalConnection !== "undefined" && core_1.TransactionalConnection) === "function" ? _a : Object, typeof (_b = typeof core_1.OrderService !== "undefined" && core_1.OrderService) === "function" ? _b : Object, stripe_service_1.StripeService, typeof (_c = typeof core_1.RequestContextService !== "undefined" && core_1.RequestContextService) === "function" ? _c : Object])
 ], StripeController);
 exports.StripeController = StripeController;
 //# sourceMappingURL=stripe.controller.js.map

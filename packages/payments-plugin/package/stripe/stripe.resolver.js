@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StripeResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -35,12 +36,12 @@ __decorate([
     core_1.Allow(core_1.Permission.Owner),
     __param(0, core_1.Ctx()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [core_1.RequestContext]),
+    __metadata("design:paramtypes", [typeof (_a = typeof core_1.RequestContext !== "undefined" && core_1.RequestContext) === "function" ? _a : Object]),
     __metadata("design:returntype", Promise)
 ], StripeResolver.prototype, "createStripePaymentIntent", null);
 StripeResolver = __decorate([
     graphql_1.Resolver(),
-    __metadata("design:paramtypes", [stripe_service_1.StripeService, core_1.ActiveOrderService])
+    __metadata("design:paramtypes", [stripe_service_1.StripeService, typeof (_b = typeof core_1.ActiveOrderService !== "undefined" && core_1.ActiveOrderService) === "function" ? _b : Object])
 ], StripeResolver);
 exports.StripeResolver = StripeResolver;
 //# sourceMappingURL=stripe.resolver.js.map

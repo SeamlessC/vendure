@@ -15,9 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VerificationTokenGenerator = void 0;
 const common_1 = require("@nestjs/common");
 const axios_1 = __importDefault(require("axios"));
-const secrets_1 = require("./secrets");
 const common_2 = require("../../../common");
 const config_service_1 = require("../../../config/config.service");
+const secrets_1 = require("./secrets");
 /**
  * This class is responsible for generating and verifying the tokens issued when new accounts are registered
  * or when a password reset is requested.

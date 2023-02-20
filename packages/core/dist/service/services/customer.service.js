@@ -150,7 +150,7 @@ let CustomerService = class CustomerService {
         return this.connection.getRepository(ctx, customer_entity_1.Customer).findOne({
             where: {
                 customFields: {
-                    referralCode: referralCode,
+                    referralCode,
                 },
                 deletedAt: null,
             },

@@ -12,6 +12,7 @@ export declare class CustomChannelFields {
     location: string;
     name: string;
     isOpen: boolean;
+    isShopActive: boolean;
 }
 export declare class CustomCollectionFields {}
 export declare class CustomCollectionFieldsTranslation {}

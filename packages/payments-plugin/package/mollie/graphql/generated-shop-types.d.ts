@@ -160,6 +160,7 @@ export declare type Channel = Node & {
 export declare type ChannelCustomFields = {
     __typename?: 'ChannelCustomFields';
     openingTime?: Maybe<Scalars['DateTime']>;
+    defaultOpeningTime?: Maybe<Scalars['DateTime']>;
     isOpen?: Maybe<Scalars['Boolean']>;
     processingTime?: Maybe<Scalars['Int']>;
     latitude?: Maybe<Scalars['Float']>;

@@ -195,6 +195,7 @@ export declare type Asset = Node & {
     source: Scalars['String'];
     preview: Scalars['String'];
     focalPoint?: Maybe<Coordinate>;
+    thumbnail: Scalars['String'];
     customFields?: Maybe<Scalars['JSON']>;
 };
 export declare type AssetFilterParameter = {
@@ -209,6 +210,7 @@ export declare type AssetFilterParameter = {
     height?: Maybe<NumberOperators>;
     source?: Maybe<StringOperators>;
     preview?: Maybe<StringOperators>;
+    thumbnail?: Maybe<StringOperators>;
 };
 export declare type AssetList = PaginatedList & {
     __typename?: 'AssetList';
@@ -240,6 +242,7 @@ export declare type AssetSortParameter = {
     height?: Maybe<SortOrder>;
     source?: Maybe<SortOrder>;
     preview?: Maybe<SortOrder>;
+    thumbnail?: Maybe<SortOrder>;
 };
 export declare enum AssetType {
     IMAGE = 'IMAGE',
@@ -362,6 +365,8 @@ export declare type Channel = Node & {
 export declare type ChannelCustomFields = {
     __typename?: 'ChannelCustomFields';
     openingTime?: Maybe<Scalars['DateTime']>;
+    defaultOpeningTime?: Maybe<Scalars['DateTime']>;
+    isShopActive?: Maybe<Scalars['Boolean']>;
     isOpen?: Maybe<Scalars['Boolean']>;
     processingTime?: Maybe<Scalars['Int']>;
     latitude?: Maybe<Scalars['Float']>;
@@ -629,6 +634,8 @@ export declare type CreateAssetInput = {
 export declare type CreateAssetResult = Asset | MimeTypeError;
 export declare type CreateChannelCustomFieldsInput = {
     openingTime?: Maybe<Scalars['DateTime']>;
+    defaultOpeningTime?: Maybe<Scalars['DateTime']>;
+    isShopActive?: Maybe<Scalars['Boolean']>;
     isOpen?: Maybe<Scalars['Boolean']>;
     processingTime?: Maybe<Scalars['Int']>;
     latitude?: Maybe<Scalars['Float']>;
@@ -4859,6 +4866,8 @@ export declare type UpdateAssetInput = {
 };
 export declare type UpdateChannelCustomFieldsInput = {
     openingTime?: Maybe<Scalars['DateTime']>;
+    defaultOpeningTime?: Maybe<Scalars['DateTime']>;
+    isShopActive?: Maybe<Scalars['Boolean']>;
     isOpen?: Maybe<Scalars['Boolean']>;
     processingTime?: Maybe<Scalars['Int']>;
     latitude?: Maybe<Scalars['Float']>;

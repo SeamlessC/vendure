@@ -1,3 +1,5 @@
+import { ID } from '@vendure/common/lib/shared-types';
+
 import { RequestContext } from '../../../api/common/request-context';
 import { Transitions } from '../../../common/finite-state-machine/types';
 import { Order } from '../../../entity/order/order.entity';
@@ -7,8 +9,7 @@ import { Order } from '../../../entity/order/order.entity';
  *
  * @docsCategory orders
  */
-export interface CustomOrderStates {
-}
+export interface CustomOrderStates {}
 /**
  * @description
  * These are the default states of the Order process. They can be augmented and
@@ -16,9 +17,23 @@ export interface CustomOrderStates {
  *
  * @docsCategory orders
  */
-export declare type OrderState = 'Created' | 'Draft' | 'AddingItems' | 'ArrangingPayment' | 'PaymentAuthorized' | 'PaymentSettled' | 'Processing' | 'ReadyForPickup' | 'Completed' | 'Modifying' | 'Delivering' | 'Cancelled' | keyof CustomOrderStates;
+export declare type OrderState =
+    | 'Created'
+    | 'Draft'
+    | 'AddingItems'
+    | 'ArrangingPayment'
+    | 'PaymentAuthorized'
+    | 'PaymentSettled'
+    | 'Processing'
+    | 'ReadyForPickup'
+    | 'Completed'
+    | 'Modifying'
+    | 'Delivering'
+    | 'Cancelled'
+    | keyof CustomOrderStates;
 export declare const orderStateTransitions: Transitions<OrderState>;
 export interface OrderTransitionData {
     ctx: RequestContext;
     order: Order;
+    fulfillmentIds?: ID[];
 }

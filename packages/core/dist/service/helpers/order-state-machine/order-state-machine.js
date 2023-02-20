@@ -25,16 +25,18 @@ const order_entity_1 = require("../../../entity/order/order.entity");
 const product_variant_entity_1 = require("../../../entity/product-variant/product-variant.entity");
 const order_placed_event_1 = require("../../../event-bus/events/order-placed-event");
 const index_1 = require("../../../event-bus/index");
+const fulfillment_service_1 = require("../../services/fulfillment.service");
 const history_service_1 = require("../../services/history.service");
 const promotion_service_1 = require("../../services/promotion.service");
 const stock_movement_service_1 = require("../../services/stock-movement.service");
 const order_utils_1 = require("../utils/order-utils");
 const order_state_1 = require("./order-state");
 let OrderStateMachine = class OrderStateMachine {
-    constructor(connection, configService, stockMovementService, historyService, promotionService, eventBus) {
+    constructor(connection, configService, stockMovementService, fulfillmentService, historyService, promotionService, eventBus) {
         this.connection = connection;
         this.configService = configService;
         this.stockMovementService = stockMovementService;
+        this.fulfillmentService = fulfillmentService;
         this.historyService = historyService;
         this.promotionService = promotionService;
         this.eventBus = eventBus;
@@ -51,9 +53,9 @@ let OrderStateMachine = class OrderStateMachine {
         const fsm = new finite_state_machine_1.FSM(this.config, order.state);
         return fsm.getNextStates();
     }
-    async transition(ctx, order, state) {
+    async transition(ctx, order, state, fulfillmentIds) {
         const fsm = new finite_state_machine_1.FSM(this.config, order.state);
-        await fsm.transitionTo(state, { ctx, order });
+        await fsm.transitionTo(state, { ctx, order, fulfillmentIds });
         order.state = fsm.currentState;
     }
     async findOrderWithFulfillments(ctx, id) {
@@ -117,7 +119,7 @@ let OrderStateMachine = class OrderStateMachine {
      * Specific business logic to be executed after Order state transition completes.
      */
     async onTransitionEnd(fromState, toState, data) {
-        const { ctx, order } = data;
+        const { ctx, order, fulfillmentIds } = data;
         const { stockAllocationStrategy, orderPlacedStrategy } = this.configService.orderOptions;
         if (order.active) {
             const shouldSetAsPlaced = orderPlacedStrategy.shouldSetAsPlaced(ctx, fromState, toState, order);
@@ -131,7 +133,14 @@ let OrderStateMachine = class OrderStateMachine {
         if (shouldAllocateStock) {
             await this.stockMovementService.createAllocationsForOrder(ctx, order);
         }
+        if (toState === 'ReadyForPickup' || toState === 'Delivering') {
+            fulfillmentIds === null || fulfillmentIds === void 0 ? void 0 : fulfillmentIds.map(async (id) => await this.fulfillmentService.transitionToState(ctx, id, 'Shipped'));
+        }
+        if (toState === 'Completed') {
+            fulfillmentIds === null || fulfillmentIds === void 0 ? void 0 : fulfillmentIds.map(async (id) => await this.fulfillmentService.transitionToState(ctx, id, 'Delivered'));
+        }
         if (toState === 'Cancelled') {
+            await this.fulfillmentService.transitionToState(ctx, order.id, 'Cancelled');
             order.active = false;
         }
         await this.historyService.createHistoryEntryForOrder({
@@ -189,6 +198,7 @@ OrderStateMachine = __decorate([
     __metadata("design:paramtypes", [transactional_connection_1.TransactionalConnection,
         config_service_1.ConfigService,
         stock_movement_service_1.StockMovementService,
+        fulfillment_service_1.FulfillmentService,
         history_service_1.HistoryService,
         promotion_service_1.PromotionService,
         index_1.EventBus])

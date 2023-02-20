@@ -93,6 +93,7 @@ export type Asset = Node & {
     source: Scalars['String'];
     preview: Scalars['String'];
     focalPoint?: Maybe<Coordinate>;
+    thumbnail: Scalars['String'];
     customFields?: Maybe<Scalars['JSON']>;
 };
 
@@ -158,6 +159,7 @@ export type Channel = Node & {
 
 export type ChannelCustomFields = {
     openingTime?: Maybe<Scalars['DateTime']>;
+    defaultOpeningTime?: Maybe<Scalars['DateTime']>;
     isOpen?: Maybe<Scalars['Boolean']>;
     processingTime?: Maybe<Scalars['Int']>;
     latitude?: Maybe<Scalars['Float']>;

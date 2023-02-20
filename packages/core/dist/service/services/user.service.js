@@ -43,7 +43,7 @@ let UserService = class UserService {
     async getUserByIdentifier(ctx, identifier) {
         return this.connection.getRepository(ctx, user_entity_1.User).findOne({
             where: {
-                identifier: identifier,
+                identifier,
                 deletedAt: null,
             },
             relations: ['roles', 'roles.channels', 'authenticationMethods'],

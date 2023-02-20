@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MollieResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
@@ -41,7 +42,7 @@ __decorate([
     __param(0, core_1.Ctx()),
     __param(1, graphql_1.Args('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [core_1.RequestContext, Object]),
+    __metadata("design:paramtypes", [typeof (_a = typeof core_1.RequestContext !== "undefined" && core_1.RequestContext) === "function" ? _a : Object, Object]),
     __metadata("design:returntype", Promise)
 ], MollieResolver.prototype, "createMolliePaymentIntent", null);
 __decorate([
@@ -57,7 +58,7 @@ __decorate([
     __param(0, core_1.Ctx()),
     __param(1, graphql_1.Args('input')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [core_1.RequestContext, Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof core_1.RequestContext !== "undefined" && core_1.RequestContext) === "function" ? _b : Object, Object]),
     __metadata("design:returntype", Promise)
 ], MollieResolver.prototype, "molliePaymentMethods", null);
 MollieResolver = __decorate([

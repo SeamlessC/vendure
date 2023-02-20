@@ -1,3 +1,5 @@
+import { ID } from '@vendure/common/lib/shared-types';
+
 import { RequestContext } from '../../../api/common/request-context';
 import { Transitions } from '../../../common/finite-state-machine/types';
 import { Order } from '../../../entity/order/order.entity';
@@ -75,4 +77,5 @@ export const orderStateTransitions: Transitions<OrderState> = {
 export interface OrderTransitionData {
     ctx: RequestContext;
     order: Order;
+    fulfillmentIds?: ID[];
 }
