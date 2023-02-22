@@ -23,7 +23,7 @@ __decorate([
     __metadata("design:type", String)
 ], JobRecord.prototype, "queueName", void 0);
 __decorate([
-    typeorm_1.Column('longtext', { nullable: true }),
+    typeorm_1.Column('simple-json', { nullable: true }),
     __metadata("design:type", Object)
 ], JobRecord.prototype, "data", void 0);
 __decorate([

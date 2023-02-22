@@ -91,9 +91,6 @@ export class JobQueue<Data extends JobData<Data> = {}> {
      * ```
      */
     async add(data: Data, options?: Pick<JobConfig<Data>, 'retries'>): Promise<SubscribableJob<Data>> {
-        console.log(JSON.stringify(data));
-        console.log(JSON.stringify(options));
-
         const job = new Job<any>({
             data,
             queueName: this.options.name,

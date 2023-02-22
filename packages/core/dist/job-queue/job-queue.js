@@ -80,8 +80,6 @@ class JobQueue {
      */
     async add(data, options) {
         var _a;
-        console.log(JSON.stringify(data));
-        console.log(JSON.stringify(options));
         const job = new job_1.Job({
             data,
             queueName: this.options.name,
