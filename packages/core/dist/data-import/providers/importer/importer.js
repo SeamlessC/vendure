@@ -162,7 +162,7 @@ let Importer = class Importer {
                 customFields,
             });
             const optionsMap = {};
-            let optionsMapping = [];
+            const optionsMapping = [];
             for (const [optionGroup, optionGroupIndex] of product.optionGroups.map((group, i) => [group, i])) {
                 const optionGroupMainTranslation = this.getTranslationByCodeOrFirst(optionGroup.translations, ctx.languageCode);
                 const code = normalize_string_1.normalizeString(`${productMainTranslation.name}-${optionGroupMainTranslation.name}`, '-');

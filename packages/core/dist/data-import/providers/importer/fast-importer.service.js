@@ -241,7 +241,7 @@ let FastImporterService = class FastImporterService {
         return this.connection.getRepository(ctx, entity_1.Role).save(role);
     }
     async createRoles(ctx, input, channels) {
-        let targetChannels = channels;
+        const targetChannels = channels;
         const role = await this.createRoleForChannels(ctx, input, targetChannels);
         return role;
     }
