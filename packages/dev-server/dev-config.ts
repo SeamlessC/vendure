@@ -32,6 +32,7 @@ export const devConfig: VendureConfig = {
         shopListQueryLimit: 1000,
         port: API_PORT,
         adminApiPath: ADMIN_API_PATH,
+
         adminApiPlayground: {
             settings: {
                 'request.credentials': 'include',
@@ -44,8 +45,10 @@ export const devConfig: VendureConfig = {
                 'request.credentials': 'include',
             } as any,
         },
+
         shopApiDebug: true,
     },
+
     authOptions: {
         disableAuth: false,
         tokenMethod: ['bearer', 'cookie'] as const,

@@ -89,7 +89,7 @@ export class CoreModule {
     }
 
     private initUiTitle() {
-        const title = getAppConfig().brand || 'VendureAdmin';
+        const title = getAppConfig().brand || 'Crepe Runner Backend';
 
         this.titleService.setTitle(title);
     }

@@ -15723,7 +15723,7 @@
             this.i18nService.setAvailableLanguages(availableLanguages || [defaultLanguage]);
         };
         CoreModule.prototype.initUiTitle = function () {
-            var title = getAppConfig().brand || 'VendureAdmin';
+            var title = getAppConfig().brand || 'Crepe Runner Backend';
             this.titleService.setTitle(title);
         };
         return CoreModule;

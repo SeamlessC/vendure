@@ -17340,7 +17340,7 @@ class CoreModule {
         this.i18nService.setAvailableLanguages(availableLanguages || [defaultLanguage]);
     }
     initUiTitle() {
-        const title = getAppConfig().brand || 'VendureAdmin';
+        const title = getAppConfig().brand || 'Crepe Runner Backend';
         this.titleService.setTitle(title);
     }
 }
