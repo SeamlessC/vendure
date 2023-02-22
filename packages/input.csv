@@ -1,0 +1,6 @@
+name,slug,description,assets,facets,optionGroups,optionValues,taxCategory,trackInventory,sku,price,stockAtHand,variantAssets,variantFacets
+Nutella Banana Crepe,nutella-banana-crepe,,Nutella-Banana-Crepe.JPG,main:sweet-classic-crepes|sweet-classic-crepes:classic-nutella-crepes,branch,mount-lavinia,Zero,true,MOUA1,720,30,,
+,,,,,branch,maharagama,Zero,true,MAHA1,720,30,,
+,,,,,branch,kollupitiya,Zero,true,KOLA1,720,30,,
+,,,,,branch,bambalapitiya,Zero,true,BAMA1,720,30,,
+,,,,,branch,one-galle-face,Zero,true,OGFA1,720,30,,

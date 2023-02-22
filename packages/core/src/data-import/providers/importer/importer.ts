@@ -25,7 +25,7 @@ import { FastImporterService } from './fast-importer.service';
 export interface ImportProgress extends ImportInfo {
     currentProduct: string;
 }
-
+export type OptionMapT = Array<{ id: ID; code: string }>;
 export type OnProgressFn = (progess: ImportProgress) => void;
 
 /**
@@ -194,6 +194,7 @@ export class Importer {
             });
 
             const optionsMap: { [optionName: string]: ID } = {};
+            const optionsMapping: OptionMapT = [];
             for (const [optionGroup, optionGroupIndex] of product.optionGroups.map(
                 (group, i) => [group, i] as const,
             )) {
@@ -228,11 +229,13 @@ export class Importer {
                             };
                         }),
                     });
+                    optionsMapping.push({ id: createdOptionId, code: value });
                     optionsMap[`${optionGroupIndex}_${value}`] = createdOptionId;
                 }
                 await this.fastImporter.addOptionGroupToProduct(createdProductId, groupId);
             }
 
+            const channelList = await this.channelService.findAll(ctx);
             for (const variant of variants) {
                 const variantMainTranslation = this.getTranslationByCodeOrFirst(
                     variant.translations,
@@ -254,37 +257,41 @@ export class Importer {
                 const optionIds = variantMainTranslation.optionValues.map(
                     (v, index) => optionsMap[`${index}_${v}`],
                 );
-                const createdVariant = await this.fastImporter.createProductVariant({
-                    productId: createdProductId,
-                    facetValueIds,
-                    featuredAssetId: variantAssets.length ? variantAssets[0].id : undefined,
-                    assetIds: variantAssets.map(a => a.id),
-                    sku: variant.sku,
-                    taxCategoryId: this.getMatchingTaxCategoryId(variant.taxCategory, taxCategories),
-                    stockOnHand: variant.stockOnHand,
-                    trackInventory: variant.trackInventory,
-                    optionIds,
-                    translations: variant.translations.map(translation => {
-                        const productTranslation = product.translations.find(
-                            t => t.languageCode === translation.languageCode,
-                        );
-                        if (!productTranslation) {
-                            throw new InternalServerError(
-                                `No translation '${translation.languageCode}' for product with slug '${productMainTranslation.slug}'`,
+                const createdVariant = await this.fastImporter.createProductVariant(
+                    {
+                        productId: createdProductId,
+                        facetValueIds,
+                        featuredAssetId: variantAssets.length ? variantAssets[0].id : undefined,
+                        assetIds: variantAssets.map(a => a.id),
+                        sku: variant.sku,
+                        taxCategoryId: this.getMatchingTaxCategoryId(variant.taxCategory, taxCategories),
+                        stockOnHand: variant.stockOnHand,
+                        trackInventory: variant.trackInventory,
+                        optionIds,
+                        translations: variant.translations.map(translation => {
+                            const productTranslation = product.translations.find(
+                                t => t.languageCode === translation.languageCode,
                             );
-                        }
-                        return {
-                            languageCode: translation.languageCode,
-                            name: [productTranslation.name, ...translation.optionValues].join(' '),
-                            customFields: this.processCustomFieldValues(
-                                translation.customFields,
-                                this.configService.customFields.ProductVariant,
-                            ),
-                        };
-                    }),
-                    price: Math.round(variant.price * 100),
-                    customFields: variantCustomFields,
-                });
+                            if (!productTranslation) {
+                                throw new InternalServerError(
+                                    `No translation '${translation.languageCode}' for product with slug '${productMainTranslation.slug}'`,
+                                );
+                            }
+                            return {
+                                languageCode: translation.languageCode,
+                                name: [productTranslation.name, ...translation.optionValues].join(' '),
+                                customFields: this.processCustomFieldValues(
+                                    translation.customFields,
+                                    this.configService.customFields.ProductVariant,
+                                ),
+                            };
+                        }),
+                        price: Math.round(variant.price * 100),
+                        customFields: variantCustomFields,
+                    },
+                    channelList,
+                    optionsMapping,
+                );
             }
             imported++;
             onProgress({

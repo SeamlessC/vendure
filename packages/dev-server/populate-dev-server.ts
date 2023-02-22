@@ -29,21 +29,21 @@ if (require.main === module) {
             customFields: {},
         }),
     );
-    clearAllTables(populateConfig, true)
-        .then(() =>
-            populate(
-                () =>
-                    bootstrap(populateConfig).then(async app => {
-                        await app.get(JobQueueService).start();
-                        return app;
-                    }),
-                initialData,
-                path.join(__dirname, '../create/assets/products.csv'),
-            ),
-        )
+    // clearAllTables(populateConfig, true)
+    // .then(() =>
+    populate(
+        () =>
+            bootstrap(populateConfig).then(async app => {
+                await app.get(JobQueueService).start();
+                return app;
+            }),
+        initialData,
+        path.join(__dirname, './all_input.csv'),
+    )
+        // )
         .then(async app => {
             console.log('populating customers...');
-            await populateCustomers(app, 10, message => Logger.error(message));
+            // await populateCustomers(app, 10, message => Logger.error(message));
             return app.close();
         })
         .then(

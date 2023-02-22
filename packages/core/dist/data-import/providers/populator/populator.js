@@ -268,6 +268,9 @@ let Populator = class Populator {
         }
     }
     async populatePaymentMethods(ctx, paymentMethods) {
+        if (paymentMethods == undefined || paymentMethods.length == 0) {
+            throw new Error(`No payment methods found`);
+        }
         for (const method of paymentMethods) {
             await this.paymentMethodService.create(ctx, {
                 name: method.name,

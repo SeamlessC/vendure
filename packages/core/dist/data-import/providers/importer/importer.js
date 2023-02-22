@@ -162,6 +162,7 @@ let Importer = class Importer {
                 customFields,
             });
             const optionsMap = {};
+            let optionsMapping = [];
             for (const [optionGroup, optionGroupIndex] of product.optionGroups.map((group, i) => [group, i])) {
                 const optionGroupMainTranslation = this.getTranslationByCodeOrFirst(optionGroup.translations, ctx.languageCode);
                 const code = normalize_string_1.normalizeString(`${productMainTranslation.name}-${optionGroupMainTranslation.name}`, '-');
@@ -186,10 +187,12 @@ let Importer = class Importer {
                             };
                         }),
                     });
+                    optionsMapping.push({ id: createdOptionId, code: value });
                     optionsMap[`${optionGroupIndex}_${value}`] = createdOptionId;
                 }
                 await this.fastImporter.addOptionGroupToProduct(createdProductId, groupId);
             }
+            const channelList = await this.channelService.findAll(ctx);
             for (const variant of variants) {
                 const variantMainTranslation = this.getTranslationByCodeOrFirst(variant.translations, ctx.languageCode);
                 const createVariantAssets = await this.assetImporter.getAssets(variant.assetPaths);
@@ -226,7 +229,7 @@ let Importer = class Importer {
                     }),
                     price: Math.round(variant.price * 100),
                     customFields: variantCustomFields,
-                });
+                }, channelList, optionsMapping);
             }
             imported++;
             onProgress({

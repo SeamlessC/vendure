@@ -47,9 +47,9 @@ export interface InitialData {
     defaultLanguage: LanguageCode;
     defaultZone: string;
     roles?: RoleDefinition[];
-    countries: CountryDefinition[];
-    taxRates: Array<{ name: string; percentage: number }>;
-    shippingMethods: Array<{ name: string; price: number }>;
-    paymentMethods: Array<{ name: string; handler: ConfigurableOperationInput }>;
-    collections: CollectionDefinition[];
+    countries?: CountryDefinition[];
+    taxRates?: Array<{ name: string; percentage: number }>;
+    shippingMethods?: Array<{ name: string; price: number }>;
+    paymentMethods?: Array<{ name: string; handler: ConfigurableOperationInput }>;
+    collections?: CollectionDefinition[];
 }

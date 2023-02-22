@@ -1,31 +1,54 @@
-import { CreateProductInput, CreateProductOptionGroupInput, CreateProductOptionInput, CreateProductVariantInput } from '@vendure/common/lib/generated-types';
+import {
+    AssignAssetsToChannelInput,
+    AssignProductVariantsToChannelInput,
+    CreateRoleInput,
+} from '@vendure/common/lib/generated-types';
+import {
+    CreateProductInput,
+    CreateProductOptionGroupInput,
+    CreateProductOptionInput,
+    CreateProductVariantInput,
+} from '@vendure/common/lib/generated-types';
 import { ID } from '@vendure/common/lib/shared-types';
+
+import { RequestContext } from '../../../api/common/request-context';
 import { TransactionalConnection } from '../../../connection/transactional-connection';
+import { Asset, Role } from '../../../entity';
 import { Channel } from '../../../entity/channel/channel.entity';
+import { ProductVariant } from '../../../entity/product-variant/product-variant.entity';
 import { TranslatableSaver } from '../../../service/helpers/translatable-saver/translatable-saver';
-import { RequestContextService } from '../../../service/index';
+import {
+    AssetService,
+    ProductVariantService,
+    RequestContextService,
+    RoleService,
+} from '../../../service/index';
 import { ChannelService } from '../../../service/services/channel.service';
 import { StockMovementService } from '../../../service/services/stock-movement.service';
-/**
- * @description
- * A service to import entities into the database. This replaces the regular `create` methods of the service layer with faster
- * versions which skip much of the defensive checks and other DB calls which are not needed when running an import. It also
- * does not publish any events, so e.g. will not trigger search index jobs.
- *
- * In testing, the use of the FastImporterService approximately doubled the speed of bulk imports.
- *
- * @docsCategory import-export
- */
+
+import { OptionMapT } from './importer';
 export declare class FastImporterService {
     private connection;
     private channelService;
     private stockMovementService;
     private translatableSaver;
     private requestContextService;
+    private productVariantService;
+    private roleService;
+    private assetService;
     private defaultChannel;
     private importCtx;
     /** @internal */
-    constructor(connection: TransactionalConnection, channelService: ChannelService, stockMovementService: StockMovementService, translatableSaver: TranslatableSaver, requestContextService: RequestContextService);
+    constructor(
+        connection: TransactionalConnection,
+        channelService: ChannelService,
+        stockMovementService: StockMovementService,
+        translatableSaver: TranslatableSaver,
+        requestContextService: RequestContextService,
+        productVariantService: ProductVariantService,
+        roleService: RoleService,
+        assetService: AssetService,
+    );
     /**
      * @description
      * This should be called prior to any of the import methods, as it establishes the
@@ -38,7 +61,18 @@ export declare class FastImporterService {
     createProduct(input: CreateProductInput): Promise<ID>;
     createProductOptionGroup(input: CreateProductOptionGroupInput): Promise<ID>;
     createProductOption(input: CreateProductOptionInput): Promise<ID>;
+    private createRoleForChannels;
+    createRoles(ctx: RequestContext, input: CreateRoleInput, channels: Channel[]): Promise<Role>;
     addOptionGroupToProduct(productId: ID, optionGroupId: ID): Promise<void>;
-    createProductVariant(input: CreateProductVariantInput): Promise<ID>;
+    assignAssetToChannel(ctx: RequestContext, input: AssignAssetsToChannelInput): Promise<Asset[]>;
+    assignProductVariantToChannels(
+        ctx: RequestContext,
+        input: AssignProductVariantsToChannelInput,
+    ): Promise<Array<import('../../../common').Translated<ProductVariant>>>;
+    createProductVariant(
+        input: CreateProductVariantInput,
+        channelList: Channel[],
+        optionsMap: OptionMapT,
+    ): Promise<ID>;
     private ensureInitialized;
 }

@@ -125,7 +125,7 @@ export async function populateCollections(
     const { Populator, Logger } = await import('@vendure/core');
     const populator = app.get(Populator);
     try {
-        if (initialData.collections.length) {
+        if (initialData.collections !== undefined && initialData.collections.length) {
             await populator.populateCollections(initialData, channel);
             Logger.info(`Created ${initialData.collections.length} Collections`, loggerCtx);
         }

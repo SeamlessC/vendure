@@ -23,7 +23,7 @@ class CustomerChannelsResolver {
             })
             .filter(
                 value =>
-                    value.code !== '__default_channel__' && (value.customFields.isShopActive as any) !== 0,
+                    value.code !== '__default_channel__' && (value.customFields.isShopActive as any) == true,
             );
         return strippedChannels;
     }

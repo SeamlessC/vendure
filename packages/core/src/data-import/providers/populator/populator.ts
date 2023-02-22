@@ -63,21 +63,22 @@ export class Populator {
     async populateInitialData(data: InitialData, channel?: Channel) {
         const ctx = await this.createRequestContext(data, channel);
         let zoneMap: ZoneMap;
+
         try {
-            zoneMap = await this.populateCountries(ctx, data.countries);
+            zoneMap = await this.populateCountries(ctx, data.countries!);
         } catch (e: any) {
             Logger.error(`Could not populate countries`);
             Logger.error(e, 'populator', e.stack);
             throw e;
         }
         try {
-            await this.populateTaxRates(ctx, data.taxRates, zoneMap);
+            await this.populateTaxRates(ctx, data.taxRates!, zoneMap);
         } catch (e: any) {
             Logger.error(`Could not populate tax rates`);
             Logger.error(e, 'populator', e.stack);
         }
         try {
-            await this.populateShippingMethods(ctx, data.shippingMethods);
+            await this.populateShippingMethods(ctx, data.shippingMethods!);
         } catch (e: any) {
             Logger.error(`Could not populate shipping methods`);
             Logger.error(e, 'populator', e.stack);
@@ -112,7 +113,7 @@ export class Populator {
 
         const allFacetValues = await this.facetValueService.findAll(ctx, ctx.languageCode);
         const collectionMap = new Map<string, Collection>();
-        for (const collectionDef of data.collections) {
+        for (const collectionDef of data.collections!) {
             const parent = collectionDef.parentName && collectionMap.get(collectionDef.parentName);
             const parentId = parent ? parent.id.toString() : undefined;
             const { assets } = await this.assetImporter.getAssets(collectionDef.assetPaths || []);
@@ -298,6 +299,9 @@ export class Populator {
     }
 
     private async populatePaymentMethods(ctx: RequestContext, paymentMethods: InitialData['paymentMethods']) {
+        if (paymentMethods == undefined || paymentMethods.length == 0) {
+            throw new Error(`No payment methods found`);
+        }
         for (const method of paymentMethods) {
             await this.paymentMethodService.create(ctx, {
                 name: method.name,

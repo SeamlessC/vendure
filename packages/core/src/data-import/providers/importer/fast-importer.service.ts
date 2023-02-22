@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import {
+    AssignAssetsToChannelInput,
+    AssignProductVariantsToChannelInput,
+    CreateRoleInput,
+    CurrencyCode,
+    LanguageCode,
+    Permission,
+} from '@vendure/common/lib/generated-types';
+import {
     CreateProductInput,
     CreateProductOptionGroupInput,
     CreateProductOptionInput,
@@ -9,7 +17,9 @@ import { ID } from '@vendure/common/lib/shared-types';
 import { unique } from '@vendure/common/lib/unique';
 
 import { RequestContext } from '../../../api/common/request-context';
+import { isGraphQlErrorResult } from '../../../common';
 import { TransactionalConnection } from '../../../connection/transactional-connection';
+import { Asset, Role } from '../../../entity';
 import { Channel } from '../../../entity/channel/channel.entity';
 import { ProductOptionGroupTranslation } from '../../../entity/product-option-group/product-option-group-translation.entity';
 import { ProductOptionGroup } from '../../../entity/product-option-group/product-option-group.entity';
@@ -23,9 +33,27 @@ import { ProductAsset } from '../../../entity/product/product-asset.entity';
 import { ProductTranslation } from '../../../entity/product/product-translation.entity';
 import { Product } from '../../../entity/product/product.entity';
 import { TranslatableSaver } from '../../../service/helpers/translatable-saver/translatable-saver';
-import { RequestContextService } from '../../../service/index';
+import {
+    AssetService,
+    ProductVariantService,
+    RequestContextService,
+    RoleService,
+} from '../../../service/index';
 import { ChannelService } from '../../../service/services/channel.service';
 import { StockMovementService } from '../../../service/services/stock-movement.service';
+
+import { OptionMapT } from './importer';
+function makeid(length: number) {
+    let result = '';
+    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        counter += 1;
+    }
+    return result;
+}
 
 /**
  * @description
@@ -37,6 +65,69 @@ import { StockMovementService } from '../../../service/services/stock-movement.s
  *
  * @docsCategory import-export
  */
+const roles: CreateRoleInput[] = [
+    {
+        code: 'administrator',
+        description: 'Administrator',
+        permissions: [
+            Permission.CreateCatalog,
+            Permission.ReadCatalog,
+            Permission.UpdateCatalog,
+            Permission.DeleteCatalog,
+            Permission.CreateSettings,
+            Permission.ReadSettings,
+            Permission.UpdateSettings,
+            Permission.DeleteSettings,
+            Permission.CreateCustomer,
+            Permission.ReadCustomer,
+            Permission.UpdateCustomer,
+            Permission.DeleteCustomer,
+            Permission.CreateCustomerGroup,
+            Permission.ReadCustomerGroup,
+            Permission.UpdateCustomerGroup,
+            Permission.DeleteCustomerGroup,
+            Permission.CreateOrder,
+            Permission.ReadOrder,
+            Permission.UpdateOrder,
+            Permission.DeleteOrder,
+            Permission.CreateSystem,
+            Permission.ReadSystem,
+            Permission.UpdateSystem,
+            Permission.DeleteSystem,
+        ],
+    },
+    {
+        code: 'order-manager',
+        description: 'Order manager',
+        permissions: [
+            Permission.CreateOrder,
+            Permission.ReadOrder,
+            Permission.UpdateOrder,
+            Permission.DeleteOrder,
+            Permission.ReadCustomer,
+            Permission.ReadPaymentMethod,
+            Permission.ReadShippingMethod,
+            Permission.ReadPromotion,
+            Permission.ReadCountry,
+            Permission.ReadZone,
+        ],
+    },
+    {
+        code: 'inventory-manager',
+        description: 'Inventory manager',
+        permissions: [
+            Permission.CreateCatalog,
+            Permission.ReadCatalog,
+            Permission.UpdateCatalog,
+            Permission.DeleteCatalog,
+            Permission.CreateTag,
+            Permission.ReadTag,
+            Permission.UpdateTag,
+            Permission.DeleteTag,
+            Permission.ReadCustomer,
+        ],
+    },
+];
 @Injectable()
 export class FastImporterService {
     private defaultChannel: Channel;
@@ -49,6 +140,9 @@ export class FastImporterService {
         private stockMovementService: StockMovementService,
         private translatableSaver: TranslatableSaver,
         private requestContextService: RequestContextService,
+        private productVariantService: ProductVariantService,
+        private roleService: RoleService,
+        private assetService: AssetService,
     ) {}
 
     /**
@@ -60,13 +154,63 @@ export class FastImporterService {
      * to that Channel.
      */
     async initialize(channel?: Channel) {
+        // await this.channelService.initChannels();
         this.importCtx = channel
             ? await this.requestContextService.create({
                   apiType: 'admin',
                   channelOrToken: channel,
               })
             : RequestContext.empty();
+        // const channelList = ['mount-lavinia', 'maharagama', 'bambalapitiya', 'kollupitiya', 'one-galle-face'];
+        // const fullChannelList = await Promise.all(
+        //     channelList.map(async code => {
+        //         const result = await this.channelService.create(this.importCtx, {
+        //             code: code,
+        //             currencyCode: CurrencyCode.LKR,
+        //             defaultLanguageCode: LanguageCode.en,
+        //             defaultShippingZoneId: 1,
+        //             pricesIncludeTax: true,
+        //             token: makeid(20),
+        //             defaultTaxZoneId: 1,
+        //         });
+        //         if (isGraphQlErrorResult(result)) {
+        //             return result;
+        //         }
+        //         const superAdminRole = await this.roleService.getSuperAdminRole(this.importCtx);
+        //         const customerRole = await this.roleService.getCustomerRole(this.importCtx);
+        //         await this.roleService.assignRoleToChannel(this.importCtx, superAdminRole.id, result.id);
+        //         await this.roleService.assignRoleToChannel(this.importCtx, customerRole.id, result.id);
+        //         return result;
+        //     }),
+        // );
+
         this.defaultChannel = await this.channelService.getDefaultChannel(this.importCtx);
+        // const outputChannelList = fullChannelList
+        //     .map(value => {
+        //         if (isGraphQlErrorResult(value)) {
+        //             throw new Error('Error in creating channels');
+        //         }
+        //         return value;
+        //     })
+        //     .concat(this.defaultChannel);
+        const outputChannelList = await this.channelService.findAll(this.importCtx);
+        await Promise.all(
+            outputChannelList.map(async channelValue => {
+                await Promise.all(
+                    roles.map(async role => {
+                        const result = await this.createRoles(
+                            this.importCtx,
+                            {
+                                ...role,
+                                code: role.code + '-' + channelValue.code,
+                                description: role.description + ' - ' + channelValue.code,
+                            },
+                            [channelValue],
+                        );
+                    }),
+                );
+            }),
+        );
     }
 
     async createProduct(input: CreateProductInput): Promise<ID> {
@@ -95,7 +239,9 @@ export class FastImporterService {
                         position: i,
                     }),
             );
-            await this.connection.getRepository(this.importCtx, ProductAsset).save(productAssets, { reload: false });
+            await this.connection
+                .getRepository(this.importCtx, ProductAsset)
+                .save(productAssets, { reload: false });
         }
         return product.id;
     }
@@ -123,6 +269,20 @@ export class FastImporterService {
         return option.id;
     }
 
+    private createRoleForChannels(ctx: RequestContext, input: CreateRoleInput, channels: Channel[]) {
+        const role = new Role({
+            code: input.code,
+            description: input.description,
+            permissions: unique([Permission.Authenticated, ...input.permissions]),
+        });
+        role.channels = channels;
+        return this.connection.getRepository(ctx, Role).save(role);
+    }
+    async createRoles(ctx: RequestContext, input: CreateRoleInput, channels: Channel[]): Promise<Role> {
+        const targetChannels: Channel[] = channels;
+        const role = await this.createRoleForChannels(ctx, input, targetChannels);
+        return role;
+    }
     async addOptionGroupToProduct(productId: ID, optionGroupId: ID) {
         this.ensureInitialized();
         await this.connection
@@ -132,8 +292,64 @@ export class FastImporterService {
             .of(productId)
             .add(optionGroupId);
     }
-
-    async createProductVariant(input: CreateProductVariantInput): Promise<ID> {
+    async assignAssetToChannel(ctx: RequestContext, input: AssignAssetsToChannelInput): Promise<Asset[]> {
+        const assets = await this.connection.findByIdsInChannel(
+            ctx,
+            Asset,
+            input.assetIds,
+            ctx.channelId,
+            {},
+        );
+        await Promise.all(
+            assets.map(async asset => {
+                await this.channelService.assignToChannels(ctx, Asset, asset.id, [input.channelId]);
+            }),
+        );
+        return this.connection.findByIdsInChannel(
+            ctx,
+            Asset,
+            assets.map(a => a.id),
+            ctx.channelId,
+            {},
+        );
+    }
+    async assignProductVariantToChannels(ctx: RequestContext, input: AssignProductVariantsToChannelInput) {
+        const variants = await this.connection
+            .getRepository(ctx, ProductVariant)
+            .findByIds(input.productVariantIds, { relations: ['taxCategory', 'assets'] });
+        const priceFactor = input.priceFactor != null ? input.priceFactor : 1;
+        for (const variant of variants) {
+            if (variant.deletedAt) {
+                continue;
+            }
+            await this.productVariantService.applyChannelPriceAndTax(variant, ctx);
+            await this.channelService.assignToChannels(ctx, Product, variant.productId, [input.channelId]);
+            await this.channelService.assignToChannels(ctx, ProductVariant, variant.id, [input.channelId]);
+            const targetChannel = await this.channelService.findOne(ctx, input.channelId);
+            const price = targetChannel?.pricesIncludeTax ? variant.priceWithTax : variant.price;
+            await this.productVariantService.createOrUpdateProductVariantPrice(
+                ctx,
+                variant.id,
+                Math.round(price * priceFactor),
+                input.channelId,
+            );
+            const assetIds = variant.assets?.map(a => a.assetId) || [];
+            await this.assignAssetToChannel(ctx, { channelId: input.channelId, assetIds });
+        }
+        const result = await this.productVariantService.findByIds(
+            ctx,
+            variants.map(v => v.id),
+        );
+        // for (const variant of variants) {
+        //     this.eventBus.publish(new ProductVariantChannelEvent(ctx, variant, input.channelId, 'assigned'));
+        // }
+        return result;
+    }
+    async createProductVariant(
+        input: CreateProductVariantInput,
+        channelList: Channel[],
+        optionsMap: OptionMapT,
+    ): Promise<ID> {
         this.ensureInitialized();
         if (!input.optionIds) {
             input.optionIds = [];
@@ -141,7 +357,8 @@ export class FastImporterService {
         if (input.price == null) {
             input.price = 0;
         }
-
+        const channelCode = optionsMap.filter(option => option.id === input.optionIds![0]);
+        const inputChannelId = channelList.filter(channel => channel.code === channelCode[0].code).pop();
         const inputWithoutPrice = {
             ...input,
         };
@@ -177,7 +394,9 @@ export class FastImporterService {
                         position: i,
                     }),
             );
-            await this.connection.getRepository(this.importCtx, ProductVariantAsset).save(variantAssets, { reload: false });
+            await this.connection
+                .getRepository(this.importCtx, ProductVariantAsset)
+                .save(variantAssets, { reload: false });
         }
         if (input.stockOnHand != null && input.stockOnHand !== 0) {
             await this.stockMovementService.adjustProductVariantStock(
@@ -194,9 +413,16 @@ export class FastImporterService {
                 channelId,
             });
             variantPrice.variant = createdVariant;
-            await this.connection.getRepository(this.importCtx, ProductVariantPrice).save(variantPrice, { reload: false });
+            await this.connection
+                .getRepository(this.importCtx, ProductVariantPrice)
+                .save(variantPrice, { reload: false });
         }
-
+        const output = await this.assignProductVariantToChannels(this.importCtx, {
+            channelId: inputChannelId!.id,
+            productVariantIds: [createdVariant.id],
+            priceFactor: 1,
+        });
+        // console.log(output);
         return createdVariant.id;
     }
 

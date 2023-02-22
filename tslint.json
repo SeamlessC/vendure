@@ -7,6 +7,7 @@
         "object-literal-sort-keys": false
     },
     "rules": {
+        "triple-equals":false,
         "no-console": false,
         "interface-over-type-literal": false,
         "quotemark": [true, "single"],

@@ -1,10 +1,14 @@
 import { ConfigurableOperationInput, LanguageCode, Permission } from '@vendure/common/lib/generated-types';
 import { ID } from '@vendure/common/lib/shared-types';
+
 import { Zone } from '../entity/zone/zone.entity';
-export declare type ZoneMap = Map<string, {
-    entity: Zone;
-    members: ID[];
-}>;
+export declare type ZoneMap = Map<
+    string,
+    {
+        entity: Zone;
+        members: ID[];
+    }
+>;
 export interface CountryDefinition {
     code: string;
     name: string;
@@ -42,18 +46,18 @@ export interface InitialData {
     defaultLanguage: LanguageCode;
     defaultZone: string;
     roles?: RoleDefinition[];
-    countries: CountryDefinition[];
-    taxRates: Array<{
+    countries?: CountryDefinition[];
+    taxRates?: Array<{
         name: string;
         percentage: number;
     }>;
-    shippingMethods: Array<{
+    shippingMethods?: Array<{
         name: string;
         price: number;
     }>;
-    paymentMethods: Array<{
+    paymentMethods?: Array<{
         name: string;
         handler: ConfigurableOperationInput;
     }>;
-    collections: CollectionDefinition[];
+    collections?: CollectionDefinition[];
 }
