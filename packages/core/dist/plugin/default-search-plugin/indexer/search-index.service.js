@@ -27,6 +27,7 @@ let SearchIndexService = class SearchIndexService {
         this.updateIndexQueue = await this.jobService.createQueue({
             name: 'update-search-index',
             process: job => {
+                console.log(JSON.stringify(job));
                 const data = job.data;
                 switch (data.type) {
                     case 'reindex':
