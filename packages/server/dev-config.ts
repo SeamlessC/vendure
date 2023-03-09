@@ -521,11 +521,11 @@ function getDbConfig(): ConnectionOptions {
                 synchronize: false,
                 logging: ['error', 'warn'],
                 type: 'mysql',
-                host: 'localhost',
+                host: '34.131.237.48',
                 port: 3306,
                 username: 'root',
                 password: 'root',
-                database: 'vendure-dev',
+                database: 'vendure-test',
             };
     }
 }
