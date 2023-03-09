@@ -1,5 +1,5 @@
 {
-    "name": "dev-server",
+    "name": "server",
     "version": "1.8.1",
     "main": "index.js",
     "license": "MIT",

@@ -36,6 +36,7 @@ let ShopProductsResolver = class ShopProductsResolver {
         this.facetService = facetService;
     }
     async products(ctx, args, relations) {
+        console.log('products');
         const options = Object.assign(Object.assign({}, args.options), { filter: Object.assign(Object.assign({}, (args.options && args.options.filter)), { enabled: { eq: true } }) });
         if (ctx.channel.customFields.isOpen === false) {
             return [];
