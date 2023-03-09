@@ -410,7 +410,7 @@ export const devConfig: VendureConfig = {
             },
         ],
     },
-    logger: new DefaultLogger({ level: LogLevel.Verbose }),
+    // logger: new DefaultLogger({ level: LogLevel.Verbose }),
     importExportOptions: {
         importAssetsDir: path.join(__dirname, 'import-assets'),
     },
