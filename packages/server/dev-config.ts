@@ -38,7 +38,7 @@ export const devConfig: VendureConfig = {
                 'request.credentials': 'include',
             } as any,
         },
-        adminApiDebug: true,
+        adminApiDebug: false,
         shopApiPath: SHOP_API_PATH,
         shopApiPlayground: {
             settings: {
@@ -46,7 +46,7 @@ export const devConfig: VendureConfig = {
             } as any,
         },
 
-        shopApiDebug: true,
+        shopApiDebug: false,
     },
 
     authOptions: {
@@ -518,7 +518,8 @@ function getDbConfig(): ConnectionOptions {
         default:
             console.log('Using mysql connection');
             return {
-                synchronize: true,
+                synchronize: false,
+                logging: ['error', 'warn'],
                 type: 'mysql',
                 host: 'localhost',
                 port: 3306,
