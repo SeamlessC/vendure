@@ -496,14 +496,25 @@ function getDbConfig() {
         default:
             console.log('Using mysql connection');
             return {
+                // config for production
+                // synchronize: false,
+                // logging: ['error', 'warn'],
+                // type: 'mysql',
+                // host: '34.131.237.48',
+                // port: 3306,
+                // username: 'root',
+                // password: 'root',
+                // database: 'vendure-test',
+                //
+                // test config
                 synchronize: false,
                 logging: ['error', 'warn'],
                 type: 'mysql',
-                host: '34.131.237.48',
+                host: 'localhost',
                 port: 3306,
                 username: 'root',
                 password: 'root',
-                database: 'vendure-test',
+                database: 'vendure-dev',
             };
     }
 }
