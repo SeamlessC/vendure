@@ -53,7 +53,7 @@ export class ProductResolver {
         @Ctx() ctx: RequestContext,
         @Args() args: QueryProductsArgs,
         @Relations({ entity: Product, omit: ['variants', 'assets'] }) relations: RelationPaths<Product>,
-    ): Promise<PaginatedList<Translated<Product>>> {
+    ): Promise<PaginatedList<Product>> {
         return this.productService.findAll(ctx, args.options || undefined, relations);
     }
 

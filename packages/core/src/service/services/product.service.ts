@@ -78,7 +78,7 @@ export class ProductService {
         ctx: RequestContext,
         options?: ListQueryOptions<Product>,
         relations?: RelationPaths<Product>,
-    ): Promise<PaginatedList<Translated<Product>>> {
+    ): Promise<PaginatedList<Product>> {
         return this.listQueryBuilder
             .build(Product, options, {
                 relations: relations || this.relations,
@@ -89,11 +89,11 @@ export class ProductService {
             .getManyAndCount()
             .then(async ([products, totalItems]) => {
                 console.log('first');
-                const items = products.map(product =>
-                    this.translator.translate(product, ctx, ['facetValues', ['facetValues', 'facet']]),
-                );
+                // const items = products.map(product =>
+                //     this.translator.translate(product, ctx, ['facetValues', ['facetValues', 'facet']]),
+                // );
                 return {
-                    items,
+                    items: products,
                     totalItems,
                 };
             });

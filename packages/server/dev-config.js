@@ -391,7 +391,7 @@ exports.devConfig = {
             },
         ],
     },
-    logger: new core_1.DefaultLogger({ level: core_1.LogLevel.Verbose }),
+    // logger: new DefaultLogger({ level: LogLevel.Verbose }),
     importExportOptions: {
         importAssetsDir: path_1.default.join(__dirname, 'import-assets'),
     },
