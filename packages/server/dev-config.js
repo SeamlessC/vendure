@@ -43,6 +43,7 @@ exports.devConfig = {
         disableAuth: false,
         tokenMethod: ['bearer', 'cookie'],
         requireVerification: true,
+        verificationTokenDuration: '1y',
         customPermissions: [],
         cookieOptions: {
             secret: 'abc',
