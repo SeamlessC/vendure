@@ -2,10 +2,9 @@
 /// <reference path="../core/typings.d.ts" />
 import { bootstrap, defaultConfig, JobQueueService, Logger, mergeConfig } from '@vendure/core';
 import { populate } from '@vendure/core/cli';
+import { initialData } from '@vendure/core/mock-data/data-sources/initial-data';
 import { clearAllTables, populateCustomers } from '@vendure/testing';
 import path from 'path';
-
-import { initialData } from '../core/mock-data/data-sources/initial-data';
 
 import { devConfig } from './dev-config';
 
@@ -24,7 +23,7 @@ if (require.main === module) {
                 requireVerification: false,
             },
             importExportOptions: {
-                importAssetsDir: path.join(__dirname, '../core/mock-data/assets'),
+                importAssetsDir: path.join(__dirname, '../../core/mock-data/assets'),
             },
             customFields: {},
         }),
