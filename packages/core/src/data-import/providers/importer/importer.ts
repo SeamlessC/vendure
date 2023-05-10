@@ -156,150 +156,155 @@ export class Importer {
         onProgress: OnProgressFn,
     ): Promise<string[]> {
         let errors: string[] = [];
-        let imported = 0;
-        const languageCode = ctx.languageCode;
-        const taxCategories = await this.taxCategoryService.findAll(ctx);
-        await this.fastImporter.initialize(ctx.channel);
-        for (const { product, variants } of rows) {
-            const productMainTranslation = this.getTranslationByCodeOrFirst(
-                product.translations,
-                ctx.languageCode,
-            );
-            const createProductAssets = await this.assetImporter.getAssets(product.assetPaths, ctx);
-            const productAssets = createProductAssets.assets;
-            if (createProductAssets.errors.length) {
-                errors = errors.concat(createProductAssets.errors);
-            }
-            const customFields = this.processCustomFieldValues(
-                product.translations[0].customFields,
-                this.configService.customFields.Product,
-            );
-            const createdProductId = await this.fastImporter.createProduct({
-                featuredAssetId: productAssets.length ? productAssets[0].id : undefined,
-                assetIds: productAssets.map(a => a.id),
-                facetValueIds: await this.getFacetValueIds(ctx, product.facets, ctx.languageCode),
-                translations: product.translations.map(translation => {
-                    return {
-                        languageCode: translation.languageCode,
-                        name: translation.name,
-                        description: translation.description,
-                        slug: translation.slug,
-                        customFields: this.processCustomFieldValues(
-                            translation.customFields,
-                            this.configService.customFields.Product,
-                        ),
-                    };
-                }),
-                customFields,
-            });
-
-            const optionsMap: { [optionName: string]: ID } = {};
-            const optionsMapping: OptionMapT = [];
-            for (const [optionGroup, optionGroupIndex] of product.optionGroups.map(
-                (group, i) => [group, i] as const,
-            )) {
-                const optionGroupMainTranslation = this.getTranslationByCodeOrFirst(
-                    optionGroup.translations,
+        try {
+            let imported = 0;
+            const languageCode = ctx.languageCode;
+            const taxCategories = await this.taxCategoryService.findAll(ctx);
+            const output = await this.fastImporter.initialize(ctx.channel);
+            await this.fastImporter.createChannels();
+            for (const { product, variants } of rows) {
+                const productMainTranslation = this.getTranslationByCodeOrFirst(
+                    product.translations,
                     ctx.languageCode,
                 );
-                const code = normalizeString(
-                    `${productMainTranslation.name}-${optionGroupMainTranslation.name}`,
-                    '-',
+                const createProductAssets = await this.assetImporter.getAssets(product.assetPaths, ctx);
+                const productAssets = createProductAssets.assets;
+                if (createProductAssets.errors.length) {
+                    errors = errors.concat(createProductAssets.errors);
+                }
+                const customFields = this.processCustomFieldValues(
+                    product.translations[0].customFields,
+                    this.configService.customFields.Product,
                 );
-                const groupId = await this.fastImporter.createProductOptionGroup({
-                    code,
-                    options: optionGroupMainTranslation.values.map(name => ({} as any)),
-                    translations: optionGroup.translations.map(translation => {
+                const createdProductId = await this.fastImporter.createProduct({
+                    featuredAssetId: productAssets.length ? productAssets[0].id : undefined,
+                    assetIds: productAssets.map(a => a.id),
+                    facetValueIds: await this.getFacetValueIds(ctx, product.facets, ctx.languageCode),
+                    translations: product.translations.map(translation => {
                         return {
                             languageCode: translation.languageCode,
                             name: translation.name,
+                            description: translation.description,
+                            slug: translation.slug,
+                            customFields: this.processCustomFieldValues(
+                                translation.customFields,
+                                this.configService.customFields.Product,
+                            ),
                         };
                     }),
+                    customFields,
                 });
-                for (const [optionIndex, value] of optionGroupMainTranslation.values.map(
-                    (val, index) => [index, val] as const,
+
+                const optionsMap: { [optionName: string]: ID } = {};
+                const optionsMapping: OptionMapT = [];
+                for (const [optionGroup, optionGroupIndex] of product.optionGroups.map(
+                    (group, i) => [group, i] as const,
                 )) {
-                    const createdOptionId = await this.fastImporter.createProductOption({
-                        productOptionGroupId: groupId,
-                        code: normalizeString(value, '-'),
+                    const optionGroupMainTranslation = this.getTranslationByCodeOrFirst(
+                        optionGroup.translations,
+                        ctx.languageCode,
+                    );
+                    const code = normalizeString(
+                        `${productMainTranslation.name}-${optionGroupMainTranslation.name}`,
+                        '-',
+                    );
+                    const groupId = await this.fastImporter.createProductOptionGroup({
+                        code,
+                        options: optionGroupMainTranslation.values.map(name => ({} as any)),
                         translations: optionGroup.translations.map(translation => {
                             return {
                                 languageCode: translation.languageCode,
-                                name: translation.values[optionIndex],
+                                name: translation.name,
                             };
                         }),
                     });
-                    optionsMapping.push({ id: createdOptionId, code: value });
-                    optionsMap[`${optionGroupIndex}_${value}`] = createdOptionId;
+                    for (const [optionIndex, value] of optionGroupMainTranslation.values.map(
+                        (val, index) => [index, val] as const,
+                    )) {
+                        const createdOptionId = await this.fastImporter.createProductOption({
+                            productOptionGroupId: groupId,
+                            code: normalizeString(value, '-'),
+                            translations: optionGroup.translations.map(translation => {
+                                return {
+                                    languageCode: translation.languageCode,
+                                    name: translation.values[optionIndex],
+                                };
+                            }),
+                        });
+                        optionsMapping.push({ id: createdOptionId, code: value });
+                        optionsMap[`${optionGroupIndex}_${value}`] = createdOptionId;
+                    }
+                    await this.fastImporter.addOptionGroupToProduct(createdProductId, groupId);
                 }
-                await this.fastImporter.addOptionGroupToProduct(createdProductId, groupId);
-            }
 
-            const channelList = await this.channelService.findAll(ctx);
-            for (const variant of variants) {
-                const variantMainTranslation = this.getTranslationByCodeOrFirst(
-                    variant.translations,
-                    ctx.languageCode,
-                );
-                const createVariantAssets = await this.assetImporter.getAssets(variant.assetPaths);
-                const variantAssets = createVariantAssets.assets;
-                if (createVariantAssets.errors.length) {
-                    errors = errors.concat(createVariantAssets.errors);
-                }
-                let facetValueIds: ID[] = [];
-                if (0 < variant.facets.length) {
-                    facetValueIds = await this.getFacetValueIds(ctx, variant.facets, languageCode);
-                }
-                const variantCustomFields = this.processCustomFieldValues(
-                    variantMainTranslation.customFields,
-                    this.configService.customFields.ProductVariant,
-                );
-                const optionIds = variantMainTranslation.optionValues.map(
-                    (v, index) => optionsMap[`${index}_${v}`],
-                );
-                const createdVariant = await this.fastImporter.createProductVariant(
-                    {
-                        productId: createdProductId,
-                        facetValueIds,
-                        featuredAssetId: variantAssets.length ? variantAssets[0].id : undefined,
-                        assetIds: variantAssets.map(a => a.id),
-                        sku: variant.sku,
-                        taxCategoryId: this.getMatchingTaxCategoryId(variant.taxCategory, taxCategories),
-                        stockOnHand: variant.stockOnHand,
-                        trackInventory: variant.trackInventory,
-                        optionIds,
-                        translations: variant.translations.map(translation => {
-                            const productTranslation = product.translations.find(
-                                t => t.languageCode === translation.languageCode,
-                            );
-                            if (!productTranslation) {
-                                throw new InternalServerError(
-                                    `No translation '${translation.languageCode}' for product with slug '${productMainTranslation.slug}'`,
+                const channelList = await this.channelService.findAll(ctx);
+                for (const variant of variants) {
+                    const variantMainTranslation = this.getTranslationByCodeOrFirst(
+                        variant.translations,
+                        ctx.languageCode,
+                    );
+                    const createVariantAssets = await this.assetImporter.getAssets(variant.assetPaths);
+                    const variantAssets = createVariantAssets.assets;
+                    if (createVariantAssets.errors.length) {
+                        errors = errors.concat(createVariantAssets.errors);
+                    }
+                    let facetValueIds: ID[] = [];
+                    if (0 < variant.facets.length) {
+                        facetValueIds = await this.getFacetValueIds(ctx, variant.facets, languageCode);
+                    }
+                    const variantCustomFields = this.processCustomFieldValues(
+                        variantMainTranslation.customFields,
+                        this.configService.customFields.ProductVariant,
+                    );
+                    const optionIds = variantMainTranslation.optionValues.map(
+                        (v, index) => optionsMap[`${index}_${v}`],
+                    );
+                    const createdVariant = await this.fastImporter.createProductVariant(
+                        {
+                            productId: createdProductId,
+                            facetValueIds,
+                            featuredAssetId: variantAssets.length ? variantAssets[0].id : undefined,
+                            assetIds: variantAssets.map(a => a.id),
+                            sku: variant.sku,
+                            taxCategoryId: this.getMatchingTaxCategoryId(variant.taxCategory, taxCategories),
+                            stockOnHand: variant.stockOnHand,
+                            trackInventory: variant.trackInventory,
+                            optionIds,
+                            translations: variant.translations.map(translation => {
+                                const productTranslation = product.translations.find(
+                                    t => t.languageCode === translation.languageCode,
                                 );
-                            }
-                            return {
-                                languageCode: translation.languageCode,
-                                name: [productTranslation.name, ...translation.optionValues].join(' '),
-                                customFields: this.processCustomFieldValues(
-                                    translation.customFields,
-                                    this.configService.customFields.ProductVariant,
-                                ),
-                            };
-                        }),
-                        price: Math.round(variant.price * 100),
-                        customFields: variantCustomFields,
-                    },
-                    channelList,
-                    optionsMapping,
-                );
+                                if (!productTranslation) {
+                                    throw new InternalServerError(
+                                        `No translation '${translation.languageCode}' for product with slug '${productMainTranslation.slug}'`,
+                                    );
+                                }
+                                return {
+                                    languageCode: translation.languageCode,
+                                    name: [productTranslation.name, ...translation.optionValues].join(' '),
+                                    customFields: this.processCustomFieldValues(
+                                        translation.customFields,
+                                        this.configService.customFields.ProductVariant,
+                                    ),
+                                };
+                            }),
+                            price: Math.round(variant.price * 100),
+                            customFields: variantCustomFields,
+                        },
+                        channelList,
+                        optionsMapping,
+                    );
+                }
+                imported++;
+                onProgress({
+                    processed: 0,
+                    imported,
+                    errors,
+                    currentProduct: productMainTranslation.name,
+                });
             }
-            imported++;
-            onProgress({
-                processed: 0,
-                imported,
-                errors,
-                currentProduct: productMainTranslation.name,
-            });
+        } catch (e) {
+            console.log(e);
         }
         return errors;
     }

@@ -16,7 +16,6 @@ import {
 import { defaultEmailHandlers, EmailPlugin } from '@vendure/email-plugin';
 import path from 'path';
 import { ConnectionOptions } from 'typeorm';
-import { GoogleStoragePlugin, GoogleStorageStrategy } from 'vendure-plugin-google-storage-assets';
 
 import { CustomerChannelsPlugin } from './customer-channels/cutomer-channels.module';
 import { nanoid } from './nanoid';
@@ -86,6 +85,7 @@ export const devConfig: VendureConfig = {
                 name: 'openingTime',
                 type: 'datetime',
                 public: true,
+
                 label: [
                     {
                         languageCode: LanguageCode.en,
@@ -110,7 +110,20 @@ export const devConfig: VendureConfig = {
                     component: 'time-form-input',
                 },
             },
-
+            {
+                name: 'defaultClosingTime',
+                type: 'datetime',
+                public: true,
+                label: [
+                    {
+                        languageCode: LanguageCode.en,
+                        value: 'Opening Time',
+                    },
+                ],
+                ui: {
+                    component: 'time-form-input',
+                },
+            },
             {
                 name: 'isOpen',
                 type: 'boolean',
@@ -411,7 +424,7 @@ export const devConfig: VendureConfig = {
             },
         ],
     },
-    // logger: new DefaultLogger({ level: LogLevel.Verbose }),
+    logger: new DefaultLogger({ level: LogLevel.Verbose }),
     importExportOptions: {
         importAssetsDir: path.join(__dirname, 'import-assets'),
     },
@@ -419,28 +432,10 @@ export const devConfig: VendureConfig = {
         CustomerChannelsPlugin,
         RestPlugin,
         AssetServerPlugin.init({
-            storageStrategyFactory: () =>
-                new GoogleStorageStrategy({
-                    bucketName: 'crepe-runner-app-assets',
-                    /**
-                     * Use to pre-generate thumbnail sized images.
-                     * Thumbnails are available on product.featured_asset.thumbnail via GraphQL
-                     */
-                    thumbnails: {
-                        width: 250,
-                        height: 250,
-                    },
-                    /**
-                     * You can set this to 'false' to make the Vendure admin ui also consume images directly
-                     * from the Google Cloud Storage CDN,
-                     * instead of via the Vendure asset server
-                     */
-                    useAssetServerForAdminUi: false,
-                }),
             route: 'assets',
-            assetUploadDir: '/tmp/vendure/assets',
+
+            assetUploadDir: path.join(__dirname, '../assets'),
         }),
-        GoogleStoragePlugin,
         // AssetServerPlugin.init({
         //     route: 'assets',
         //     assetUploadDir: path.join(__dirname, 'assets'),
@@ -487,7 +482,7 @@ export const devConfig: VendureConfig = {
 };
 
 function getDbConfig(): ConnectionOptions {
-    const dbType = process.env.DB || 'mysql';
+    const dbType = process.env.DB || 'postgres';
     switch (dbType) {
         case 'postgres':
             console.log('Using postgres connection');
@@ -496,9 +491,9 @@ function getDbConfig(): ConnectionOptions {
                 type: 'postgres',
                 host: '127.0.0.1',
                 port: 5432,
-                username: 'admin',
-                password: 'secret',
-                database: 'vendure-dev',
+                username: 'postgres',
+                password: 'root',
+                database: 'vendure_dev',
             };
         case 'sqlite':
             console.log('Using sqlite connection');
@@ -520,24 +515,24 @@ function getDbConfig(): ConnectionOptions {
             console.log('Using mysql connection');
             return {
                 // config for production
-                // synchronize: false,
-                // logging: ['error', 'warn'],
-                // type: 'mysql',
-                // host: '34.131.237.48',
-                // port: 3306,
-                // username: 'root',
-                // password: 'root',
-                // database: 'vendure-test',
-                //
-                // test config
-                synchronize: false,
+                synchronize: true,
                 logging: ['error', 'warn'],
                 type: 'mysql',
-                host: 'localhost',
+                host: '34.131.237.48',
                 port: 3306,
                 username: 'root',
                 password: 'root',
-                database: 'vendure-dev',
+                database: 'vendure-test',
+
+                // test config
+                // synchronize: true,
+                // logging: ['error', 'warn'],
+                // type: 'mysql',
+                // host: 'localhost',
+                // port: 3306,
+                // username: 'root',
+                // password: 'root',
+                // database: 'vendure-dev',
             };
     }
 }

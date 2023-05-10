@@ -1,28 +1,5 @@
-import {
-    ActiveOrderResult,
-    AddPaymentToOrderResult,
-    ApplyCouponCodeResult,
-    MutationAddItemToOrderArgs,
-    MutationAddPaymentToOrderArgs,
-    MutationAdjustOrderLineArgs,
-    MutationApplyCouponCodeArgs,
-    MutationRemoveOrderLineArgs,
-    MutationSetOrderBillingAddressArgs,
-    MutationSetOrderCustomFieldsArgs,
-    MutationSetOrderShippingAddressArgs,
-    MutationSetOrderShippingMethodArgs,
-    MutationTransitionOrderToStateArgs,
-    PaymentMethodQuote,
-    QueryOrderArgs,
-    QueryOrderByCodeArgs,
-    RemoveOrderItemsResult,
-    SetOrderShippingMethodResult,
-    ShippingMethodQuote,
-    TransitionOrderToStateResult,
-    UpdateOrderItemsResult,
-} from '@vendure/common/lib/generated-shop-types';
+import { ActiveOrderResult, AddPaymentToOrderResult, ApplyCouponCodeResult, MutationAddItemToOrderArgs, MutationAddPaymentToOrderArgs, MutationAdjustOrderLineArgs, MutationApplyCouponCodeArgs, MutationRemoveOrderLineArgs, MutationSetOrderBillingAddressArgs, MutationSetOrderCustomFieldsArgs, MutationSetOrderShippingAddressArgs, MutationSetOrderShippingMethodArgs, MutationTransitionOrderToStateArgs, PaymentMethodQuote, QueryOrderArgs, QueryOrderByCodeArgs, RemoveOrderItemsResult, SetOrderShippingMethodResult, ShippingMethodQuote, TransitionOrderToStateResult, UpdateOrderItemsResult } from '@vendure/common/lib/generated-shop-types';
 import { QueryCountriesArgs } from '@vendure/common/lib/generated-types';
-
 import { ErrorResultUnion } from '../../../common/error/error-result';
 import { Translated } from '../../../common/types/locale-types';
 import { ConfigService } from '../../../config';
@@ -41,69 +18,24 @@ export declare class ShopOrderResolver {
     private countryService;
     private activeOrderService;
     private configService;
-    constructor(
-        orderService: OrderService,
-        customerService: CustomerService,
-        sessionService: SessionService,
-        countryService: CountryService,
-        activeOrderService: ActiveOrderService,
-        configService: ConfigService,
-    );
+    constructor(orderService: OrderService, customerService: CustomerService, sessionService: SessionService, countryService: CountryService, activeOrderService: ActiveOrderService, configService: ConfigService);
     availableCountries(ctx: RequestContext, args: QueryCountriesArgs): Promise<Array<Translated<Country>>>;
-    order(
-        ctx: RequestContext,
-        args: QueryOrderArgs,
-        relations: RelationPaths<Order>,
-    ): Promise<Order | undefined>;
+    order(ctx: RequestContext, args: QueryOrderArgs, relations: RelationPaths<Order>): Promise<Order | undefined>;
     activeOrder(ctx: RequestContext, relations: RelationPaths<Order>): Promise<Order | undefined>;
-    orderByCode(
-        ctx: RequestContext,
-        args: QueryOrderByCodeArgs,
-        relations: RelationPaths<Order>,
-    ): Promise<Order | undefined>;
-    setOrderShippingAddress(
-        ctx: RequestContext,
-        args: MutationSetOrderShippingAddressArgs,
-    ): Promise<ErrorResultUnion<ActiveOrderResult, Order>>;
-    setOrderBillingAddress(
-        ctx: RequestContext,
-        args: MutationSetOrderBillingAddressArgs,
-    ): Promise<ErrorResultUnion<ActiveOrderResult, Order>>;
+    orderByCode(ctx: RequestContext, args: QueryOrderByCodeArgs, relations: RelationPaths<Order>): Promise<Order | undefined>;
+    setOrderShippingAddress(ctx: RequestContext, args: MutationSetOrderShippingAddressArgs): Promise<ErrorResultUnion<ActiveOrderResult, Order>>;
+    setOrderBillingAddress(ctx: RequestContext, args: MutationSetOrderBillingAddressArgs): Promise<ErrorResultUnion<ActiveOrderResult, Order>>;
     eligibleShippingMethods(ctx: RequestContext): Promise<ShippingMethodQuote[]>;
     eligiblePaymentMethods(ctx: RequestContext): Promise<PaymentMethodQuote[]>;
-    setOrderShippingMethod(
-        ctx: RequestContext,
-        args: MutationSetOrderShippingMethodArgs,
-    ): Promise<ErrorResultUnion<SetOrderShippingMethodResult, Order>>;
-    setOrderCustomFields(
-        ctx: RequestContext,
-        args: MutationSetOrderCustomFieldsArgs,
-    ): Promise<ErrorResultUnion<ActiveOrderResult, Order>>;
+    setOrderShippingMethod(ctx: RequestContext, args: MutationSetOrderShippingMethodArgs): Promise<ErrorResultUnion<SetOrderShippingMethodResult, Order>>;
+    setOrderCustomFields(ctx: RequestContext, args: MutationSetOrderCustomFieldsArgs): Promise<ErrorResultUnion<ActiveOrderResult, Order>>;
     nextOrderStates(ctx: RequestContext): Promise<ReadonlyArray<string>>;
-    transitionOrderToState(
-        ctx: RequestContext,
-        args: MutationTransitionOrderToStateArgs,
-    ): Promise<ErrorResultUnion<TransitionOrderToStateResult, Order> | undefined>;
-    addItemToOrder(
-        ctx: RequestContext,
-        args: MutationAddItemToOrderArgs,
-    ): Promise<ErrorResultUnion<UpdateOrderItemsResult, Order>>;
-    adjustOrderLine(
-        ctx: RequestContext,
-        args: MutationAdjustOrderLineArgs,
-    ): Promise<ErrorResultUnion<UpdateOrderItemsResult, Order>>;
-    removeOrderLine(
-        ctx: RequestContext,
-        args: MutationRemoveOrderLineArgs,
-    ): Promise<ErrorResultUnion<RemoveOrderItemsResult, Order>>;
+    transitionOrderToState(ctx: RequestContext, args: MutationTransitionOrderToStateArgs): Promise<ErrorResultUnion<TransitionOrderToStateResult, Order> | undefined>;
+    addItemToOrder(ctx: RequestContext, args: MutationAddItemToOrderArgs): Promise<ErrorResultUnion<UpdateOrderItemsResult, Order>>;
+    adjustOrderLine(ctx: RequestContext, args: MutationAdjustOrderLineArgs): Promise<ErrorResultUnion<UpdateOrderItemsResult, Order>>;
+    removeOrderLine(ctx: RequestContext, args: MutationRemoveOrderLineArgs): Promise<ErrorResultUnion<RemoveOrderItemsResult, Order>>;
     removeAllOrderLines(ctx: RequestContext): Promise<ErrorResultUnion<RemoveOrderItemsResult, Order>>;
-    applyCouponCode(
-        ctx: RequestContext,
-        args: MutationApplyCouponCodeArgs,
-    ): Promise<ErrorResultUnion<ApplyCouponCodeResult, Order>>;
+    applyCouponCode(ctx: RequestContext, args: MutationApplyCouponCodeArgs): Promise<ErrorResultUnion<ApplyCouponCodeResult, Order>>;
     removeCouponCode(ctx: RequestContext, args: MutationApplyCouponCodeArgs): Promise<Order>;
-    addPaymentToOrder(
-        ctx: RequestContext,
-        args: MutationAddPaymentToOrderArgs,
-    ): Promise<ErrorResultUnion<AddPaymentToOrderResult, Order>>;
+    addPaymentToOrder(ctx: RequestContext, args: MutationAddPaymentToOrderArgs): Promise<ErrorResultUnion<AddPaymentToOrderResult, Order>>;
 }

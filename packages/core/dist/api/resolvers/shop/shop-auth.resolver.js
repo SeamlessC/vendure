@@ -17,8 +17,10 @@ const graphql_1 = require("@nestjs/graphql");
 const generated_shop_types_1 = require("@vendure/common/lib/generated-shop-types");
 const generated_types_1 = require("@vendure/common/lib/generated-types");
 const error_result_1 = require("../../../common/error/error-result");
+const errors_1 = require("../../../common/error/errors");
 const native_authentication_strategy_1 = require("../../../config/auth/native-authentication-strategy");
 const config_service_1 = require("../../../config/config.service");
+const service_1 = require("../../../service");
 const administrator_service_1 = require("../../../service/services/administrator.service");
 const auth_service_1 = require("../../../service/services/auth.service");
 const customer_service_1 = require("../../../service/services/customer.service");
@@ -31,10 +33,12 @@ const request_context_decorator_1 = require("../../decorators/request-context.de
 const transaction_decorator_1 = require("../../decorators/transaction.decorator");
 const base_auth_resolver_1 = require("../base/base-auth.resolver");
 let ShopAuthResolver = class ShopAuthResolver extends base_auth_resolver_1.BaseAuthResolver {
-    constructor(authService, userService, administratorService, configService, customerService, historyService) {
+    constructor(authService, userService, administratorService, configService, customerGroupService, customerService, historyService, userService2) {
         super(authService, userService, administratorService, configService);
+        this.customerGroupService = customerGroupService;
         this.customerService = customerService;
         this.historyService = historyService;
+        this.userService2 = userService2;
     }
     async login(args, ctx, req, res) {
         const nativeAuthStrategyError = this.requireNativeAuthStrategy();
@@ -216,6 +220,38 @@ let ShopAuthResolver = class ShopAuthResolver extends base_auth_resolver_1.BaseA
     requireNativeAuthStrategy() {
         return super.requireNativeAuthStrategy();
     }
+    async deleteCustomerFromShop(ctx, args, req, res) {
+        const nativeAuthStrategyError = this.requireNativeAuthStrategy();
+        if (nativeAuthStrategyError) {
+            return nativeAuthStrategyError;
+        }
+        const authResult = (await super.baseLogin({ password: args.password, username: args.phoneNumber, rememberMe: false }, ctx, req, res));
+        if (error_result_1.isGraphQlErrorResult(authResult)) {
+            return authResult;
+        }
+        const customer = await this.getCustomerForOwner(ctx);
+        const groups = await this.customerService.getCustomerGroups(ctx, customer.id);
+        for (const group of groups) {
+            await this.customerGroupService.removeCustomersFromGroup(ctx, {
+                customerGroupId: group.id,
+                customerIds: [customer.id],
+            });
+        }
+        const customerResponse = await this.customerService.softDelete(ctx, customer.id);
+        const logout = await super.logout(ctx, req, res);
+        return customerResponse;
+    }
+    async getCustomerForOwner(ctx) {
+        const userId = ctx.activeUserId;
+        if (!userId) {
+            throw new errors_1.ForbiddenError();
+        }
+        const customer = await this.customerService.findOneByUserId(ctx, userId);
+        if (!customer) {
+            throw new errors_1.InternalServerError(`error.no-customer-found-for-current-user`);
+        }
+        return customer;
+    }
 };
 __decorate([
     transaction_decorator_1.Transaction(),
@@ -324,14 +360,28 @@ __decorate([
     __metadata("design:paramtypes", [request_context_1.RequestContext, Object]),
     __metadata("design:returntype", Promise)
 ], ShopAuthResolver.prototype, "updateCustomerPassword", null);
+__decorate([
+    transaction_decorator_1.Transaction(),
+    graphql_1.Mutation(),
+    allow_decorator_1.Allow(generated_shop_types_1.Permission.Owner),
+    __param(0, request_context_decorator_1.Ctx()),
+    __param(1, graphql_1.Args()),
+    __param(2, graphql_1.Context('req')),
+    __param(3, graphql_1.Context('res')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [request_context_1.RequestContext, Object, Object, Object]),
+    __metadata("design:returntype", Promise)
+], ShopAuthResolver.prototype, "deleteCustomerFromShop", null);
 ShopAuthResolver = __decorate([
     graphql_1.Resolver(),
     __metadata("design:paramtypes", [auth_service_1.AuthService,
         user_service_1.UserService,
         administrator_service_1.AdministratorService,
         config_service_1.ConfigService,
+        service_1.CustomerGroupService,
         customer_service_1.CustomerService,
-        history_service_1.HistoryService])
+        history_service_1.HistoryService,
+        user_service_1.UserService])
 ], ShopAuthResolver);
 exports.ShopAuthResolver = ShopAuthResolver;
 //# sourceMappingURL=shop-auth.resolver.js.map

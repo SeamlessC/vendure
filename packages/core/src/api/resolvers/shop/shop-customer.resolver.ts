@@ -1,9 +1,13 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
+    DeleteCustomerAccountResult,
     MutationDeleteCustomerAddressArgs,
+    MutationDeleteCustomerFromShopArgs,
     MutationUpdateCustomerArgs,
     Success,
+    // DeleteCustomerAccountResult,
 } from '@vendure/common/lib/generated-shop-types';
+// import { MutationDeleteCustomerArgs } from '@vendure/common/lib/generated-types';
 import {
     MutationCreateCustomerAddressArgs,
     MutationUpdateCustomerAddressArgs,
@@ -13,6 +17,7 @@ import {
 import { ForbiddenError, InternalServerError } from '../../../common/error/errors';
 import { idsAreEqual } from '../../../common/utils';
 import { Address, Customer } from '../../../entity';
+import { CustomerGroupService, UserService } from '../../../service';
 import { CustomerService } from '../../../service/services/customer.service';
 import { RequestContext } from '../../common/request-context';
 import { Allow } from '../../decorators/allow.decorator';
@@ -21,7 +26,9 @@ import { Transaction } from '../../decorators/transaction.decorator';
 
 @Resolver()
 export class ShopCustomerResolver {
-    constructor(private customerService: CustomerService) {}
+    constructor(
+        private customerService: CustomerService,
+    ) {}
 
     @Query()
     @Allow(Permission.Owner)
@@ -71,6 +78,7 @@ export class ShopCustomerResolver {
         }
         return this.customerService.updateAddress(ctx, args.input);
     }
+
 
     @Transaction()
     @Mutation()

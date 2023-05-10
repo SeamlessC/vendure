@@ -47,8 +47,8 @@ export class AssetImporter {
                         if (isGraphQlErrorResult(asset)) {
                             errors.push(asset.message);
                         } else {
-                            this.assetMap.set(assetPath, asset as Asset);
-                            assets.push(asset as Asset);
+                            this.assetMap.set(assetPath, asset as any);
+                            assets.push(asset as any);
                         }
                     }
                 } catch (e: any) {

@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ShopCustomerResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
+// import { MutationDeleteCustomerArgs } from '@vendure/common/lib/generated-types';
 const generated_types_1 = require("@vendure/common/lib/generated-types");
 const errors_1 = require("../../../common/error/errors");
 const utils_1 = require("../../../common/utils");

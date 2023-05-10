@@ -303,7 +303,7 @@ export class AssetService {
                 await this.connection.getRepository(ctx, Asset).save(result);
             }
             this.eventBus.publish(new AssetEvent(ctx, result, 'created', input));
-            resolve(result);
+            resolve(result as any);
         });
     }
 
@@ -458,7 +458,7 @@ export class AssetService {
                     : maybeCtx instanceof RequestContext
                     ? maybeCtx
                     : RequestContext.empty();
-            return this.createAssetInternal(ctx, stream, filename, mimetype);
+            return this.createAssetInternal(ctx, stream, filename, mimetype) as any;
         } else {
             throw new InternalServerError(`error.path-should-be-a-string-got-buffer`);
         }

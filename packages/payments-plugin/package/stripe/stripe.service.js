@@ -14,7 +14,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StripeService = void 0;
 const common_1 = require("@nestjs/common");
@@ -111,7 +110,7 @@ let StripeService = class StripeService {
 StripeService = __decorate([
     common_1.Injectable(),
     __param(1, common_1.Inject(constants_1.STRIPE_PLUGIN_OPTIONS)),
-    __metadata("design:paramtypes", [typeof (_a = typeof core_1.TransactionalConnection !== "undefined" && core_1.TransactionalConnection) === "function" ? _a : Object, Object])
+    __metadata("design:paramtypes", [core_1.TransactionalConnection, Object])
 ], StripeService);
 exports.StripeService = StripeService;
 //# sourceMappingURL=stripe.service.js.map

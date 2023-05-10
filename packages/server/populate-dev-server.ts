@@ -23,33 +23,33 @@ if (require.main === module) {
                 requireVerification: false,
             },
             importExportOptions: {
-                importAssetsDir: path.join(__dirname, '../../core/mock-data/assets'),
+                importAssetsDir: path.join(__dirname, '../core/mock-data/assets'),
             },
             customFields: {},
         }),
     );
-    // clearAllTables(populateConfig, true)
-    // .then(() =>
-    populate(
-        () =>
-            bootstrap(populateConfig).then(async app => {
-                await app.get(JobQueueService).start();
-                return app;
-            }),
-        initialData,
-        path.join(__dirname, './all_input.csv'),
-    )
-        // )
-        .then(async app => {
-            console.log('populating customers...');
-            // await populateCustomers(app, 10, message => Logger.error(message));
-            return app.close();
-        })
-        .then(
-            () => process.exit(0),
-            err => {
-                console.log(err);
-                process.exit(1);
-            },
-        );
+    clearAllTables(populateConfig, true).then(() =>
+        populate(
+            () =>
+                bootstrap(populateConfig).then(async app => {
+                    await app.get(JobQueueService).start();
+                    return app;
+                }),
+            initialData,
+            path.join(__dirname, './all_input.csv'),
+        )
+            // )
+            .then(async app => {
+                console.log('populating customers...');
+                // await populateCustomers(app, 10, message => Logger.error(message));
+                return app.close();
+            })
+            .then(
+                () => process.exit(0),
+                err => {
+                    console.log(err);
+                    process.exit(1);
+                },
+            ),
+    );
 }

@@ -195,6 +195,7 @@ export type Asset = Node & {
   source: Scalars['String'];
   preview: Scalars['String'];
   focalPoint?: Maybe<Coordinate>;
+  thumbnail: Scalars['String'];
   customFields?: Maybe<Scalars['JSON']>;
 };
 
@@ -210,6 +211,7 @@ export type AssetFilterParameter = {
   height?: Maybe<NumberOperators>;
   source?: Maybe<StringOperators>;
   preview?: Maybe<StringOperators>;
+  thumbnail?: Maybe<StringOperators>;
 };
 
 export type AssetList = PaginatedList & {
@@ -244,6 +246,7 @@ export type AssetSortParameter = {
   height?: Maybe<SortOrder>;
   source?: Maybe<SortOrder>;
   preview?: Maybe<SortOrder>;
+  thumbnail?: Maybe<SortOrder>;
 };
 
 export enum AssetType {
@@ -379,9 +382,9 @@ export type Channel = Node & {
 
 export type ChannelCustomFields = {
   __typename?: 'ChannelCustomFields';
+  isShopActive?: Maybe<Scalars['Boolean']>;
   openingTime?: Maybe<Scalars['DateTime']>;
   defaultOpeningTime?: Maybe<Scalars['DateTime']>;
-  isShopActive?: Maybe<Scalars['Boolean']>;
   isOpen?: Maybe<Scalars['Boolean']>;
   processingTime?: Maybe<Scalars['Int']>;
   latitude?: Maybe<Scalars['Float']>;
@@ -683,9 +686,9 @@ export type CreateAssetInput = {
 export type CreateAssetResult = Asset | MimeTypeError;
 
 export type CreateChannelCustomFieldsInput = {
+  isShopActive?: Maybe<Scalars['Boolean']>;
   openingTime?: Maybe<Scalars['DateTime']>;
   defaultOpeningTime?: Maybe<Scalars['DateTime']>;
-  isShopActive?: Maybe<Scalars['Boolean']>;
   isOpen?: Maybe<Scalars['Boolean']>;
   processingTime?: Maybe<Scalars['Int']>;
   latitude?: Maybe<Scalars['Float']>;
@@ -5462,9 +5465,9 @@ export type UpdateAssetInput = {
 };
 
 export type UpdateChannelCustomFieldsInput = {
+  isShopActive?: Maybe<Scalars['Boolean']>;
   openingTime?: Maybe<Scalars['DateTime']>;
   defaultOpeningTime?: Maybe<Scalars['DateTime']>;
-  isShopActive?: Maybe<Scalars['Boolean']>;
   isOpen?: Maybe<Scalars['Boolean']>;
   processingTime?: Maybe<Scalars['Int']>;
   latitude?: Maybe<Scalars['Float']>;

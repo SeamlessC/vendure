@@ -88,7 +88,7 @@ export class ProductService {
             })
             .getManyAndCount()
             .then(async ([products, totalItems]) => {
-                console.log('first');
+                // console.log('first');
                 // const items = products.map(product =>
                 //     this.translator.translate(product, ctx, ['facetValues', ['facetValues', 'facet']]),
                 // );

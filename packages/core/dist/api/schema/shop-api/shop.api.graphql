@@ -101,6 +101,7 @@ type Mutation {
     refreshCustomerVerification(phoneNumber: String!): RefreshCustomerVerificationResult!
     "Update an existing Customer"
     updateCustomer(input: UpdateCustomerInput!): Customer!
+    deleteCustomerFromShop(phoneNumber: String!, password: String!): DeleteCustomerAccountResult!
     "Create a new Customer Address"
     createCustomerAddress(input: CreateAddressInput!): Address!
     "Update an existing Address"
@@ -221,6 +222,11 @@ union VerifyCustomerAccountResult =
     | MissingPasswordError
     | PasswordValidationError
     | PasswordAlreadySetError
+    | NativeAuthStrategyError
+union DeleteCustomerAccountResult =
+      DeletionResponse
+    | InvalidCredentialsError
+    | NotVerifiedError
     | NativeAuthStrategyError
 union UpdateCustomerPasswordResult =
       Success

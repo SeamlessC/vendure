@@ -1,4 +1,110 @@
 {
   "defaultLanguage": "en",
-  "defaultZone": "Sri Lanka"
+  "defaultZone": "Sri Lanka",
+  "roles": [
+    {
+      "code": "administrator",
+      "description": "Administrator",
+      "permissions": [
+        "CreateCatalog",
+        "ReadCatalog",
+        "UpdateCatalog",
+        "DeleteCatalog",
+        "CreateSettings",
+        "ReadSettings",
+        "UpdateSettings",
+        "DeleteSettings",
+        "CreateCustomer",
+        "ReadCustomer",
+        "UpdateCustomer",
+        "DeleteCustomer",
+        "CreateCustomerGroup",
+        "ReadCustomerGroup",
+        "UpdateCustomerGroup",
+        "DeleteCustomerGroup",
+        "CreateOrder",
+        "ReadOrder",
+        "UpdateOrder",
+        "DeleteOrder",
+        "CreateSystem",
+        "ReadSystem",
+        "UpdateSystem",
+        "DeleteSystem"
+      ]
+    },
+    {
+      "code": "order-manager",
+      "description": "Order manager",
+      "permissions": [
+        "CreateOrder",
+        "ReadOrder",
+        "UpdateOrder",
+        "DeleteOrder",
+        "ReadCustomer",
+        "ReadPaymentMethod",
+        "ReadShippingMethod",
+        "ReadPromotion",
+        "ReadCountry",
+        "ReadZone"
+      ]
+    },
+    {
+      "code": "inventory-manager",
+      "description": "Inventory manager",
+      "permissions": [
+        "CreateCatalog",
+        "ReadCatalog",
+        "UpdateCatalog",
+        "DeleteCatalog",
+        "CreateTag",
+        "ReadTag",
+        "UpdateTag",
+        "DeleteTag",
+        "ReadCustomer"
+      ]
+    }
+  ],
+  "taxRates": [
+    {
+      "name": "Zero",
+      "percentage": 0
+    }
+  ],
+  "shippingMethods": [
+    {
+      "name": "pickup",
+      "price": 0
+    }
+  ],
+  "paymentMethods": [
+    {
+      "name": "cash",
+      "handler": {
+        "code": "cash",
+        "arguments": [
+          {
+            "name": "automaticSettle",
+            "value": "false"
+          }
+        ]
+      }
+    }
+  ],
+  "countries": [
+    {
+      "name": "Sri Lanka",
+      "code": "LK",
+      "zone": "Sri Lanka"
+    },
+    {
+      "name": "Maldives",
+      "code": "MV",
+      "zone": "Asia"
+    },
+    {
+      "name": "South Africa",
+      "code": "ZA",
+      "zone": "Africa"
+    }
+  ]
 }

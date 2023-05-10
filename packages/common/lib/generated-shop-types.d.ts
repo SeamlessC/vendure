@@ -1,19 +1,15 @@
 export declare type Maybe<T> = T;
-export declare type Exact<
-    T extends {
-        [key: string]: unknown;
-    },
-> = {
+export declare type Exact<T extends {
+    [key: string]: unknown;
+}> = {
     [K in keyof T]: T[K];
 };
-export declare type MakeOptional<T, K extends keyof T> = Omit<T, K> &
-    {
-        [SubKey in K]?: Maybe<T[SubKey]>;
-    };
-export declare type MakeMaybe<T, K extends keyof T> = Omit<T, K> &
-    {
-        [SubKey in K]: Maybe<T[SubKey]>;
-    };
+export declare type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
+    [SubKey in K]?: Maybe<T[SubKey]>;
+};
+export declare type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
+    [SubKey in K]: Maybe<T[SubKey]>;
+};
 /** All built-in and custom scalars, mapped to their actual values */
 export declare type Scalars = {
     ID: string | number;
@@ -29,14 +25,7 @@ export declare type Scalars = {
     Upload: any;
 };
 export declare type ActiveOrderResult = Order | NoActiveOrderError;
-export declare type AddPaymentToOrderResult =
-    | Order
-    | OrderPaymentStateError
-    | IneligiblePaymentMethodError
-    | PaymentFailedError
-    | PaymentDeclinedError
-    | OrderStateTransitionError
-    | NoActiveOrderError;
+export declare type AddPaymentToOrderResult = Order | OrderPaymentStateError | IneligiblePaymentMethodError | PaymentFailedError | PaymentDeclinedError | OrderStateTransitionError | NoActiveOrderError;
 export declare type Address = Node & {
     __typename?: 'Address';
     id: Scalars['ID'];
@@ -71,9 +60,9 @@ export declare type Adjustment = {
     amount: Scalars['Int'];
 };
 export declare enum AdjustmentType {
-    PROMOTION = 'PROMOTION',
-    DISTRIBUTED_ORDER_PROMOTION = 'DISTRIBUTED_ORDER_PROMOTION',
-    OTHER = 'OTHER',
+    PROMOTION = "PROMOTION",
+    DISTRIBUTED_ORDER_PROMOTION = "DISTRIBUTED_ORDER_PROMOTION",
+    OTHER = "OTHER"
 }
 /** Returned when attempting to set the Customer for an Order when already logged in. */
 export declare type AlreadyLoggedInError = ErrorResult & {
@@ -81,11 +70,7 @@ export declare type AlreadyLoggedInError = ErrorResult & {
     errorCode: ErrorCode;
     message: Scalars['String'];
 };
-export declare type ApplyCouponCodeResult =
-    | Order
-    | CouponCodeExpiredError
-    | CouponCodeInvalidError
-    | CouponCodeLimitError;
+export declare type ApplyCouponCodeResult = Order | CouponCodeExpiredError | CouponCodeInvalidError | CouponCodeLimitError;
 export declare type Asset = Node & {
     __typename?: 'Asset';
     id: Scalars['ID'];
@@ -100,17 +85,18 @@ export declare type Asset = Node & {
     source: Scalars['String'];
     preview: Scalars['String'];
     focalPoint?: Maybe<Coordinate>;
+    thumbnail: Scalars['String'];
     customFields?: Maybe<Scalars['JSON']>;
 };
 export declare type AssetList = PaginatedList & {
     __typename?: 'AssetList';
-    items: Asset[];
+    items: Array<Asset>;
     totalItems: Scalars['Int'];
 };
 export declare enum AssetType {
-    IMAGE = 'IMAGE',
-    VIDEO = 'VIDEO',
-    BINARY = 'BINARY',
+    IMAGE = "IMAGE",
+    VIDEO = "VIDEO",
+    BINARY = "BINARY"
 }
 export declare type AuthenticationInput = {
     native?: Maybe<NativeAuthInput>;
@@ -128,8 +114,8 @@ export declare type BooleanCustomFieldConfig = CustomField & {
     name: Scalars['String'];
     type: Scalars['String'];
     list: Scalars['Boolean'];
-    label?: Maybe<LocalizedString[]>;
-    description?: Maybe<LocalizedString[]>;
+    label?: Maybe<Array<LocalizedString>>;
+    description?: Maybe<Array<LocalizedString>>;
     readonly?: Maybe<Scalars['Boolean']>;
     internal?: Maybe<Scalars['Boolean']>;
     nullable?: Maybe<Scalars['Boolean']>;
@@ -176,15 +162,15 @@ export declare type Collection = Node & {
     languageCode?: Maybe<LanguageCode>;
     name: Scalars['String'];
     slug: Scalars['String'];
-    breadcrumbs: CollectionBreadcrumb[];
+    breadcrumbs: Array<CollectionBreadcrumb>;
     position: Scalars['Int'];
     description: Scalars['String'];
     featuredAsset?: Maybe<Asset>;
-    assets: Asset[];
+    assets: Array<Asset>;
     parent?: Maybe<Collection>;
-    children?: Maybe<Collection[]>;
-    filters: ConfigurableOperation[];
-    translations: CollectionTranslation[];
+    children?: Maybe<Array<Collection>>;
+    filters: Array<ConfigurableOperation>;
+    translations: Array<CollectionTranslation>;
     productVariants: ProductVariantList;
     customFields?: Maybe<Scalars['JSON']>;
 };
@@ -209,7 +195,7 @@ export declare type CollectionFilterParameter = {
 };
 export declare type CollectionList = PaginatedList & {
     __typename?: 'CollectionList';
-    items: Collection[];
+    items: Array<Collection>;
     totalItems: Scalars['Int'];
 };
 export declare type CollectionListOptions = {
@@ -276,17 +262,17 @@ export declare type ConfigArgInput = {
 export declare type ConfigurableOperation = {
     __typename?: 'ConfigurableOperation';
     code: Scalars['String'];
-    args: ConfigArg[];
+    args: Array<ConfigArg>;
 };
 export declare type ConfigurableOperationDefinition = {
     __typename?: 'ConfigurableOperationDefinition';
     code: Scalars['String'];
-    args: ConfigArgDefinition[];
+    args: Array<ConfigArgDefinition>;
     description: Scalars['String'];
 };
 export declare type ConfigurableOperationInput = {
     code: Scalars['String'];
-    arguments: ConfigArgInput[];
+    arguments: Array<ConfigArgInput>;
 };
 export declare type Coordinate = {
     __typename?: 'Coordinate';
@@ -302,12 +288,12 @@ export declare type Country = Node & {
     code: Scalars['String'];
     name: Scalars['String'];
     enabled: Scalars['Boolean'];
-    translations: CountryTranslation[];
+    translations: Array<CountryTranslation>;
     customFields?: Maybe<Scalars['JSON']>;
 };
 export declare type CountryList = PaginatedList & {
     __typename?: 'CountryList';
-    items: Country[];
+    items: Array<Country>;
     totalItems: Scalars['Int'];
 };
 export declare type CountryTranslation = {
@@ -382,353 +368,345 @@ export declare type CreateCustomerInput = {
  */
 export declare enum CurrencyCode {
     /** United Arab Emirates dirham */
-    AED = 'AED',
+    AED = "AED",
     /** Afghan afghani */
-    AFN = 'AFN',
+    AFN = "AFN",
     /** Albanian lek */
-    ALL = 'ALL',
+    ALL = "ALL",
     /** Armenian dram */
-    AMD = 'AMD',
+    AMD = "AMD",
     /** Netherlands Antillean guilder */
-    ANG = 'ANG',
+    ANG = "ANG",
     /** Angolan kwanza */
-    AOA = 'AOA',
+    AOA = "AOA",
     /** Argentine peso */
-    ARS = 'ARS',
+    ARS = "ARS",
     /** Australian dollar */
-    AUD = 'AUD',
+    AUD = "AUD",
     /** Aruban florin */
-    AWG = 'AWG',
+    AWG = "AWG",
     /** Azerbaijani manat */
-    AZN = 'AZN',
+    AZN = "AZN",
     /** Bosnia and Herzegovina convertible mark */
-    BAM = 'BAM',
+    BAM = "BAM",
     /** Barbados dollar */
-    BBD = 'BBD',
+    BBD = "BBD",
     /** Bangladeshi taka */
-    BDT = 'BDT',
+    BDT = "BDT",
     /** Bulgarian lev */
-    BGN = 'BGN',
+    BGN = "BGN",
     /** Bahraini dinar */
-    BHD = 'BHD',
+    BHD = "BHD",
     /** Burundian franc */
-    BIF = 'BIF',
+    BIF = "BIF",
     /** Bermudian dollar */
-    BMD = 'BMD',
+    BMD = "BMD",
     /** Brunei dollar */
-    BND = 'BND',
+    BND = "BND",
     /** Boliviano */
-    BOB = 'BOB',
+    BOB = "BOB",
     /** Brazilian real */
-    BRL = 'BRL',
+    BRL = "BRL",
     /** Bahamian dollar */
-    BSD = 'BSD',
+    BSD = "BSD",
     /** Bhutanese ngultrum */
-    BTN = 'BTN',
+    BTN = "BTN",
     /** Botswana pula */
-    BWP = 'BWP',
+    BWP = "BWP",
     /** Belarusian ruble */
-    BYN = 'BYN',
+    BYN = "BYN",
     /** Belize dollar */
-    BZD = 'BZD',
+    BZD = "BZD",
     /** Canadian dollar */
-    CAD = 'CAD',
+    CAD = "CAD",
     /** Congolese franc */
-    CDF = 'CDF',
+    CDF = "CDF",
     /** Swiss franc */
-    CHF = 'CHF',
+    CHF = "CHF",
     /** Chilean peso */
-    CLP = 'CLP',
+    CLP = "CLP",
     /** Renminbi (Chinese) yuan */
-    CNY = 'CNY',
+    CNY = "CNY",
     /** Colombian peso */
-    COP = 'COP',
+    COP = "COP",
     /** Costa Rican colon */
-    CRC = 'CRC',
+    CRC = "CRC",
     /** Cuban convertible peso */
-    CUC = 'CUC',
+    CUC = "CUC",
     /** Cuban peso */
-    CUP = 'CUP',
+    CUP = "CUP",
     /** Cape Verde escudo */
-    CVE = 'CVE',
+    CVE = "CVE",
     /** Czech koruna */
-    CZK = 'CZK',
+    CZK = "CZK",
     /** Djiboutian franc */
-    DJF = 'DJF',
+    DJF = "DJF",
     /** Danish krone */
-    DKK = 'DKK',
+    DKK = "DKK",
     /** Dominican peso */
-    DOP = 'DOP',
+    DOP = "DOP",
     /** Algerian dinar */
-    DZD = 'DZD',
+    DZD = "DZD",
     /** Egyptian pound */
-    EGP = 'EGP',
+    EGP = "EGP",
     /** Eritrean nakfa */
-    ERN = 'ERN',
+    ERN = "ERN",
     /** Ethiopian birr */
-    ETB = 'ETB',
+    ETB = "ETB",
     /** Euro */
-    EUR = 'EUR',
+    EUR = "EUR",
     /** Fiji dollar */
-    FJD = 'FJD',
+    FJD = "FJD",
     /** Falkland Islands pound */
-    FKP = 'FKP',
+    FKP = "FKP",
     /** Pound sterling */
-    GBP = 'GBP',
+    GBP = "GBP",
     /** Georgian lari */
-    GEL = 'GEL',
+    GEL = "GEL",
     /** Ghanaian cedi */
-    GHS = 'GHS',
+    GHS = "GHS",
     /** Gibraltar pound */
-    GIP = 'GIP',
+    GIP = "GIP",
     /** Gambian dalasi */
-    GMD = 'GMD',
+    GMD = "GMD",
     /** Guinean franc */
-    GNF = 'GNF',
+    GNF = "GNF",
     /** Guatemalan quetzal */
-    GTQ = 'GTQ',
+    GTQ = "GTQ",
     /** Guyanese dollar */
-    GYD = 'GYD',
+    GYD = "GYD",
     /** Hong Kong dollar */
-    HKD = 'HKD',
+    HKD = "HKD",
     /** Honduran lempira */
-    HNL = 'HNL',
+    HNL = "HNL",
     /** Croatian kuna */
-    HRK = 'HRK',
+    HRK = "HRK",
     /** Haitian gourde */
-    HTG = 'HTG',
+    HTG = "HTG",
     /** Hungarian forint */
-    HUF = 'HUF',
+    HUF = "HUF",
     /** Indonesian rupiah */
-    IDR = 'IDR',
+    IDR = "IDR",
     /** Israeli new shekel */
-    ILS = 'ILS',
+    ILS = "ILS",
     /** Indian rupee */
-    INR = 'INR',
+    INR = "INR",
     /** Iraqi dinar */
-    IQD = 'IQD',
+    IQD = "IQD",
     /** Iranian rial */
-    IRR = 'IRR',
+    IRR = "IRR",
     /** Icelandic króna */
-    ISK = 'ISK',
+    ISK = "ISK",
     /** Jamaican dollar */
-    JMD = 'JMD',
+    JMD = "JMD",
     /** Jordanian dinar */
-    JOD = 'JOD',
+    JOD = "JOD",
     /** Japanese yen */
-    JPY = 'JPY',
+    JPY = "JPY",
     /** Kenyan shilling */
-    KES = 'KES',
+    KES = "KES",
     /** Kyrgyzstani som */
-    KGS = 'KGS',
+    KGS = "KGS",
     /** Cambodian riel */
-    KHR = 'KHR',
+    KHR = "KHR",
     /** Comoro franc */
-    KMF = 'KMF',
+    KMF = "KMF",
     /** North Korean won */
-    KPW = 'KPW',
+    KPW = "KPW",
     /** South Korean won */
-    KRW = 'KRW',
+    KRW = "KRW",
     /** Kuwaiti dinar */
-    KWD = 'KWD',
+    KWD = "KWD",
     /** Cayman Islands dollar */
-    KYD = 'KYD',
+    KYD = "KYD",
     /** Kazakhstani tenge */
-    KZT = 'KZT',
+    KZT = "KZT",
     /** Lao kip */
-    LAK = 'LAK',
+    LAK = "LAK",
     /** Lebanese pound */
-    LBP = 'LBP',
+    LBP = "LBP",
     /** Sri Lankan rupee */
-    LKR = 'LKR',
+    LKR = "LKR",
     /** Liberian dollar */
-    LRD = 'LRD',
+    LRD = "LRD",
     /** Lesotho loti */
-    LSL = 'LSL',
+    LSL = "LSL",
     /** Libyan dinar */
-    LYD = 'LYD',
+    LYD = "LYD",
     /** Moroccan dirham */
-    MAD = 'MAD',
+    MAD = "MAD",
     /** Moldovan leu */
-    MDL = 'MDL',
+    MDL = "MDL",
     /** Malagasy ariary */
-    MGA = 'MGA',
+    MGA = "MGA",
     /** Macedonian denar */
-    MKD = 'MKD',
+    MKD = "MKD",
     /** Myanmar kyat */
-    MMK = 'MMK',
+    MMK = "MMK",
     /** Mongolian tögrög */
-    MNT = 'MNT',
+    MNT = "MNT",
     /** Macanese pataca */
-    MOP = 'MOP',
+    MOP = "MOP",
     /** Mauritanian ouguiya */
-    MRU = 'MRU',
+    MRU = "MRU",
     /** Mauritian rupee */
-    MUR = 'MUR',
+    MUR = "MUR",
     /** Maldivian rufiyaa */
-    MVR = 'MVR',
+    MVR = "MVR",
     /** Malawian kwacha */
-    MWK = 'MWK',
+    MWK = "MWK",
     /** Mexican peso */
-    MXN = 'MXN',
+    MXN = "MXN",
     /** Malaysian ringgit */
-    MYR = 'MYR',
+    MYR = "MYR",
     /** Mozambican metical */
-    MZN = 'MZN',
+    MZN = "MZN",
     /** Namibian dollar */
-    NAD = 'NAD',
+    NAD = "NAD",
     /** Nigerian naira */
-    NGN = 'NGN',
+    NGN = "NGN",
     /** Nicaraguan córdoba */
-    NIO = 'NIO',
+    NIO = "NIO",
     /** Norwegian krone */
-    NOK = 'NOK',
+    NOK = "NOK",
     /** Nepalese rupee */
-    NPR = 'NPR',
+    NPR = "NPR",
     /** New Zealand dollar */
-    NZD = 'NZD',
+    NZD = "NZD",
     /** Omani rial */
-    OMR = 'OMR',
+    OMR = "OMR",
     /** Panamanian balboa */
-    PAB = 'PAB',
+    PAB = "PAB",
     /** Peruvian sol */
-    PEN = 'PEN',
+    PEN = "PEN",
     /** Papua New Guinean kina */
-    PGK = 'PGK',
+    PGK = "PGK",
     /** Philippine peso */
-    PHP = 'PHP',
+    PHP = "PHP",
     /** Pakistani rupee */
-    PKR = 'PKR',
+    PKR = "PKR",
     /** Polish złoty */
-    PLN = 'PLN',
+    PLN = "PLN",
     /** Paraguayan guaraní */
-    PYG = 'PYG',
+    PYG = "PYG",
     /** Qatari riyal */
-    QAR = 'QAR',
+    QAR = "QAR",
     /** Romanian leu */
-    RON = 'RON',
+    RON = "RON",
     /** Serbian dinar */
-    RSD = 'RSD',
+    RSD = "RSD",
     /** Russian ruble */
-    RUB = 'RUB',
+    RUB = "RUB",
     /** Rwandan franc */
-    RWF = 'RWF',
+    RWF = "RWF",
     /** Saudi riyal */
-    SAR = 'SAR',
+    SAR = "SAR",
     /** Solomon Islands dollar */
-    SBD = 'SBD',
+    SBD = "SBD",
     /** Seychelles rupee */
-    SCR = 'SCR',
+    SCR = "SCR",
     /** Sudanese pound */
-    SDG = 'SDG',
+    SDG = "SDG",
     /** Swedish krona/kronor */
-    SEK = 'SEK',
+    SEK = "SEK",
     /** Singapore dollar */
-    SGD = 'SGD',
+    SGD = "SGD",
     /** Saint Helena pound */
-    SHP = 'SHP',
+    SHP = "SHP",
     /** Sierra Leonean leone */
-    SLL = 'SLL',
+    SLL = "SLL",
     /** Somali shilling */
-    SOS = 'SOS',
+    SOS = "SOS",
     /** Surinamese dollar */
-    SRD = 'SRD',
+    SRD = "SRD",
     /** South Sudanese pound */
-    SSP = 'SSP',
+    SSP = "SSP",
     /** São Tomé and Príncipe dobra */
-    STN = 'STN',
+    STN = "STN",
     /** Salvadoran colón */
-    SVC = 'SVC',
+    SVC = "SVC",
     /** Syrian pound */
-    SYP = 'SYP',
+    SYP = "SYP",
     /** Swazi lilangeni */
-    SZL = 'SZL',
+    SZL = "SZL",
     /** Thai baht */
-    THB = 'THB',
+    THB = "THB",
     /** Tajikistani somoni */
-    TJS = 'TJS',
+    TJS = "TJS",
     /** Turkmenistan manat */
-    TMT = 'TMT',
+    TMT = "TMT",
     /** Tunisian dinar */
-    TND = 'TND',
+    TND = "TND",
     /** Tongan paʻanga */
-    TOP = 'TOP',
+    TOP = "TOP",
     /** Turkish lira */
-    TRY = 'TRY',
+    TRY = "TRY",
     /** Trinidad and Tobago dollar */
-    TTD = 'TTD',
+    TTD = "TTD",
     /** New Taiwan dollar */
-    TWD = 'TWD',
+    TWD = "TWD",
     /** Tanzanian shilling */
-    TZS = 'TZS',
+    TZS = "TZS",
     /** Ukrainian hryvnia */
-    UAH = 'UAH',
+    UAH = "UAH",
     /** Ugandan shilling */
-    UGX = 'UGX',
+    UGX = "UGX",
     /** United States dollar */
-    USD = 'USD',
+    USD = "USD",
     /** Uruguayan peso */
-    UYU = 'UYU',
+    UYU = "UYU",
     /** Uzbekistan som */
-    UZS = 'UZS',
+    UZS = "UZS",
     /** Venezuelan bolívar soberano */
-    VES = 'VES',
+    VES = "VES",
     /** Vietnamese đồng */
-    VND = 'VND',
+    VND = "VND",
     /** Vanuatu vatu */
-    VUV = 'VUV',
+    VUV = "VUV",
     /** Samoan tala */
-    WST = 'WST',
+    WST = "WST",
     /** CFA franc BEAC */
-    XAF = 'XAF',
+    XAF = "XAF",
     /** East Caribbean dollar */
-    XCD = 'XCD',
+    XCD = "XCD",
     /** CFA franc BCEAO */
-    XOF = 'XOF',
+    XOF = "XOF",
     /** CFP franc (franc Pacifique) */
-    XPF = 'XPF',
+    XPF = "XPF",
     /** Yemeni rial */
-    YER = 'YER',
+    YER = "YER",
     /** South African rand */
-    ZAR = 'ZAR',
+    ZAR = "ZAR",
     /** Zambian kwacha */
-    ZMW = 'ZMW',
+    ZMW = "ZMW",
     /** Zimbabwean dollar */
-    ZWL = 'ZWL',
+    ZWL = "ZWL"
 }
 export declare type CurrentUser = {
     __typename?: 'CurrentUser';
     id: Scalars['ID'];
     identifier: Scalars['String'];
-    channels: CurrentUserChannel[];
+    channels: Array<CurrentUserChannel>;
 };
 export declare type CurrentUserChannel = {
     __typename?: 'CurrentUserChannel';
     id: Scalars['ID'];
     token: Scalars['String'];
     code: Scalars['String'];
-    permissions: Permission[];
+    permissions: Array<Permission>;
 };
 export declare type CustomField = {
     name: Scalars['String'];
     type: Scalars['String'];
     list: Scalars['Boolean'];
-    label?: Maybe<LocalizedString[]>;
-    description?: Maybe<LocalizedString[]>;
+    label?: Maybe<Array<LocalizedString>>;
+    description?: Maybe<Array<LocalizedString>>;
     readonly?: Maybe<Scalars['Boolean']>;
     internal?: Maybe<Scalars['Boolean']>;
     nullable?: Maybe<Scalars['Boolean']>;
     ui?: Maybe<Scalars['JSON']>;
 };
-export declare type CustomFieldConfig =
-    | StringCustomFieldConfig
-    | LocaleStringCustomFieldConfig
-    | IntCustomFieldConfig
-    | FloatCustomFieldConfig
-    | BooleanCustomFieldConfig
-    | DateTimeCustomFieldConfig
-    | RelationCustomFieldConfig
-    | TextCustomFieldConfig;
+export declare type CustomFieldConfig = StringCustomFieldConfig | LocaleStringCustomFieldConfig | IntCustomFieldConfig | FloatCustomFieldConfig | BooleanCustomFieldConfig | DateTimeCustomFieldConfig | RelationCustomFieldConfig | TextCustomFieldConfig;
 export declare type Customer = Node & {
     __typename?: 'Customer';
     id: Scalars['ID'];
@@ -739,7 +717,7 @@ export declare type Customer = Node & {
     lastName: Scalars['String'];
     phoneNumber: Scalars['String'];
     emailAddress: Scalars['String'];
-    addresses?: Maybe<Address[]>;
+    addresses?: Maybe<Array<Address>>;
     orders: OrderList;
     user?: Maybe<User>;
     customFields?: Maybe<CustomerCustomFields>;
@@ -784,7 +762,7 @@ export declare type CustomerGroupCustomersArgs = {
 };
 export declare type CustomerList = PaginatedList & {
     __typename?: 'CustomerList';
-    items: Customer[];
+    items: Array<Customer>;
     totalItems: Scalars['Int'];
 };
 export declare type CustomerListOptions = {
@@ -838,8 +816,8 @@ export declare type DateTimeCustomFieldConfig = CustomField & {
     name: Scalars['String'];
     type: Scalars['String'];
     list: Scalars['Boolean'];
-    label?: Maybe<LocalizedString[]>;
-    description?: Maybe<LocalizedString[]>;
+    label?: Maybe<Array<LocalizedString>>;
+    description?: Maybe<Array<LocalizedString>>;
     readonly?: Maybe<Scalars['Boolean']>;
     internal?: Maybe<Scalars['Boolean']>;
     nullable?: Maybe<Scalars['Boolean']>;
@@ -848,6 +826,7 @@ export declare type DateTimeCustomFieldConfig = CustomField & {
     step?: Maybe<Scalars['Int']>;
     ui?: Maybe<Scalars['JSON']>;
 };
+export declare type DeleteCustomerAccountResult = DeletionResponse | InvalidCredentialsError | NotVerifiedError | NativeAuthStrategyError;
 export declare type DeletionResponse = {
     __typename?: 'DeletionResponse';
     result: DeletionResult;
@@ -855,9 +834,9 @@ export declare type DeletionResponse = {
 };
 export declare enum DeletionResult {
     /** The entity was successfully deleted */
-    DELETED = 'DELETED',
+    DELETED = "DELETED",
     /** Deletion did not take place, reason given in message */
-    NOT_DELETED = 'NOT_DELETED',
+    NOT_DELETED = "NOT_DELETED"
 }
 export declare type Discount = {
     __typename?: 'Discount';
@@ -874,37 +853,37 @@ export declare type EmailAddressConflictError = ErrorResult & {
     message: Scalars['String'];
 };
 export declare enum ErrorCode {
-    UNKNOWN_ERROR = 'UNKNOWN_ERROR',
-    NATIVE_AUTH_STRATEGY_ERROR = 'NATIVE_AUTH_STRATEGY_ERROR',
-    INVALID_CREDENTIALS_ERROR = 'INVALID_CREDENTIALS_ERROR',
-    ORDER_STATE_TRANSITION_ERROR = 'ORDER_STATE_TRANSITION_ERROR',
-    EMAIL_ADDRESS_CONFLICT_ERROR = 'EMAIL_ADDRESS_CONFLICT_ERROR',
-    ORDER_LIMIT_ERROR = 'ORDER_LIMIT_ERROR',
-    NEGATIVE_QUANTITY_ERROR = 'NEGATIVE_QUANTITY_ERROR',
-    INSUFFICIENT_STOCK_ERROR = 'INSUFFICIENT_STOCK_ERROR',
-    COUPON_CODE_INVALID_ERROR = 'COUPON_CODE_INVALID_ERROR',
-    COUPON_CODE_EXPIRED_ERROR = 'COUPON_CODE_EXPIRED_ERROR',
-    COUPON_CODE_LIMIT_ERROR = 'COUPON_CODE_LIMIT_ERROR',
-    ORDER_MODIFICATION_ERROR = 'ORDER_MODIFICATION_ERROR',
-    INELIGIBLE_SHIPPING_METHOD_ERROR = 'INELIGIBLE_SHIPPING_METHOD_ERROR',
-    NO_ACTIVE_ORDER_ERROR = 'NO_ACTIVE_ORDER_ERROR',
-    SHOP_CLOSED_ERROR = 'SHOP_CLOSED_ERROR',
-    ORDER_PAYMENT_STATE_ERROR = 'ORDER_PAYMENT_STATE_ERROR',
-    INELIGIBLE_PAYMENT_METHOD_ERROR = 'INELIGIBLE_PAYMENT_METHOD_ERROR',
-    PAYMENT_FAILED_ERROR = 'PAYMENT_FAILED_ERROR',
-    PAYMENT_DECLINED_ERROR = 'PAYMENT_DECLINED_ERROR',
-    ALREADY_LOGGED_IN_ERROR = 'ALREADY_LOGGED_IN_ERROR',
-    MISSING_PASSWORD_ERROR = 'MISSING_PASSWORD_ERROR',
-    PASSWORD_VALIDATION_ERROR = 'PASSWORD_VALIDATION_ERROR',
-    OTPREQUEST_TIMEOUT_ERROR = 'OTPREQUEST_TIMEOUT_ERROR',
-    PASSWORD_ALREADY_SET_ERROR = 'PASSWORD_ALREADY_SET_ERROR',
-    VERIFICATION_TOKEN_INVALID_ERROR = 'VERIFICATION_TOKEN_INVALID_ERROR',
-    VERIFICATION_TOKEN_EXPIRED_ERROR = 'VERIFICATION_TOKEN_EXPIRED_ERROR',
-    IDENTIFIER_CHANGE_TOKEN_INVALID_ERROR = 'IDENTIFIER_CHANGE_TOKEN_INVALID_ERROR',
-    IDENTIFIER_CHANGE_TOKEN_EXPIRED_ERROR = 'IDENTIFIER_CHANGE_TOKEN_EXPIRED_ERROR',
-    PASSWORD_RESET_TOKEN_INVALID_ERROR = 'PASSWORD_RESET_TOKEN_INVALID_ERROR',
-    PASSWORD_RESET_TOKEN_EXPIRED_ERROR = 'PASSWORD_RESET_TOKEN_EXPIRED_ERROR',
-    NOT_VERIFIED_ERROR = 'NOT_VERIFIED_ERROR',
+    UNKNOWN_ERROR = "UNKNOWN_ERROR",
+    NATIVE_AUTH_STRATEGY_ERROR = "NATIVE_AUTH_STRATEGY_ERROR",
+    INVALID_CREDENTIALS_ERROR = "INVALID_CREDENTIALS_ERROR",
+    ORDER_STATE_TRANSITION_ERROR = "ORDER_STATE_TRANSITION_ERROR",
+    EMAIL_ADDRESS_CONFLICT_ERROR = "EMAIL_ADDRESS_CONFLICT_ERROR",
+    ORDER_LIMIT_ERROR = "ORDER_LIMIT_ERROR",
+    NEGATIVE_QUANTITY_ERROR = "NEGATIVE_QUANTITY_ERROR",
+    INSUFFICIENT_STOCK_ERROR = "INSUFFICIENT_STOCK_ERROR",
+    COUPON_CODE_INVALID_ERROR = "COUPON_CODE_INVALID_ERROR",
+    COUPON_CODE_EXPIRED_ERROR = "COUPON_CODE_EXPIRED_ERROR",
+    COUPON_CODE_LIMIT_ERROR = "COUPON_CODE_LIMIT_ERROR",
+    ORDER_MODIFICATION_ERROR = "ORDER_MODIFICATION_ERROR",
+    INELIGIBLE_SHIPPING_METHOD_ERROR = "INELIGIBLE_SHIPPING_METHOD_ERROR",
+    NO_ACTIVE_ORDER_ERROR = "NO_ACTIVE_ORDER_ERROR",
+    SHOP_CLOSED_ERROR = "SHOP_CLOSED_ERROR",
+    ORDER_PAYMENT_STATE_ERROR = "ORDER_PAYMENT_STATE_ERROR",
+    INELIGIBLE_PAYMENT_METHOD_ERROR = "INELIGIBLE_PAYMENT_METHOD_ERROR",
+    PAYMENT_FAILED_ERROR = "PAYMENT_FAILED_ERROR",
+    PAYMENT_DECLINED_ERROR = "PAYMENT_DECLINED_ERROR",
+    ALREADY_LOGGED_IN_ERROR = "ALREADY_LOGGED_IN_ERROR",
+    MISSING_PASSWORD_ERROR = "MISSING_PASSWORD_ERROR",
+    PASSWORD_VALIDATION_ERROR = "PASSWORD_VALIDATION_ERROR",
+    OTPREQUEST_TIMEOUT_ERROR = "OTPREQUEST_TIMEOUT_ERROR",
+    PASSWORD_ALREADY_SET_ERROR = "PASSWORD_ALREADY_SET_ERROR",
+    VERIFICATION_TOKEN_INVALID_ERROR = "VERIFICATION_TOKEN_INVALID_ERROR",
+    VERIFICATION_TOKEN_EXPIRED_ERROR = "VERIFICATION_TOKEN_EXPIRED_ERROR",
+    IDENTIFIER_CHANGE_TOKEN_INVALID_ERROR = "IDENTIFIER_CHANGE_TOKEN_INVALID_ERROR",
+    IDENTIFIER_CHANGE_TOKEN_EXPIRED_ERROR = "IDENTIFIER_CHANGE_TOKEN_EXPIRED_ERROR",
+    PASSWORD_RESET_TOKEN_INVALID_ERROR = "PASSWORD_RESET_TOKEN_INVALID_ERROR",
+    PASSWORD_RESET_TOKEN_EXPIRED_ERROR = "PASSWORD_RESET_TOKEN_EXPIRED_ERROR",
+    NOT_VERIFIED_ERROR = "NOT_VERIFIED_ERROR"
 }
 export declare type ErrorResult = {
     errorCode: ErrorCode;
@@ -918,8 +897,8 @@ export declare type Facet = Node & {
     languageCode: LanguageCode;
     name: Scalars['String'];
     code: Scalars['String'];
-    values: FacetValue[];
-    translations: FacetTranslation[];
+    values: Array<FacetValue>;
+    translations: Array<FacetTranslation>;
     customFields?: Maybe<Scalars['JSON']>;
 };
 export declare type FacetFilterParameter = {
@@ -932,7 +911,7 @@ export declare type FacetFilterParameter = {
 };
 export declare type FacetList = PaginatedList & {
     __typename?: 'FacetList';
-    items: Facet[];
+    items: Array<Facet>;
     totalItems: Scalars['Int'];
 };
 export declare type FacetListOptions = {
@@ -971,7 +950,7 @@ export declare type FacetValue = Node & {
     facet: Facet;
     name: Scalars['String'];
     code: Scalars['String'];
-    translations: FacetValueTranslation[];
+    translations: Array<FacetValueTranslation>;
     customFields?: Maybe<FacetValueCustomFields>;
 };
 export declare type FacetValueCustomFields = {
@@ -1013,8 +992,8 @@ export declare type FloatCustomFieldConfig = CustomField & {
     name: Scalars['String'];
     type: Scalars['String'];
     list: Scalars['Boolean'];
-    label?: Maybe<LocalizedString[]>;
-    description?: Maybe<LocalizedString[]>;
+    label?: Maybe<Array<LocalizedString>>;
+    description?: Maybe<Array<LocalizedString>>;
     readonly?: Maybe<Scalars['Boolean']>;
     internal?: Maybe<Scalars['Boolean']>;
     nullable?: Maybe<Scalars['Boolean']>;
@@ -1028,8 +1007,8 @@ export declare type Fulfillment = Node & {
     id: Scalars['ID'];
     createdAt: Scalars['DateTime'];
     updatedAt: Scalars['DateTime'];
-    orderItems: OrderItem[];
-    summary: FulfillmentLineSummary[];
+    orderItems: Array<OrderItem>;
+    summary: Array<FulfillmentLineSummary>;
     state: Scalars['String'];
     method: Scalars['String'];
     trackingCode?: Maybe<Scalars['String']>;
@@ -1041,9 +1020,9 @@ export declare type FulfillmentLineSummary = {
     quantity: Scalars['Int'];
 };
 export declare enum GlobalFlag {
-    TRUE = 'TRUE',
-    FALSE = 'FALSE',
-    INHERIT = 'INHERIT',
+    TRUE = "TRUE",
+    FALSE = "FALSE",
+    INHERIT = "INHERIT"
 }
 export declare type HistoryEntry = Node & {
     __typename?: 'HistoryEntry';
@@ -1061,7 +1040,7 @@ export declare type HistoryEntryFilterParameter = {
 };
 export declare type HistoryEntryList = PaginatedList & {
     __typename?: 'HistoryEntryList';
-    items: HistoryEntry[];
+    items: Array<HistoryEntry>;
     totalItems: Scalars['Int'];
 };
 export declare type HistoryEntryListOptions = {
@@ -1082,30 +1061,30 @@ export declare type HistoryEntrySortParameter = {
     updatedAt?: Maybe<SortOrder>;
 };
 export declare enum HistoryEntryType {
-    CUSTOMER_REGISTERED = 'CUSTOMER_REGISTERED',
-    CUSTOMER_VERIFIED = 'CUSTOMER_VERIFIED',
-    CUSTOMER_DETAIL_UPDATED = 'CUSTOMER_DETAIL_UPDATED',
-    CUSTOMER_ADDED_TO_GROUP = 'CUSTOMER_ADDED_TO_GROUP',
-    CUSTOMER_REMOVED_FROM_GROUP = 'CUSTOMER_REMOVED_FROM_GROUP',
-    CUSTOMER_ADDRESS_CREATED = 'CUSTOMER_ADDRESS_CREATED',
-    CUSTOMER_ADDRESS_UPDATED = 'CUSTOMER_ADDRESS_UPDATED',
-    CUSTOMER_ADDRESS_DELETED = 'CUSTOMER_ADDRESS_DELETED',
-    CUSTOMER_PASSWORD_UPDATED = 'CUSTOMER_PASSWORD_UPDATED',
-    CUSTOMER_PASSWORD_RESET_REQUESTED = 'CUSTOMER_PASSWORD_RESET_REQUESTED',
-    CUSTOMER_PASSWORD_RESET_VERIFIED = 'CUSTOMER_PASSWORD_RESET_VERIFIED',
-    CUSTOMER_EMAIL_UPDATE_REQUESTED = 'CUSTOMER_EMAIL_UPDATE_REQUESTED',
-    CUSTOMER_EMAIL_UPDATE_VERIFIED = 'CUSTOMER_EMAIL_UPDATE_VERIFIED',
-    CUSTOMER_NOTE = 'CUSTOMER_NOTE',
-    ORDER_STATE_TRANSITION = 'ORDER_STATE_TRANSITION',
-    ORDER_PAYMENT_TRANSITION = 'ORDER_PAYMENT_TRANSITION',
-    ORDER_FULFILLMENT = 'ORDER_FULFILLMENT',
-    ORDER_CANCELLATION = 'ORDER_CANCELLATION',
-    ORDER_REFUND_TRANSITION = 'ORDER_REFUND_TRANSITION',
-    ORDER_FULFILLMENT_TRANSITION = 'ORDER_FULFILLMENT_TRANSITION',
-    ORDER_NOTE = 'ORDER_NOTE',
-    ORDER_COUPON_APPLIED = 'ORDER_COUPON_APPLIED',
-    ORDER_COUPON_REMOVED = 'ORDER_COUPON_REMOVED',
-    ORDER_MODIFIED = 'ORDER_MODIFIED',
+    CUSTOMER_REGISTERED = "CUSTOMER_REGISTERED",
+    CUSTOMER_VERIFIED = "CUSTOMER_VERIFIED",
+    CUSTOMER_DETAIL_UPDATED = "CUSTOMER_DETAIL_UPDATED",
+    CUSTOMER_ADDED_TO_GROUP = "CUSTOMER_ADDED_TO_GROUP",
+    CUSTOMER_REMOVED_FROM_GROUP = "CUSTOMER_REMOVED_FROM_GROUP",
+    CUSTOMER_ADDRESS_CREATED = "CUSTOMER_ADDRESS_CREATED",
+    CUSTOMER_ADDRESS_UPDATED = "CUSTOMER_ADDRESS_UPDATED",
+    CUSTOMER_ADDRESS_DELETED = "CUSTOMER_ADDRESS_DELETED",
+    CUSTOMER_PASSWORD_UPDATED = "CUSTOMER_PASSWORD_UPDATED",
+    CUSTOMER_PASSWORD_RESET_REQUESTED = "CUSTOMER_PASSWORD_RESET_REQUESTED",
+    CUSTOMER_PASSWORD_RESET_VERIFIED = "CUSTOMER_PASSWORD_RESET_VERIFIED",
+    CUSTOMER_EMAIL_UPDATE_REQUESTED = "CUSTOMER_EMAIL_UPDATE_REQUESTED",
+    CUSTOMER_EMAIL_UPDATE_VERIFIED = "CUSTOMER_EMAIL_UPDATE_VERIFIED",
+    CUSTOMER_NOTE = "CUSTOMER_NOTE",
+    ORDER_STATE_TRANSITION = "ORDER_STATE_TRANSITION",
+    ORDER_PAYMENT_TRANSITION = "ORDER_PAYMENT_TRANSITION",
+    ORDER_FULFILLMENT = "ORDER_FULFILLMENT",
+    ORDER_CANCELLATION = "ORDER_CANCELLATION",
+    ORDER_REFUND_TRANSITION = "ORDER_REFUND_TRANSITION",
+    ORDER_FULFILLMENT_TRANSITION = "ORDER_FULFILLMENT_TRANSITION",
+    ORDER_NOTE = "ORDER_NOTE",
+    ORDER_COUPON_APPLIED = "ORDER_COUPON_APPLIED",
+    ORDER_COUPON_REMOVED = "ORDER_COUPON_REMOVED",
+    ORDER_MODIFIED = "ORDER_MODIFIED"
 }
 /** Operators for filtering on a list of ID fields */
 export declare type IdListOperators = {
@@ -1162,8 +1141,8 @@ export declare type IntCustomFieldConfig = CustomField & {
     name: Scalars['String'];
     type: Scalars['String'];
     list: Scalars['Boolean'];
-    label?: Maybe<LocalizedString[]>;
-    description?: Maybe<LocalizedString[]>;
+    label?: Maybe<Array<LocalizedString>>;
+    description?: Maybe<Array<LocalizedString>>;
     readonly?: Maybe<Scalars['Boolean']>;
     internal?: Maybe<Scalars['Boolean']>;
     nullable?: Maybe<Scalars['Boolean']>;
@@ -1190,315 +1169,315 @@ export declare type InvalidCredentialsError = ErrorResult & {
  */
 export declare enum LanguageCode {
     /** Afrikaans */
-    af = 'af',
+    af = "af",
     /** Akan */
-    ak = 'ak',
+    ak = "ak",
     /** Albanian */
-    sq = 'sq',
+    sq = "sq",
     /** Amharic */
-    am = 'am',
+    am = "am",
     /** Arabic */
-    ar = 'ar',
+    ar = "ar",
     /** Armenian */
-    hy = 'hy',
+    hy = "hy",
     /** Azerbaijani */
-    az = 'az',
+    az = "az",
     /** Bambara */
-    bm = 'bm',
+    bm = "bm",
     /** Bangla */
-    bn = 'bn',
+    bn = "bn",
     /** Basque */
-    eu = 'eu',
+    eu = "eu",
     /** Belarusian */
-    be = 'be',
+    be = "be",
     /** Bosnian */
-    bs = 'bs',
+    bs = "bs",
     /** Breton */
-    br = 'br',
+    br = "br",
     /** Bulgarian */
-    bg = 'bg',
+    bg = "bg",
     /** Burmese */
-    my = 'my',
+    my = "my",
     /** Catalan */
-    ca = 'ca',
+    ca = "ca",
     /** Chechen */
-    ce = 'ce',
+    ce = "ce",
     /** Chinese */
-    zh = 'zh',
+    zh = "zh",
     /** Simplified Chinese */
-    zh_Hans = 'zh_Hans',
+    zh_Hans = "zh_Hans",
     /** Traditional Chinese */
-    zh_Hant = 'zh_Hant',
+    zh_Hant = "zh_Hant",
     /** Church Slavic */
-    cu = 'cu',
+    cu = "cu",
     /** Cornish */
-    kw = 'kw',
+    kw = "kw",
     /** Corsican */
-    co = 'co',
+    co = "co",
     /** Croatian */
-    hr = 'hr',
+    hr = "hr",
     /** Czech */
-    cs = 'cs',
+    cs = "cs",
     /** Danish */
-    da = 'da',
+    da = "da",
     /** Dutch */
-    nl = 'nl',
+    nl = "nl",
     /** Flemish */
-    nl_BE = 'nl_BE',
+    nl_BE = "nl_BE",
     /** Dzongkha */
-    dz = 'dz',
+    dz = "dz",
     /** English */
-    en = 'en',
+    en = "en",
     /** Australian English */
-    en_AU = 'en_AU',
+    en_AU = "en_AU",
     /** Canadian English */
-    en_CA = 'en_CA',
+    en_CA = "en_CA",
     /** British English */
-    en_GB = 'en_GB',
+    en_GB = "en_GB",
     /** American English */
-    en_US = 'en_US',
+    en_US = "en_US",
     /** Esperanto */
-    eo = 'eo',
+    eo = "eo",
     /** Estonian */
-    et = 'et',
+    et = "et",
     /** Ewe */
-    ee = 'ee',
+    ee = "ee",
     /** Faroese */
-    fo = 'fo',
+    fo = "fo",
     /** Finnish */
-    fi = 'fi',
+    fi = "fi",
     /** French */
-    fr = 'fr',
+    fr = "fr",
     /** Canadian French */
-    fr_CA = 'fr_CA',
+    fr_CA = "fr_CA",
     /** Swiss French */
-    fr_CH = 'fr_CH',
+    fr_CH = "fr_CH",
     /** Fulah */
-    ff = 'ff',
+    ff = "ff",
     /** Galician */
-    gl = 'gl',
+    gl = "gl",
     /** Ganda */
-    lg = 'lg',
+    lg = "lg",
     /** Georgian */
-    ka = 'ka',
+    ka = "ka",
     /** German */
-    de = 'de',
+    de = "de",
     /** Austrian German */
-    de_AT = 'de_AT',
+    de_AT = "de_AT",
     /** Swiss High German */
-    de_CH = 'de_CH',
+    de_CH = "de_CH",
     /** Greek */
-    el = 'el',
+    el = "el",
     /** Gujarati */
-    gu = 'gu',
+    gu = "gu",
     /** Haitian Creole */
-    ht = 'ht',
+    ht = "ht",
     /** Hausa */
-    ha = 'ha',
+    ha = "ha",
     /** Hebrew */
-    he = 'he',
+    he = "he",
     /** Hindi */
-    hi = 'hi',
+    hi = "hi",
     /** Hungarian */
-    hu = 'hu',
+    hu = "hu",
     /** Igbo */
-    ig = 'ig',
+    ig = "ig",
     /** Indonesian */
-    id = 'id',
+    id = "id",
     /** Interlingua */
-    ia = 'ia',
+    ia = "ia",
     /** Irish */
-    ga = 'ga',
+    ga = "ga",
     /** Italian */
-    it = 'it',
+    it = "it",
     /** Japanese */
-    ja = 'ja',
+    ja = "ja",
     /** Javanese */
-    jv = 'jv',
+    jv = "jv",
     /** Kalaallisut */
-    kl = 'kl',
+    kl = "kl",
     /** Kannada */
-    kn = 'kn',
+    kn = "kn",
     /** Kashmiri */
-    ks = 'ks',
+    ks = "ks",
     /** Kazakh */
-    kk = 'kk',
+    kk = "kk",
     /** Khmer */
-    km = 'km',
+    km = "km",
     /** Kikuyu */
-    ki = 'ki',
+    ki = "ki",
     /** Kinyarwanda */
-    rw = 'rw',
+    rw = "rw",
     /** Korean */
-    ko = 'ko',
+    ko = "ko",
     /** Kurdish */
-    ku = 'ku',
+    ku = "ku",
     /** Kyrgyz */
-    ky = 'ky',
+    ky = "ky",
     /** Lao */
-    lo = 'lo',
+    lo = "lo",
     /** Latin */
-    la = 'la',
+    la = "la",
     /** Latvian */
-    lv = 'lv',
+    lv = "lv",
     /** Lingala */
-    ln = 'ln',
+    ln = "ln",
     /** Lithuanian */
-    lt = 'lt',
+    lt = "lt",
     /** Luba-Katanga */
-    lu = 'lu',
+    lu = "lu",
     /** Luxembourgish */
-    lb = 'lb',
+    lb = "lb",
     /** Macedonian */
-    mk = 'mk',
+    mk = "mk",
     /** Malagasy */
-    mg = 'mg',
+    mg = "mg",
     /** Malay */
-    ms = 'ms',
+    ms = "ms",
     /** Malayalam */
-    ml = 'ml',
+    ml = "ml",
     /** Maltese */
-    mt = 'mt',
+    mt = "mt",
     /** Manx */
-    gv = 'gv',
+    gv = "gv",
     /** Maori */
-    mi = 'mi',
+    mi = "mi",
     /** Marathi */
-    mr = 'mr',
+    mr = "mr",
     /** Mongolian */
-    mn = 'mn',
+    mn = "mn",
     /** Nepali */
-    ne = 'ne',
+    ne = "ne",
     /** North Ndebele */
-    nd = 'nd',
+    nd = "nd",
     /** Northern Sami */
-    se = 'se',
+    se = "se",
     /** Norwegian Bokmål */
-    nb = 'nb',
+    nb = "nb",
     /** Norwegian Nynorsk */
-    nn = 'nn',
+    nn = "nn",
     /** Nyanja */
-    ny = 'ny',
+    ny = "ny",
     /** Odia */
-    or = 'or',
+    or = "or",
     /** Oromo */
-    om = 'om',
+    om = "om",
     /** Ossetic */
-    os = 'os',
+    os = "os",
     /** Pashto */
-    ps = 'ps',
+    ps = "ps",
     /** Persian */
-    fa = 'fa',
+    fa = "fa",
     /** Dari */
-    fa_AF = 'fa_AF',
+    fa_AF = "fa_AF",
     /** Polish */
-    pl = 'pl',
+    pl = "pl",
     /** Portuguese */
-    pt = 'pt',
+    pt = "pt",
     /** Brazilian Portuguese */
-    pt_BR = 'pt_BR',
+    pt_BR = "pt_BR",
     /** European Portuguese */
-    pt_PT = 'pt_PT',
+    pt_PT = "pt_PT",
     /** Punjabi */
-    pa = 'pa',
+    pa = "pa",
     /** Quechua */
-    qu = 'qu',
+    qu = "qu",
     /** Romanian */
-    ro = 'ro',
+    ro = "ro",
     /** Moldavian */
-    ro_MD = 'ro_MD',
+    ro_MD = "ro_MD",
     /** Romansh */
-    rm = 'rm',
+    rm = "rm",
     /** Rundi */
-    rn = 'rn',
+    rn = "rn",
     /** Russian */
-    ru = 'ru',
+    ru = "ru",
     /** Samoan */
-    sm = 'sm',
+    sm = "sm",
     /** Sango */
-    sg = 'sg',
+    sg = "sg",
     /** Sanskrit */
-    sa = 'sa',
+    sa = "sa",
     /** Scottish Gaelic */
-    gd = 'gd',
+    gd = "gd",
     /** Serbian */
-    sr = 'sr',
+    sr = "sr",
     /** Shona */
-    sn = 'sn',
+    sn = "sn",
     /** Sichuan Yi */
-    ii = 'ii',
+    ii = "ii",
     /** Sindhi */
-    sd = 'sd',
+    sd = "sd",
     /** Sinhala */
-    si = 'si',
+    si = "si",
     /** Slovak */
-    sk = 'sk',
+    sk = "sk",
     /** Slovenian */
-    sl = 'sl',
+    sl = "sl",
     /** Somali */
-    so = 'so',
+    so = "so",
     /** Southern Sotho */
-    st = 'st',
+    st = "st",
     /** Spanish */
-    es = 'es',
+    es = "es",
     /** European Spanish */
-    es_ES = 'es_ES',
+    es_ES = "es_ES",
     /** Mexican Spanish */
-    es_MX = 'es_MX',
+    es_MX = "es_MX",
     /** Sundanese */
-    su = 'su',
+    su = "su",
     /** Swahili */
-    sw = 'sw',
+    sw = "sw",
     /** Congo Swahili */
-    sw_CD = 'sw_CD',
+    sw_CD = "sw_CD",
     /** Swedish */
-    sv = 'sv',
+    sv = "sv",
     /** Tajik */
-    tg = 'tg',
+    tg = "tg",
     /** Tamil */
-    ta = 'ta',
+    ta = "ta",
     /** Tatar */
-    tt = 'tt',
+    tt = "tt",
     /** Telugu */
-    te = 'te',
+    te = "te",
     /** Thai */
-    th = 'th',
+    th = "th",
     /** Tibetan */
-    bo = 'bo',
+    bo = "bo",
     /** Tigrinya */
-    ti = 'ti',
+    ti = "ti",
     /** Tongan */
-    to = 'to',
+    to = "to",
     /** Turkish */
-    tr = 'tr',
+    tr = "tr",
     /** Turkmen */
-    tk = 'tk',
+    tk = "tk",
     /** Ukrainian */
-    uk = 'uk',
+    uk = "uk",
     /** Urdu */
-    ur = 'ur',
+    ur = "ur",
     /** Uyghur */
-    ug = 'ug',
+    ug = "ug",
     /** Uzbek */
-    uz = 'uz',
+    uz = "uz",
     /** Vietnamese */
-    vi = 'vi',
+    vi = "vi",
     /** Volapük */
-    vo = 'vo',
+    vo = "vo",
     /** Welsh */
-    cy = 'cy',
+    cy = "cy",
     /** Western Frisian */
-    fy = 'fy',
+    fy = "fy",
     /** Wolof */
-    wo = 'wo',
+    wo = "wo",
     /** Xhosa */
-    xh = 'xh',
+    xh = "xh",
     /** Yiddish */
-    yi = 'yi',
+    yi = "yi",
     /** Yoruba */
-    yo = 'yo',
+    yo = "yo",
     /** Zulu */
-    zu = 'zu',
+    zu = "zu"
 }
 export declare type LocaleStringCustomFieldConfig = CustomField & {
     __typename?: 'LocaleStringCustomFieldConfig';
@@ -1506,8 +1485,8 @@ export declare type LocaleStringCustomFieldConfig = CustomField & {
     type: Scalars['String'];
     list: Scalars['Boolean'];
     length?: Maybe<Scalars['Int']>;
-    label?: Maybe<LocalizedString[]>;
-    description?: Maybe<LocalizedString[]>;
+    label?: Maybe<Array<LocalizedString>>;
+    description?: Maybe<Array<LocalizedString>>;
     readonly?: Maybe<Scalars['Boolean']>;
     internal?: Maybe<Scalars['Boolean']>;
     nullable?: Maybe<Scalars['Boolean']>;
@@ -1520,8 +1499,8 @@ export declare type LocalizedString = {
     value: Scalars['String'];
 };
 export declare enum LogicalOperator {
-    AND = 'AND',
-    OR = 'OR',
+    AND = "AND",
+    OR = "OR"
 }
 /** Returned when attempting to register or verify a customer account without a password, when one is required. */
 export declare type MissingPasswordError = ErrorResult & {
@@ -1582,6 +1561,7 @@ export declare type Mutation = {
     refreshCustomerVerification: RefreshCustomerVerificationResult;
     /** Update an existing Customer */
     updateCustomer: Customer;
+    deleteCustomerFromShop: DeleteCustomerAccountResult;
     /** Create a new Customer Address */
     createCustomerAddress: Address;
     /** Update an existing Address */
@@ -1661,6 +1641,10 @@ export declare type MutationRefreshCustomerVerificationArgs = {
 export declare type MutationUpdateCustomerArgs = {
     input: UpdateCustomerInput;
 };
+export declare type MutationDeleteCustomerFromShopArgs = {
+    phoneNumber: Scalars['String'];
+    password: Scalars['String'];
+};
 export declare type MutationCreateCustomerAddressArgs = {
     input: CreateAddressInput;
 };
@@ -1697,11 +1681,7 @@ export declare type NativeAuthStrategyError = ErrorResult & {
     errorCode: ErrorCode;
     message: Scalars['String'];
 };
-export declare type NativeAuthenticationResult =
-    | CurrentUser
-    | InvalidCredentialsError
-    | NotVerifiedError
-    | NativeAuthStrategyError;
+export declare type NativeAuthenticationResult = CurrentUser | InvalidCredentialsError | NotVerifiedError | NativeAuthStrategyError;
 /** Returned when attempting to set a negative OrderLine quantity. */
 export declare type NegativeQuantityError = ErrorResult & {
     __typename?: 'NegativeQuantityError';
@@ -1771,21 +1751,21 @@ export declare type Order = Node & {
     customer?: Maybe<Customer>;
     shippingAddress?: Maybe<OrderAddress>;
     billingAddress?: Maybe<OrderAddress>;
-    lines: OrderLine[];
+    lines: Array<OrderLine>;
     /**
      * Surcharges are arbitrary modifications to the Order total which are neither
      * ProductVariants nor discounts resulting from applied Promotions. For example,
      * one-off discounts based on customer interaction, or surcharges based on payment
      * methods.
      */
-    surcharges: Surcharge[];
-    discounts: Discount[];
+    surcharges: Array<Surcharge>;
+    discounts: Array<Discount>;
     /** An array of all coupon codes applied to the Order */
     couponCodes: Array<Scalars['String']>;
     /** Promotions applied to the order. Only gets populated after the payment process has completed. */
-    promotions: Promotion[];
-    payments?: Maybe<Payment[]>;
-    fulfillments?: Maybe<Fulfillment[]>;
+    promotions: Array<Promotion>;
+    payments?: Maybe<Array<Payment>>;
+    fulfillments?: Maybe<Array<Fulfillment>>;
     totalQuantity: Scalars['Int'];
     /**
      * The subTotal is the total of all OrderLines in the Order. This figure also includes any Order-level
@@ -1797,7 +1777,7 @@ export declare type Order = Node & {
     /** Same as subTotal, but inclusive of tax */
     subTotalWithTax: Scalars['Int'];
     currencyCode: CurrencyCode;
-    shippingLines: ShippingLine[];
+    shippingLines: Array<ShippingLine>;
     shipping: Scalars['Int'];
     shippingWithTax: Scalars['Int'];
     /** Equal to subTotal plus shipping */
@@ -1805,7 +1785,7 @@ export declare type Order = Node & {
     /** The final payable amount. Equal to subTotalWithTax plus shippingWithTax */
     totalWithTax: Scalars['Int'];
     /** A summary of the taxes being applied to this Order */
-    taxSummary: OrderTaxSummary[];
+    taxSummary: Array<OrderTaxSummary>;
     history: HistoryEntryList;
     customFields?: Maybe<OrderCustomFields>;
 };
@@ -1881,8 +1861,8 @@ export declare type OrderItem = Node & {
     proratedUnitPriceWithTax: Scalars['Int'];
     unitTax: Scalars['Int'];
     taxRate: Scalars['Float'];
-    adjustments: Adjustment[];
-    taxLines: TaxLine[];
+    adjustments: Array<Adjustment>;
+    taxLines: Array<TaxLine>;
     fulfillment?: Maybe<Fulfillment>;
     refundId?: Maybe<Scalars['ID']>;
 };
@@ -1928,7 +1908,7 @@ export declare type OrderLine = Node & {
     /** The proratedUnitPrice including tax */
     proratedUnitPriceWithTax: Scalars['Int'];
     quantity: Scalars['Int'];
-    items: OrderItem[];
+    items: Array<OrderItem>;
     taxRate: Scalars['Float'];
     /** The total price of the line excluding tax and discounts. */
     linePrice: Scalars['Int'];
@@ -1948,10 +1928,10 @@ export declare type OrderLine = Node & {
     proratedLinePriceWithTax: Scalars['Int'];
     /** The total tax on this line */
     lineTax: Scalars['Int'];
-    discounts: Discount[];
-    taxLines: TaxLine[];
+    discounts: Array<Discount>;
+    taxLines: Array<TaxLine>;
     order: Order;
-    fulfillments?: Maybe<Fulfillment[]>;
+    fulfillments?: Maybe<Array<Fulfillment>>;
     customFields?: Maybe<OrderLineCustomFields>;
 };
 export declare type OrderLineCustomFields = {
@@ -1963,7 +1943,7 @@ export declare type OrderLineCustomFieldsInput = {
 };
 export declare type OrderList = PaginatedList & {
     __typename?: 'OrderList';
-    items: Order[];
+    items: Array<Order>;
     totalItems: Scalars['Int'];
 };
 export declare type OrderListOptions = {
@@ -2032,7 +2012,7 @@ export declare type OrderTaxSummary = {
     taxTotal: Scalars['Int'];
 };
 export declare type PaginatedList = {
-    items: Node[];
+    items: Array<Node>;
     totalItems: Scalars['Int'];
 };
 /** Returned when attempting to verify a customer account with a password, when a password has already been set. */
@@ -2076,7 +2056,7 @@ export declare type Payment = Node & {
     state: Scalars['String'];
     transactionId?: Maybe<Scalars['String']>;
     errorMessage?: Maybe<Scalars['String']>;
-    refunds: Refund[];
+    refunds: Array<Refund>;
     metadata?: Maybe<Scalars['JSON']>;
 };
 /** Returned when a Payment is declined by the payment provider. */
@@ -2161,175 +2141,175 @@ export declare type PaymentMethodQuote = {
  */
 export declare enum Permission {
     /** Authenticated means simply that the user is logged in */
-    Authenticated = 'Authenticated',
+    Authenticated = "Authenticated",
     /** SuperAdmin has unrestricted access to all operations */
-    SuperAdmin = 'SuperAdmin',
+    SuperAdmin = "SuperAdmin",
     /** Owner means the user owns this entity, e.g. a Customer's own Order */
-    Owner = 'Owner',
+    Owner = "Owner",
     /** Public means any unauthenticated user may perform the operation */
-    Public = 'Public',
+    Public = "Public",
     /** Grants permission to update GlobalSettings */
-    UpdateGlobalSettings = 'UpdateGlobalSettings',
+    UpdateGlobalSettings = "UpdateGlobalSettings",
     /** Grants permission to create Products, Facets, Assets, Collections */
-    CreateCatalog = 'CreateCatalog',
+    CreateCatalog = "CreateCatalog",
     /** Grants permission to read Products, Facets, Assets, Collections */
-    ReadCatalog = 'ReadCatalog',
+    ReadCatalog = "ReadCatalog",
     /** Grants permission to update Products, Facets, Assets, Collections */
-    UpdateCatalog = 'UpdateCatalog',
+    UpdateCatalog = "UpdateCatalog",
     /** Grants permission to delete Products, Facets, Assets, Collections */
-    DeleteCatalog = 'DeleteCatalog',
+    DeleteCatalog = "DeleteCatalog",
     /** Grants permission to create PaymentMethods, ShippingMethods, TaxCategories, TaxRates, Zones, Countries, System & GlobalSettings */
-    CreateSettings = 'CreateSettings',
+    CreateSettings = "CreateSettings",
     /** Grants permission to read PaymentMethods, ShippingMethods, TaxCategories, TaxRates, Zones, Countries, System & GlobalSettings */
-    ReadSettings = 'ReadSettings',
+    ReadSettings = "ReadSettings",
     /** Grants permission to update PaymentMethods, ShippingMethods, TaxCategories, TaxRates, Zones, Countries, System & GlobalSettings */
-    UpdateSettings = 'UpdateSettings',
+    UpdateSettings = "UpdateSettings",
     /** Grants permission to delete PaymentMethods, ShippingMethods, TaxCategories, TaxRates, Zones, Countries, System & GlobalSettings */
-    DeleteSettings = 'DeleteSettings',
+    DeleteSettings = "DeleteSettings",
     /** Grants permission to create Administrator */
-    CreateAdministrator = 'CreateAdministrator',
+    CreateAdministrator = "CreateAdministrator",
     /** Grants permission to read Administrator */
-    ReadAdministrator = 'ReadAdministrator',
+    ReadAdministrator = "ReadAdministrator",
     /** Grants permission to update Administrator */
-    UpdateAdministrator = 'UpdateAdministrator',
+    UpdateAdministrator = "UpdateAdministrator",
     /** Grants permission to delete Administrator */
-    DeleteAdministrator = 'DeleteAdministrator',
+    DeleteAdministrator = "DeleteAdministrator",
     /** Grants permission to create Asset */
-    CreateAsset = 'CreateAsset',
+    CreateAsset = "CreateAsset",
     /** Grants permission to read Asset */
-    ReadAsset = 'ReadAsset',
+    ReadAsset = "ReadAsset",
     /** Grants permission to update Asset */
-    UpdateAsset = 'UpdateAsset',
+    UpdateAsset = "UpdateAsset",
     /** Grants permission to delete Asset */
-    DeleteAsset = 'DeleteAsset',
+    DeleteAsset = "DeleteAsset",
     /** Grants permission to create Channel */
-    CreateChannel = 'CreateChannel',
+    CreateChannel = "CreateChannel",
     /** Grants permission to read Channel */
-    ReadChannel = 'ReadChannel',
+    ReadChannel = "ReadChannel",
     /** Grants permission to update Channel */
-    UpdateChannel = 'UpdateChannel',
+    UpdateChannel = "UpdateChannel",
     /** Grants permission to delete Channel */
-    DeleteChannel = 'DeleteChannel',
+    DeleteChannel = "DeleteChannel",
     /** Grants permission to create Collection */
-    CreateCollection = 'CreateCollection',
+    CreateCollection = "CreateCollection",
     /** Grants permission to read Collection */
-    ReadCollection = 'ReadCollection',
+    ReadCollection = "ReadCollection",
     /** Grants permission to update Collection */
-    UpdateCollection = 'UpdateCollection',
+    UpdateCollection = "UpdateCollection",
     /** Grants permission to delete Collection */
-    DeleteCollection = 'DeleteCollection',
+    DeleteCollection = "DeleteCollection",
     /** Grants permission to create Country */
-    CreateCountry = 'CreateCountry',
+    CreateCountry = "CreateCountry",
     /** Grants permission to read Country */
-    ReadCountry = 'ReadCountry',
+    ReadCountry = "ReadCountry",
     /** Grants permission to update Country */
-    UpdateCountry = 'UpdateCountry',
+    UpdateCountry = "UpdateCountry",
     /** Grants permission to delete Country */
-    DeleteCountry = 'DeleteCountry',
+    DeleteCountry = "DeleteCountry",
     /** Grants permission to create Customer */
-    CreateCustomer = 'CreateCustomer',
+    CreateCustomer = "CreateCustomer",
     /** Grants permission to read Customer */
-    ReadCustomer = 'ReadCustomer',
+    ReadCustomer = "ReadCustomer",
     /** Grants permission to update Customer */
-    UpdateCustomer = 'UpdateCustomer',
+    UpdateCustomer = "UpdateCustomer",
     /** Grants permission to delete Customer */
-    DeleteCustomer = 'DeleteCustomer',
+    DeleteCustomer = "DeleteCustomer",
     /** Grants permission to create CustomerGroup */
-    CreateCustomerGroup = 'CreateCustomerGroup',
+    CreateCustomerGroup = "CreateCustomerGroup",
     /** Grants permission to read CustomerGroup */
-    ReadCustomerGroup = 'ReadCustomerGroup',
+    ReadCustomerGroup = "ReadCustomerGroup",
     /** Grants permission to update CustomerGroup */
-    UpdateCustomerGroup = 'UpdateCustomerGroup',
+    UpdateCustomerGroup = "UpdateCustomerGroup",
     /** Grants permission to delete CustomerGroup */
-    DeleteCustomerGroup = 'DeleteCustomerGroup',
+    DeleteCustomerGroup = "DeleteCustomerGroup",
     /** Grants permission to create Facet */
-    CreateFacet = 'CreateFacet',
+    CreateFacet = "CreateFacet",
     /** Grants permission to read Facet */
-    ReadFacet = 'ReadFacet',
+    ReadFacet = "ReadFacet",
     /** Grants permission to update Facet */
-    UpdateFacet = 'UpdateFacet',
+    UpdateFacet = "UpdateFacet",
     /** Grants permission to delete Facet */
-    DeleteFacet = 'DeleteFacet',
+    DeleteFacet = "DeleteFacet",
     /** Grants permission to create Order */
-    CreateOrder = 'CreateOrder',
+    CreateOrder = "CreateOrder",
     /** Grants permission to read Order */
-    ReadOrder = 'ReadOrder',
+    ReadOrder = "ReadOrder",
     /** Grants permission to update Order */
-    UpdateOrder = 'UpdateOrder',
+    UpdateOrder = "UpdateOrder",
     /** Grants permission to delete Order */
-    DeleteOrder = 'DeleteOrder',
+    DeleteOrder = "DeleteOrder",
     /** Grants permission to create PaymentMethod */
-    CreatePaymentMethod = 'CreatePaymentMethod',
+    CreatePaymentMethod = "CreatePaymentMethod",
     /** Grants permission to read PaymentMethod */
-    ReadPaymentMethod = 'ReadPaymentMethod',
+    ReadPaymentMethod = "ReadPaymentMethod",
     /** Grants permission to update PaymentMethod */
-    UpdatePaymentMethod = 'UpdatePaymentMethod',
+    UpdatePaymentMethod = "UpdatePaymentMethod",
     /** Grants permission to delete PaymentMethod */
-    DeletePaymentMethod = 'DeletePaymentMethod',
+    DeletePaymentMethod = "DeletePaymentMethod",
     /** Grants permission to create Product */
-    CreateProduct = 'CreateProduct',
+    CreateProduct = "CreateProduct",
     /** Grants permission to read Product */
-    ReadProduct = 'ReadProduct',
+    ReadProduct = "ReadProduct",
     /** Grants permission to update Product */
-    UpdateProduct = 'UpdateProduct',
+    UpdateProduct = "UpdateProduct",
     /** Grants permission to delete Product */
-    DeleteProduct = 'DeleteProduct',
+    DeleteProduct = "DeleteProduct",
     /** Grants permission to create Promotion */
-    CreatePromotion = 'CreatePromotion',
+    CreatePromotion = "CreatePromotion",
     /** Grants permission to read Promotion */
-    ReadPromotion = 'ReadPromotion',
+    ReadPromotion = "ReadPromotion",
     /** Grants permission to update Promotion */
-    UpdatePromotion = 'UpdatePromotion',
+    UpdatePromotion = "UpdatePromotion",
     /** Grants permission to delete Promotion */
-    DeletePromotion = 'DeletePromotion',
+    DeletePromotion = "DeletePromotion",
     /** Grants permission to create ShippingMethod */
-    CreateShippingMethod = 'CreateShippingMethod',
+    CreateShippingMethod = "CreateShippingMethod",
     /** Grants permission to read ShippingMethod */
-    ReadShippingMethod = 'ReadShippingMethod',
+    ReadShippingMethod = "ReadShippingMethod",
     /** Grants permission to update ShippingMethod */
-    UpdateShippingMethod = 'UpdateShippingMethod',
+    UpdateShippingMethod = "UpdateShippingMethod",
     /** Grants permission to delete ShippingMethod */
-    DeleteShippingMethod = 'DeleteShippingMethod',
+    DeleteShippingMethod = "DeleteShippingMethod",
     /** Grants permission to create Tag */
-    CreateTag = 'CreateTag',
+    CreateTag = "CreateTag",
     /** Grants permission to read Tag */
-    ReadTag = 'ReadTag',
+    ReadTag = "ReadTag",
     /** Grants permission to update Tag */
-    UpdateTag = 'UpdateTag',
+    UpdateTag = "UpdateTag",
     /** Grants permission to delete Tag */
-    DeleteTag = 'DeleteTag',
+    DeleteTag = "DeleteTag",
     /** Grants permission to create TaxCategory */
-    CreateTaxCategory = 'CreateTaxCategory',
+    CreateTaxCategory = "CreateTaxCategory",
     /** Grants permission to read TaxCategory */
-    ReadTaxCategory = 'ReadTaxCategory',
+    ReadTaxCategory = "ReadTaxCategory",
     /** Grants permission to update TaxCategory */
-    UpdateTaxCategory = 'UpdateTaxCategory',
+    UpdateTaxCategory = "UpdateTaxCategory",
     /** Grants permission to delete TaxCategory */
-    DeleteTaxCategory = 'DeleteTaxCategory',
+    DeleteTaxCategory = "DeleteTaxCategory",
     /** Grants permission to create TaxRate */
-    CreateTaxRate = 'CreateTaxRate',
+    CreateTaxRate = "CreateTaxRate",
     /** Grants permission to read TaxRate */
-    ReadTaxRate = 'ReadTaxRate',
+    ReadTaxRate = "ReadTaxRate",
     /** Grants permission to update TaxRate */
-    UpdateTaxRate = 'UpdateTaxRate',
+    UpdateTaxRate = "UpdateTaxRate",
     /** Grants permission to delete TaxRate */
-    DeleteTaxRate = 'DeleteTaxRate',
+    DeleteTaxRate = "DeleteTaxRate",
     /** Grants permission to create System */
-    CreateSystem = 'CreateSystem',
+    CreateSystem = "CreateSystem",
     /** Grants permission to read System */
-    ReadSystem = 'ReadSystem',
+    ReadSystem = "ReadSystem",
     /** Grants permission to update System */
-    UpdateSystem = 'UpdateSystem',
+    UpdateSystem = "UpdateSystem",
     /** Grants permission to delete System */
-    DeleteSystem = 'DeleteSystem',
+    DeleteSystem = "DeleteSystem",
     /** Grants permission to create Zone */
-    CreateZone = 'CreateZone',
+    CreateZone = "CreateZone",
     /** Grants permission to read Zone */
-    ReadZone = 'ReadZone',
+    ReadZone = "ReadZone",
     /** Grants permission to update Zone */
-    UpdateZone = 'UpdateZone',
+    UpdateZone = "UpdateZone",
     /** Grants permission to delete Zone */
-    DeleteZone = 'DeleteZone',
+    DeleteZone = "DeleteZone"
 }
 /** The price range where the result has more than one price */
 export declare type PriceRange = {
@@ -2347,15 +2327,15 @@ export declare type Product = Node & {
     slug: Scalars['String'];
     description: Scalars['String'];
     featuredAsset?: Maybe<Asset>;
-    assets: Asset[];
+    assets: Array<Asset>;
     /** Returns all ProductVariants */
-    variants: ProductVariant[];
+    variants: Array<ProductVariant>;
     /** Returns a paginated, sortable, filterable list of ProductVariants */
     variantList: ProductVariantList;
-    optionGroups: ProductOptionGroup[];
-    facetValues: FacetValue[];
-    translations: ProductTranslation[];
-    collections: Collection[];
+    optionGroups: Array<ProductOptionGroup>;
+    facetValues: Array<FacetValue>;
+    translations: Array<ProductTranslation>;
+    collections: Array<Collection>;
     customFields?: Maybe<Scalars['JSON']>;
 };
 export declare type ProductVariantListArgs = {
@@ -2372,7 +2352,7 @@ export declare type ProductFilterParameter = {
 };
 export declare type ProductList = PaginatedList & {
     __typename?: 'ProductList';
-    items: Product[];
+    items: Array<Product>;
     totalItems: Scalars['Int'];
 };
 export declare type ProductListOptions = {
@@ -2397,7 +2377,7 @@ export declare type ProductOption = Node & {
     name: Scalars['String'];
     groupId: Scalars['ID'];
     group: ProductOptionGroup;
-    translations: ProductOptionTranslation[];
+    translations: Array<ProductOptionTranslation>;
     customFields?: Maybe<Scalars['JSON']>;
 };
 export declare type ProductOptionGroup = Node & {
@@ -2408,8 +2388,8 @@ export declare type ProductOptionGroup = Node & {
     languageCode: LanguageCode;
     code: Scalars['String'];
     name: Scalars['String'];
-    options: ProductOption[];
-    translations: ProductOptionGroupTranslation[];
+    options: Array<ProductOption>;
+    translations: Array<ProductOptionGroupTranslation>;
     customFields?: Maybe<Scalars['JSON']>;
 };
 export declare type ProductOptionGroupTranslation = {
@@ -2457,16 +2437,16 @@ export declare type ProductVariant = Node & {
     sku: Scalars['String'];
     name: Scalars['String'];
     featuredAsset?: Maybe<Asset>;
-    assets: Asset[];
+    assets: Array<Asset>;
     price: Scalars['Int'];
     currencyCode: CurrencyCode;
     priceWithTax: Scalars['Int'];
     stockLevel: Scalars['String'];
     taxRateApplied: TaxRate;
     taxCategory: TaxCategory;
-    options: ProductOption[];
-    facetValues: FacetValue[];
-    translations: ProductVariantTranslation[];
+    options: Array<ProductOption>;
+    facetValues: Array<FacetValue>;
+    translations: Array<ProductVariantTranslation>;
     customFields?: Maybe<ProductVariantCustomFields>;
 };
 export declare type ProductVariantCustomFields = {
@@ -2489,7 +2469,7 @@ export declare type ProductVariantFilterParameter = {
 };
 export declare type ProductVariantList = PaginatedList & {
     __typename?: 'ProductVariantList';
-    items: ProductVariant[];
+    items: Array<ProductVariant>;
     totalItems: Scalars['Int'];
 };
 export declare type ProductVariantListOptions = {
@@ -2535,8 +2515,8 @@ export declare type Promotion = Node & {
     perCustomerUsageLimit?: Maybe<Scalars['Int']>;
     name: Scalars['String'];
     enabled: Scalars['Boolean'];
-    conditions: ConfigurableOperation[];
-    actions: ConfigurableOperation[];
+    conditions: Array<ConfigurableOperation>;
+    actions: Array<ConfigurableOperation>;
     customFields?: Maybe<PromotionCustomFields>;
 };
 export declare type PromotionCustomFields = {
@@ -2546,7 +2526,7 @@ export declare type PromotionCustomFields = {
 };
 export declare type PromotionList = PaginatedList & {
     __typename?: 'PromotionList';
-    items: Promotion[];
+    items: Array<Promotion>;
     totalItems: Scalars['Int'];
 };
 export declare type Query = {
@@ -2562,15 +2542,15 @@ export declare type Query = {
      */
     activeOrder?: Maybe<Order>;
     /** An array of supported Countries */
-    availableCountries: Country[];
+    availableCountries: Array<Country>;
     /** A list of Collections available to the shop */
     collections: CollectionList;
     /** Returns a Collection either by its id or slug. If neither 'id' nor 'slug' is specified, an error will result. */
     collection?: Maybe<Collection>;
     /** Returns a list of eligible shipping methods based on the current active Order */
-    eligibleShippingMethods: ShippingMethodQuote[];
+    eligibleShippingMethods: Array<ShippingMethodQuote>;
     /** Returns a list of payment methods and their eligibility based on the current active Order */
-    eligiblePaymentMethods: PaymentMethodQuote[];
+    eligiblePaymentMethods: Array<PaymentMethodQuote>;
     /** A list of Facets available to the shop */
     facets: FacetList;
     /** Returns a Facet by its id */
@@ -2597,7 +2577,7 @@ export declare type Query = {
     products: ProductList;
     /** Search Products based on the criteria set by the `SearchInput` */
     search: SearchResponse;
-    customerChannels: Channel[];
+    customerChannels: Array<Channel>;
 };
 export declare type QueryCollectionsArgs = {
     options?: Maybe<CollectionListOptions>;
@@ -2628,10 +2608,7 @@ export declare type QueryProductsArgs = {
 export declare type QuerySearchArgs = {
     input: SearchInput;
 };
-export declare type RefreshCustomerVerificationResult =
-    | Success
-    | NativeAuthStrategyError
-    | OtpRequestTimeoutError;
+export declare type RefreshCustomerVerificationResult = Success | NativeAuthStrategyError | OtpRequestTimeoutError;
 export declare type Refund = Node & {
     __typename?: 'Refund';
     id: Scalars['ID'];
@@ -2645,16 +2622,11 @@ export declare type Refund = Node & {
     state: Scalars['String'];
     transactionId?: Maybe<Scalars['String']>;
     reason?: Maybe<Scalars['String']>;
-    orderItems: OrderItem[];
+    orderItems: Array<OrderItem>;
     paymentId: Scalars['ID'];
     metadata?: Maybe<Scalars['JSON']>;
 };
-export declare type RegisterCustomerAccountResult =
-    | Success
-    | MissingPasswordError
-    | PasswordValidationError
-    | NativeAuthStrategyError
-    | EmailAddressConflictError;
+export declare type RegisterCustomerAccountResult = Success | MissingPasswordError | PasswordValidationError | NativeAuthStrategyError | EmailAddressConflictError;
 export declare type RegisterCustomerCustomFieldsInput = {
     referredCode?: Maybe<Scalars['String']>;
     dob?: Maybe<Scalars['DateTime']>;
@@ -2674,8 +2646,8 @@ export declare type RelationCustomFieldConfig = CustomField & {
     name: Scalars['String'];
     type: Scalars['String'];
     list: Scalars['Boolean'];
-    label?: Maybe<LocalizedString[]>;
-    description?: Maybe<LocalizedString[]>;
+    label?: Maybe<Array<LocalizedString>>;
+    description?: Maybe<Array<LocalizedString>>;
     readonly?: Maybe<Scalars['Boolean']>;
     internal?: Maybe<Scalars['Boolean']>;
     nullable?: Maybe<Scalars['Boolean']>;
@@ -2685,18 +2657,8 @@ export declare type RelationCustomFieldConfig = CustomField & {
 };
 export declare type RemoveOrderItemsResult = Order | OrderModificationError;
 export declare type RequestPasswordResetResult = Success | NativeAuthStrategyError | OtpRequestTimeoutError;
-export declare type RequestUpdateCustomerEmailAddressResult =
-    | Success
-    | InvalidCredentialsError
-    | EmailAddressConflictError
-    | NativeAuthStrategyError;
-export declare type ResetPasswordResult =
-    | CurrentUser
-    | PasswordResetTokenInvalidError
-    | PasswordResetTokenExpiredError
-    | PasswordValidationError
-    | NativeAuthStrategyError
-    | NotVerifiedError;
+export declare type RequestUpdateCustomerEmailAddressResult = Success | InvalidCredentialsError | EmailAddressConflictError | NativeAuthStrategyError;
+export declare type ResetPasswordResult = CurrentUser | PasswordResetTokenInvalidError | PasswordResetTokenExpiredError | PasswordValidationError | NativeAuthStrategyError | NotVerifiedError;
 export declare type Role = Node & {
     __typename?: 'Role';
     id: Scalars['ID'];
@@ -2704,19 +2666,19 @@ export declare type Role = Node & {
     updatedAt: Scalars['DateTime'];
     code: Scalars['String'];
     description: Scalars['String'];
-    permissions: Permission[];
-    channels: Channel[];
+    permissions: Array<Permission>;
+    channels: Array<Channel>;
 };
 export declare type RoleList = PaginatedList & {
     __typename?: 'RoleList';
-    items: Role[];
+    items: Array<Role>;
     totalItems: Scalars['Int'];
 };
 export declare type SearchInput = {
     term?: Maybe<Scalars['String']>;
     facetValueIds?: Maybe<Array<Scalars['ID']>>;
     facetValueOperator?: Maybe<LogicalOperator>;
-    facetValueFilters?: Maybe<FacetValueFilterInput[]>;
+    facetValueFilters?: Maybe<Array<FacetValueFilterInput>>;
     collectionId?: Maybe<Scalars['ID']>;
     collectionSlug?: Maybe<Scalars['String']>;
     groupByProduct?: Maybe<Scalars['Boolean']>;
@@ -2730,10 +2692,10 @@ export declare type SearchReindexResponse = {
 };
 export declare type SearchResponse = {
     __typename?: 'SearchResponse';
-    items: SearchResult[];
+    items: Array<SearchResult>;
     totalItems: Scalars['Int'];
-    facetValues: FacetValueResult[];
-    collections: CollectionResult[];
+    facetValues: Array<FacetValueResult>;
+    collections: Array<CollectionResult>;
 };
 export declare type SearchResult = {
     __typename?: 'SearchResult';
@@ -2768,16 +2730,8 @@ export declare type SearchResultSortParameter = {
     name?: Maybe<SortOrder>;
     price?: Maybe<SortOrder>;
 };
-export declare type SetCustomerForOrderResult =
-    | Order
-    | AlreadyLoggedInError
-    | EmailAddressConflictError
-    | NoActiveOrderError;
-export declare type SetOrderShippingMethodResult =
-    | Order
-    | OrderModificationError
-    | IneligibleShippingMethodError
-    | NoActiveOrderError;
+export declare type SetCustomerForOrderResult = Order | AlreadyLoggedInError | EmailAddressConflictError | NoActiveOrderError;
+export declare type SetOrderShippingMethodResult = Order | OrderModificationError | IneligibleShippingMethodError | NoActiveOrderError;
 export declare type ShippingLine = {
     __typename?: 'ShippingLine';
     id: Scalars['ID'];
@@ -2786,7 +2740,7 @@ export declare type ShippingLine = {
     priceWithTax: Scalars['Int'];
     discountedPrice: Scalars['Int'];
     discountedPriceWithTax: Scalars['Int'];
-    discounts: Discount[];
+    discounts: Array<Discount>;
 };
 export declare type ShippingMethod = Node & {
     __typename?: 'ShippingMethod';
@@ -2800,12 +2754,12 @@ export declare type ShippingMethod = Node & {
     fulfillmentHandlerCode: Scalars['String'];
     checker: ConfigurableOperation;
     calculator: ConfigurableOperation;
-    translations: ShippingMethodTranslation[];
+    translations: Array<ShippingMethodTranslation>;
     customFields?: Maybe<Scalars['JSON']>;
 };
 export declare type ShippingMethodList = PaginatedList & {
     __typename?: 'ShippingMethodList';
-    items: ShippingMethod[];
+    items: Array<ShippingMethod>;
     totalItems: Scalars['Int'];
 };
 export declare type ShippingMethodQuote = {
@@ -2840,8 +2794,8 @@ export declare type SinglePrice = {
     value: Scalars['Int'];
 };
 export declare enum SortOrder {
-    ASC = 'ASC',
-    DESC = 'DESC',
+    ASC = "ASC",
+    DESC = "DESC"
 }
 export declare type StringCustomFieldConfig = CustomField & {
     __typename?: 'StringCustomFieldConfig';
@@ -2849,19 +2803,19 @@ export declare type StringCustomFieldConfig = CustomField & {
     type: Scalars['String'];
     list: Scalars['Boolean'];
     length?: Maybe<Scalars['Int']>;
-    label?: Maybe<LocalizedString[]>;
-    description?: Maybe<LocalizedString[]>;
+    label?: Maybe<Array<LocalizedString>>;
+    description?: Maybe<Array<LocalizedString>>;
     readonly?: Maybe<Scalars['Boolean']>;
     internal?: Maybe<Scalars['Boolean']>;
     nullable?: Maybe<Scalars['Boolean']>;
     pattern?: Maybe<Scalars['String']>;
-    options?: Maybe<StringFieldOption[]>;
+    options?: Maybe<Array<StringFieldOption>>;
     ui?: Maybe<Scalars['JSON']>;
 };
 export declare type StringFieldOption = {
     __typename?: 'StringFieldOption';
     value: Scalars['String'];
-    label?: Maybe<LocalizedString[]>;
+    label?: Maybe<Array<LocalizedString>>;
 };
 /** Operators for filtering on a list of String fields */
 export declare type StringListOperators = {
@@ -2889,7 +2843,7 @@ export declare type Surcharge = Node & {
     updatedAt: Scalars['DateTime'];
     description: Scalars['String'];
     sku?: Maybe<Scalars['String']>;
-    taxLines: TaxLine[];
+    taxLines: Array<TaxLine>;
     price: Scalars['Int'];
     priceWithTax: Scalars['Int'];
     taxRate: Scalars['Float'];
@@ -2903,7 +2857,7 @@ export declare type Tag = Node & {
 };
 export declare type TagList = PaginatedList & {
     __typename?: 'TagList';
-    items: Tag[];
+    items: Array<Tag>;
     totalItems: Scalars['Int'];
 };
 export declare type TaxCategory = Node & {
@@ -2935,7 +2889,7 @@ export declare type TaxRate = Node & {
 };
 export declare type TaxRateList = PaginatedList & {
     __typename?: 'TaxRateList';
-    items: TaxRate[];
+    items: Array<TaxRate>;
     totalItems: Scalars['Int'];
 };
 export declare type TextCustomFieldConfig = CustomField & {
@@ -2943,8 +2897,8 @@ export declare type TextCustomFieldConfig = CustomField & {
     name: Scalars['String'];
     type: Scalars['String'];
     list: Scalars['Boolean'];
-    label?: Maybe<LocalizedString[]>;
-    description?: Maybe<LocalizedString[]>;
+    label?: Maybe<Array<LocalizedString>>;
+    description?: Maybe<Array<LocalizedString>>;
     readonly?: Maybe<Scalars['Boolean']>;
     internal?: Maybe<Scalars['Boolean']>;
     nullable?: Maybe<Scalars['Boolean']>;
@@ -2978,22 +2932,14 @@ export declare type UpdateCustomerCustomFieldsInput = {
     dob?: Maybe<Scalars['DateTime']>;
     gender?: Maybe<Scalars['String']>;
 };
-export declare type UpdateCustomerEmailAddressResult =
-    | Success
-    | IdentifierChangeTokenInvalidError
-    | IdentifierChangeTokenExpiredError
-    | NativeAuthStrategyError;
+export declare type UpdateCustomerEmailAddressResult = Success | IdentifierChangeTokenInvalidError | IdentifierChangeTokenExpiredError | NativeAuthStrategyError;
 export declare type UpdateCustomerInput = {
     title?: Maybe<Scalars['String']>;
     firstName?: Maybe<Scalars['String']>;
     lastName?: Maybe<Scalars['String']>;
     customFields?: Maybe<UpdateCustomerCustomFieldsInput>;
 };
-export declare type UpdateCustomerPasswordResult =
-    | Success
-    | InvalidCredentialsError
-    | PasswordValidationError
-    | NativeAuthStrategyError;
+export declare type UpdateCustomerPasswordResult = Success | InvalidCredentialsError | PasswordValidationError | NativeAuthStrategyError;
 export declare type UpdateOrderCustomFieldsInput = {
     scheduledTime?: Maybe<Scalars['DateTime']>;
     completedTime?: Maybe<Scalars['DateTime']>;
@@ -3001,13 +2947,7 @@ export declare type UpdateOrderCustomFieldsInput = {
 export declare type UpdateOrderInput = {
     customFields?: Maybe<UpdateOrderCustomFieldsInput>;
 };
-export declare type UpdateOrderItemsResult =
-    | Order
-    | ShopClosedError
-    | OrderModificationError
-    | OrderLimitError
-    | NegativeQuantityError
-    | InsufficientStockError;
+export declare type UpdateOrderItemsResult = Order | ShopClosedError | OrderModificationError | OrderLimitError | NegativeQuantityError | InsufficientStockError;
 export declare type User = Node & {
     __typename?: 'User';
     id: Scalars['ID'];
@@ -3015,9 +2955,9 @@ export declare type User = Node & {
     updatedAt: Scalars['DateTime'];
     identifier: Scalars['String'];
     verified: Scalars['Boolean'];
-    roles: Role[];
+    roles: Array<Role>;
     lastLogin?: Maybe<Scalars['DateTime']>;
-    authenticationMethods: AuthenticationMethod[];
+    authenticationMethods: Array<AuthenticationMethod>;
     customFields?: Maybe<Scalars['JSON']>;
 };
 /**
@@ -3038,21 +2978,14 @@ export declare type VerificationTokenInvalidError = ErrorResult & {
     errorCode: ErrorCode;
     message: Scalars['String'];
 };
-export declare type VerifyCustomerAccountResult =
-    | CurrentUser
-    | VerificationTokenInvalidError
-    | VerificationTokenExpiredError
-    | MissingPasswordError
-    | PasswordValidationError
-    | PasswordAlreadySetError
-    | NativeAuthStrategyError;
+export declare type VerifyCustomerAccountResult = CurrentUser | VerificationTokenInvalidError | VerificationTokenExpiredError | MissingPasswordError | PasswordValidationError | PasswordAlreadySetError | NativeAuthStrategyError;
 export declare type Zone = Node & {
     __typename?: 'Zone';
     id: Scalars['ID'];
     createdAt: Scalars['DateTime'];
     updatedAt: Scalars['DateTime'];
     name: Scalars['String'];
-    members: Country[];
+    members: Array<Country>;
     customFields?: Maybe<ZoneCustomFields>;
 };
 export declare type ZoneCustomFields = {

@@ -8,9 +8,10 @@
     "scripts": {
         "watchall": "run-p watch watch:core-common",
         "dev": "concurrently yarn:run*",
-        "populate": "lerna run populate --scope dev-server",
-        "run:server": "tsnd --respawn ./packages/dev-server/index.ts",
-        "run:worker": "tsnd --respawn ./packages/dev-server/index-worker.ts",
+        "populate": "lerna run populate --scope @vendure/server",
+        "start": "cd ./packages/server && yarn start ",
+        "run:worker": "tsnd --respawn ./packages/server/index-worker.ts",
+        "run:server": "tsnd --respawn ./packages/server/index.ts",
         "watch": "lerna run watch --parallel",
         "watch:core-common": "lerna run --scope @vendure/common --scope @vendure/core watch --parallel",
         "lint": "yarn tslint --fix",
@@ -26,6 +27,7 @@
         "test": "lerna run test --stream --no-bail",
         "e2e": "lerna run e2e --stream --no-bail",
         "build": "lerna run build",
+        "serverbuild": "lerna run build --scope @vendure/server",
         "corebuild": "lerna run build --scope @vendure/core",
         "check-imports": "ts-node scripts/check-imports.ts",
         "check-core-type-defs": "ts-node scripts/check-core-type-defs.ts",
@@ -33,8 +35,7 @@
         "generate-changelog": "ts-node scripts/changelogs/generate-changelog.ts",
         "publish-release": "lerna publish -m \"chore: Publish %s\" --no-push --force-publish",
         "publish-prerelease": "lerna publish -m \"chore: Pre-release %s\" prerelease --no-push --force-publish --preid beta --dist-tag next",
-        "publish-local": "lerna version --no-git-tag-version && cd scripts && ./publish-to-verdaccio.sh",
-        "start": "lerna run start --scope @vendure/server"
+        "publish-local": "lerna version --no-git-tag-version && cd scripts && ./publish-to-verdaccio.sh"
     },
     "devDependencies": {
         "@commitlint/cli": "^12.0.1",

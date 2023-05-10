@@ -1,10 +1,12 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import {
     AuthenticationResult,
+    DeleteCustomerAccountResult,
     ErrorCode,
     InvalidCredentialsError,
     MissingPasswordError,
     MutationAuthenticateArgs,
+    MutationDeleteCustomerFromShopArgs,
     MutationLoginArgs,
     MutationRefreshCustomerVerificationArgs,
     MutationRegisterCustomerAccountArgs,
@@ -26,14 +28,16 @@ import {
     UpdateCustomerPasswordResult,
     VerifyCustomerAccountResult,
 } from '@vendure/common/lib/generated-shop-types';
-import { HistoryEntryType } from '@vendure/common/lib/generated-types';
+import { DeletionResult, HistoryEntryType } from '@vendure/common/lib/generated-types';
 import { Request, Response } from 'express';
 
 import { isGraphQlErrorResult } from '../../../common/error/error-result';
-import { ForbiddenError } from '../../../common/error/errors';
+import { ForbiddenError, InternalServerError } from '../../../common/error/errors';
 import { NativeAuthStrategyError } from '../../../common/error/generated-graphql-shop-errors';
 import { NATIVE_AUTH_STRATEGY_NAME } from '../../../config/auth/native-authentication-strategy';
 import { ConfigService } from '../../../config/config.service';
+import { Customer } from '../../../entity';
+import { CustomerGroupService } from '../../../service';
 import { AdministratorService } from '../../../service/services/administrator.service';
 import { AuthService } from '../../../service/services/auth.service';
 import { CustomerService } from '../../../service/services/customer.service';
@@ -53,8 +57,10 @@ export class ShopAuthResolver extends BaseAuthResolver {
         userService: UserService,
         administratorService: AdministratorService,
         configService: ConfigService,
+        private customerGroupService: CustomerGroupService,
         protected customerService: CustomerService,
         protected historyService: HistoryService,
+        private userService2: UserService,
     ) {
         super(authService, userService, administratorService, configService);
     }
@@ -329,5 +335,51 @@ export class ShopAuthResolver extends BaseAuthResolver {
 
     protected requireNativeAuthStrategy() {
         return super.requireNativeAuthStrategy() as NativeAuthStrategyError | undefined;
+    }
+    @Transaction()
+    @Mutation()
+    @Allow(Permission.Owner)
+    async deleteCustomerFromShop(
+        @Ctx() ctx: RequestContext,
+        @Args() args: MutationDeleteCustomerFromShopArgs,
+        @Context('req') req: Request,
+        @Context('res') res: Response,
+    ): Promise<DeleteCustomerAccountResult> {
+        const nativeAuthStrategyError = this.requireNativeAuthStrategy();
+        if (nativeAuthStrategyError) {
+            return nativeAuthStrategyError;
+        }
+        const authResult = (await super.baseLogin(
+            { password: args.password, username: args.phoneNumber, rememberMe: false },
+            ctx,
+            req,
+            res,
+        )) as AuthenticationResult;
+        if (isGraphQlErrorResult(authResult)) {
+            return authResult;
+        }
+        const customer = await this.getCustomerForOwner(ctx);
+        const groups = await this.customerService.getCustomerGroups(ctx, customer.id);
+        for (const group of groups) {
+            await this.customerGroupService.removeCustomersFromGroup(ctx, {
+                customerGroupId: group.id,
+                customerIds: [customer.id],
+            });
+        }
+        const customerResponse = await this.customerService.softDelete(ctx, customer.id);
+        const logout = await super.logout(ctx, req, res);
+        return customerResponse;
+    }
+
+    private async getCustomerForOwner(ctx: RequestContext): Promise<Customer> {
+        const userId = ctx.activeUserId;
+        if (!userId) {
+            throw new ForbiddenError();
+        }
+        const customer = await this.customerService.findOneByUserId(ctx, userId);
+        if (!customer) {
+            throw new InternalServerError(`error.no-customer-found-for-current-user`);
+        }
+        return customer;
     }
 }

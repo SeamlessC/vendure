@@ -44,7 +44,6 @@ export class ShopProductsResolver {
         @Args() args: QueryProductsArgs,
         @Relations({ entity: Product, omit: ['variants', 'assets'] }) relations: RelationPaths<Product>,
     ): Promise<PaginatedList<Product>> {
-        console.log('products');
         const options: ListQueryOptions<Product> = {
             ...args.options,
             filter: {

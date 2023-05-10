@@ -395,6 +395,11 @@ export const shopErrorOperationTypeResolvers = {
       return isGraphQLError(value) ? (value as any).__typename : 'Success';
     },
   },
+  DeleteCustomerAccountResult: {
+    __resolveType(value: any) {
+      return isGraphQLError(value) ? (value as any).__typename : 'DeletionResponse';
+    },
+  },
   VerifyCustomerAccountResult: {
     __resolveType(value: any) {
       return isGraphQLError(value) ? (value as any).__typename : 'CurrentUser';

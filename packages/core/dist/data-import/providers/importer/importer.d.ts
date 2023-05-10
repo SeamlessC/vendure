@@ -3,7 +3,6 @@ import { ImportInfo, LanguageCode } from '@vendure/common/lib/generated-types';
 import { ID } from '@vendure/common/lib/shared-types';
 import { Observable } from 'rxjs';
 import { Stream } from 'stream';
-
 import { RequestContext } from '../../../api/common/request-context';
 import { ConfigService } from '../../../config/config.service';
 import { ChannelService } from '../../../service/services/channel.service';
@@ -12,7 +11,6 @@ import { FacetService } from '../../../service/services/facet.service';
 import { TaxCategoryService } from '../../../service/services/tax-category.service';
 import { AssetImporter } from '../asset-importer/asset-importer';
 import { ImportParser, ParsedProductWithVariants } from '../import-parser/import-parser';
-
 import { FastImporterService } from './fast-importer.service';
 export interface ImportProgress extends ImportInfo {
     currentProduct: string;
@@ -45,16 +43,7 @@ export declare class Importer {
     private facetMap;
     private facetValueMap;
     /** @internal */
-    constructor(
-        configService: ConfigService,
-        importParser: ImportParser,
-        channelService: ChannelService,
-        facetService: FacetService,
-        facetValueService: FacetValueService,
-        taxCategoryService: TaxCategoryService,
-        assetImporter: AssetImporter,
-        fastImporter: FastImporterService,
-    );
+    constructor(configService: ConfigService, importParser: ImportParser, channelService: ChannelService, facetService: FacetService, facetValueService: FacetValueService, taxCategoryService: TaxCategoryService, assetImporter: AssetImporter, fastImporter: FastImporterService);
     /**
      * @description
      * Parses the contents of the [product import CSV file](/docs/developer-guide/importing-product-data/#product-import-format) and imports
@@ -62,22 +51,14 @@ export declare class Importer {
      *
      * The `ctxOrLanguageCode` argument is used to specify the languageCode to be used when creating the Products.
      */
-    parseAndImport(
-        input: string | Stream,
-        ctxOrLanguageCode: RequestContext | LanguageCode,
-        reportProgress?: boolean,
-    ): Observable<ImportProgress>;
+    parseAndImport(input: string | Stream, ctxOrLanguageCode: RequestContext | LanguageCode, reportProgress?: boolean): Observable<ImportProgress>;
     private doParseAndImport;
     private getRequestContext;
     /**
      * @description
      * Imports the products specified in the rows object. Return an array of error messages.
      */
-    importProducts(
-        ctx: RequestContext,
-        rows: ParsedProductWithVariants[],
-        onProgress: OnProgressFn,
-    ): Promise<string[]>;
+    importProducts(ctx: RequestContext, rows: ParsedProductWithVariants[], onProgress: OnProgressFn): Promise<string[]>;
     private getFacetValueIds;
     private processCustomFieldValues;
     /**

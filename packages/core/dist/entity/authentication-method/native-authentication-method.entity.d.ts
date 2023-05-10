@@ -1,5 +1,4 @@
 import { DeepPartial } from '@vendure/common/lib/shared-types';
-
 import { AuthenticationMethod } from './authentication-method.entity';
 /**
  * @description
@@ -32,7 +31,4 @@ export declare class NativeAuthenticationMethod extends AuthenticationMethod {
      */
     pendingIdentifier: string | null;
 }
-export declare type tokenNames = keyof Pick<
-    NativeAuthenticationMethod,
-    'identifierChangeToken' | 'verificationToken' | 'passwordResetToken'
->;
+export declare type tokenNames = keyof Pick<NativeAuthenticationMethod, 'identifierChangeToken' | 'verificationToken' | 'passwordResetToken'>;

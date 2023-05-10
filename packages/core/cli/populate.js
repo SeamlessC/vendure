@@ -96,7 +96,8 @@ async function importProductsFromCsv(app, productsCsvPath, languageCode, channel
         languageCode,
         channelOrToken: channel,
     });
-    return importer.parseAndImport(productData, ctx, true).toPromise();
+    const output = await importer.parseAndImport(productData, ctx, true).toPromise();
+    return output;
 }
 exports.importProductsFromCsv = importProductsFromCsv;
 //# sourceMappingURL=populate.js.map

@@ -15,198 +15,198 @@ export declare class ErrorResult {
     message: Scalars['String'];
 }
 export declare class AlreadyLoggedInError extends ErrorResult {
-    readonly __typename = 'AlreadyLoggedInError';
+    readonly __typename = "AlreadyLoggedInError";
     readonly errorCode: any;
-    readonly message = 'ALREADY_LOGGED_IN_ERROR';
+    readonly message = "ALREADY_LOGGED_IN_ERROR";
     constructor();
 }
 export declare class CouponCodeExpiredError extends ErrorResult {
     couponCode: Scalars['String'];
-    readonly __typename = 'CouponCodeExpiredError';
+    readonly __typename = "CouponCodeExpiredError";
     readonly errorCode: any;
-    readonly message = 'COUPON_CODE_EXPIRED_ERROR';
+    readonly message = "COUPON_CODE_EXPIRED_ERROR";
     constructor(couponCode: Scalars['String']);
 }
 export declare class CouponCodeInvalidError extends ErrorResult {
     couponCode: Scalars['String'];
-    readonly __typename = 'CouponCodeInvalidError';
+    readonly __typename = "CouponCodeInvalidError";
     readonly errorCode: any;
-    readonly message = 'COUPON_CODE_INVALID_ERROR';
+    readonly message = "COUPON_CODE_INVALID_ERROR";
     constructor(couponCode: Scalars['String']);
 }
 export declare class CouponCodeLimitError extends ErrorResult {
     couponCode: Scalars['String'];
     limit: Scalars['Int'];
-    readonly __typename = 'CouponCodeLimitError';
+    readonly __typename = "CouponCodeLimitError";
     readonly errorCode: any;
-    readonly message = 'COUPON_CODE_LIMIT_ERROR';
+    readonly message = "COUPON_CODE_LIMIT_ERROR";
     constructor(couponCode: Scalars['String'], limit: Scalars['Int']);
 }
 export declare class EmailAddressConflictError extends ErrorResult {
-    readonly __typename = 'EmailAddressConflictError';
+    readonly __typename = "EmailAddressConflictError";
     readonly errorCode: any;
-    readonly message = 'EMAIL_ADDRESS_CONFLICT_ERROR';
+    readonly message = "EMAIL_ADDRESS_CONFLICT_ERROR";
     constructor();
 }
 export declare class IdentifierChangeTokenExpiredError extends ErrorResult {
-    readonly __typename = 'IdentifierChangeTokenExpiredError';
+    readonly __typename = "IdentifierChangeTokenExpiredError";
     readonly errorCode: any;
-    readonly message = 'IDENTIFIER_CHANGE_TOKEN_EXPIRED_ERROR';
+    readonly message = "IDENTIFIER_CHANGE_TOKEN_EXPIRED_ERROR";
     constructor();
 }
 export declare class IdentifierChangeTokenInvalidError extends ErrorResult {
-    readonly __typename = 'IdentifierChangeTokenInvalidError';
+    readonly __typename = "IdentifierChangeTokenInvalidError";
     readonly errorCode: any;
-    readonly message = 'IDENTIFIER_CHANGE_TOKEN_INVALID_ERROR';
+    readonly message = "IDENTIFIER_CHANGE_TOKEN_INVALID_ERROR";
     constructor();
 }
 export declare class IneligiblePaymentMethodError extends ErrorResult {
     eligibilityCheckerMessage: any;
-    readonly __typename = 'IneligiblePaymentMethodError';
+    readonly __typename = "IneligiblePaymentMethodError";
     readonly errorCode: any;
-    readonly message = 'INELIGIBLE_PAYMENT_METHOD_ERROR';
+    readonly message = "INELIGIBLE_PAYMENT_METHOD_ERROR";
     constructor(eligibilityCheckerMessage: any);
 }
 export declare class IneligibleShippingMethodError extends ErrorResult {
-    readonly __typename = 'IneligibleShippingMethodError';
+    readonly __typename = "IneligibleShippingMethodError";
     readonly errorCode: any;
-    readonly message = 'INELIGIBLE_SHIPPING_METHOD_ERROR';
+    readonly message = "INELIGIBLE_SHIPPING_METHOD_ERROR";
     constructor();
 }
 export declare class InsufficientStockError extends ErrorResult {
     quantityAvailable: Scalars['Int'];
     order: any;
-    readonly __typename = 'InsufficientStockError';
+    readonly __typename = "InsufficientStockError";
     readonly errorCode: any;
-    readonly message = 'INSUFFICIENT_STOCK_ERROR';
+    readonly message = "INSUFFICIENT_STOCK_ERROR";
     constructor(quantityAvailable: Scalars['Int'], order: any);
 }
 export declare class InvalidCredentialsError extends ErrorResult {
     authenticationError: Scalars['String'];
-    readonly __typename = 'InvalidCredentialsError';
+    readonly __typename = "InvalidCredentialsError";
     readonly errorCode: any;
-    readonly message = 'INVALID_CREDENTIALS_ERROR';
+    readonly message = "INVALID_CREDENTIALS_ERROR";
     constructor(authenticationError: Scalars['String']);
 }
 export declare class MissingPasswordError extends ErrorResult {
-    readonly __typename = 'MissingPasswordError';
+    readonly __typename = "MissingPasswordError";
     readonly errorCode: any;
-    readonly message = 'MISSING_PASSWORD_ERROR';
+    readonly message = "MISSING_PASSWORD_ERROR";
     constructor();
 }
 export declare class NativeAuthStrategyError extends ErrorResult {
-    readonly __typename = 'NativeAuthStrategyError';
+    readonly __typename = "NativeAuthStrategyError";
     readonly errorCode: any;
-    readonly message = 'NATIVE_AUTH_STRATEGY_ERROR';
+    readonly message = "NATIVE_AUTH_STRATEGY_ERROR";
     constructor();
 }
 export declare class NegativeQuantityError extends ErrorResult {
-    readonly __typename = 'NegativeQuantityError';
+    readonly __typename = "NegativeQuantityError";
     readonly errorCode: any;
-    readonly message = 'NEGATIVE_QUANTITY_ERROR';
+    readonly message = "NEGATIVE_QUANTITY_ERROR";
     constructor();
 }
 export declare class NoActiveOrderError extends ErrorResult {
-    readonly __typename = 'NoActiveOrderError';
+    readonly __typename = "NoActiveOrderError";
     readonly errorCode: any;
-    readonly message = 'NO_ACTIVE_ORDER_ERROR';
+    readonly message = "NO_ACTIVE_ORDER_ERROR";
     constructor();
 }
 export declare class NotVerifiedError extends ErrorResult {
-    readonly __typename = 'NotVerifiedError';
+    readonly __typename = "NotVerifiedError";
     readonly errorCode: any;
-    readonly message = 'NOT_VERIFIED_ERROR';
+    readonly message = "NOT_VERIFIED_ERROR";
     constructor();
 }
 export declare class OTPRequestTimeoutError extends ErrorResult {
-    readonly __typename = 'OTPRequestTimeoutError';
+    readonly __typename = "OTPRequestTimeoutError";
     readonly errorCode: any;
-    readonly message = 'OTPREQUEST_TIMEOUT_ERROR';
+    readonly message = "OTPREQUEST_TIMEOUT_ERROR";
     constructor();
 }
 export declare class OrderLimitError extends ErrorResult {
     maxItems: Scalars['Int'];
-    readonly __typename = 'OrderLimitError';
+    readonly __typename = "OrderLimitError";
     readonly errorCode: any;
-    readonly message = 'ORDER_LIMIT_ERROR';
+    readonly message = "ORDER_LIMIT_ERROR";
     constructor(maxItems: Scalars['Int']);
 }
 export declare class OrderModificationError extends ErrorResult {
-    readonly __typename = 'OrderModificationError';
+    readonly __typename = "OrderModificationError";
     readonly errorCode: any;
-    readonly message = 'ORDER_MODIFICATION_ERROR';
+    readonly message = "ORDER_MODIFICATION_ERROR";
     constructor();
 }
 export declare class OrderPaymentStateError extends ErrorResult {
-    readonly __typename = 'OrderPaymentStateError';
+    readonly __typename = "OrderPaymentStateError";
     readonly errorCode: any;
-    readonly message = 'ORDER_PAYMENT_STATE_ERROR';
+    readonly message = "ORDER_PAYMENT_STATE_ERROR";
     constructor();
 }
 export declare class OrderStateTransitionError extends ErrorResult {
     transitionError: Scalars['String'];
     fromState: Scalars['String'];
     toState: Scalars['String'];
-    readonly __typename = 'OrderStateTransitionError';
+    readonly __typename = "OrderStateTransitionError";
     readonly errorCode: any;
-    readonly message = 'ORDER_STATE_TRANSITION_ERROR';
+    readonly message = "ORDER_STATE_TRANSITION_ERROR";
     constructor(transitionError: Scalars['String'], fromState: Scalars['String'], toState: Scalars['String']);
 }
 export declare class PasswordAlreadySetError extends ErrorResult {
-    readonly __typename = 'PasswordAlreadySetError';
+    readonly __typename = "PasswordAlreadySetError";
     readonly errorCode: any;
-    readonly message = 'PASSWORD_ALREADY_SET_ERROR';
+    readonly message = "PASSWORD_ALREADY_SET_ERROR";
     constructor();
 }
 export declare class PasswordResetTokenExpiredError extends ErrorResult {
-    readonly __typename = 'PasswordResetTokenExpiredError';
+    readonly __typename = "PasswordResetTokenExpiredError";
     readonly errorCode: any;
-    readonly message = 'PASSWORD_RESET_TOKEN_EXPIRED_ERROR';
+    readonly message = "PASSWORD_RESET_TOKEN_EXPIRED_ERROR";
     constructor();
 }
 export declare class PasswordResetTokenInvalidError extends ErrorResult {
-    readonly __typename = 'PasswordResetTokenInvalidError';
+    readonly __typename = "PasswordResetTokenInvalidError";
     readonly errorCode: any;
-    readonly message = 'PASSWORD_RESET_TOKEN_INVALID_ERROR';
+    readonly message = "PASSWORD_RESET_TOKEN_INVALID_ERROR";
     constructor();
 }
 export declare class PasswordValidationError extends ErrorResult {
     validationErrorMessage: Scalars['String'];
-    readonly __typename = 'PasswordValidationError';
+    readonly __typename = "PasswordValidationError";
     readonly errorCode: any;
-    readonly message = 'PASSWORD_VALIDATION_ERROR';
+    readonly message = "PASSWORD_VALIDATION_ERROR";
     constructor(validationErrorMessage: Scalars['String']);
 }
 export declare class PaymentDeclinedError extends ErrorResult {
     paymentErrorMessage: Scalars['String'];
-    readonly __typename = 'PaymentDeclinedError';
+    readonly __typename = "PaymentDeclinedError";
     readonly errorCode: any;
-    readonly message = 'PAYMENT_DECLINED_ERROR';
+    readonly message = "PAYMENT_DECLINED_ERROR";
     constructor(paymentErrorMessage: Scalars['String']);
 }
 export declare class PaymentFailedError extends ErrorResult {
     paymentErrorMessage: Scalars['String'];
-    readonly __typename = 'PaymentFailedError';
+    readonly __typename = "PaymentFailedError";
     readonly errorCode: any;
-    readonly message = 'PAYMENT_FAILED_ERROR';
+    readonly message = "PAYMENT_FAILED_ERROR";
     constructor(paymentErrorMessage: Scalars['String']);
 }
 export declare class ShopClosedError extends ErrorResult {
-    readonly __typename = 'ShopClosedError';
+    readonly __typename = "ShopClosedError";
     readonly errorCode: any;
-    readonly message = 'SHOP_CLOSED_ERROR';
+    readonly message = "SHOP_CLOSED_ERROR";
     constructor();
 }
 export declare class VerificationTokenExpiredError extends ErrorResult {
-    readonly __typename = 'VerificationTokenExpiredError';
+    readonly __typename = "VerificationTokenExpiredError";
     readonly errorCode: any;
-    readonly message = 'VERIFICATION_TOKEN_EXPIRED_ERROR';
+    readonly message = "VERIFICATION_TOKEN_EXPIRED_ERROR";
     constructor();
 }
 export declare class VerificationTokenInvalidError extends ErrorResult {
-    readonly __typename = 'VerificationTokenInvalidError';
+    readonly __typename = "VerificationTokenInvalidError";
     readonly errorCode: any;
-    readonly message = 'VERIFICATION_TOKEN_INVALID_ERROR';
+    readonly message = "VERIFICATION_TOKEN_INVALID_ERROR";
     constructor();
 }
 export declare const shopErrorOperationTypeResolvers: {
@@ -241,6 +241,9 @@ export declare const shopErrorOperationTypeResolvers: {
         __resolveType(value: any): any;
     };
     RefreshCustomerVerificationResult: {
+        __resolveType(value: any): any;
+    };
+    DeleteCustomerAccountResult: {
         __resolveType(value: any): any;
     };
     VerifyCustomerAccountResult: {

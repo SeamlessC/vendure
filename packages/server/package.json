@@ -5,13 +5,11 @@
     "license": "MIT",
     "private": true,
     "scripts": {
-        "start": "node ./dist/server/index.js",
-        "start:worker": "node ./dist/index-worker.js",
-        "build": "rimraf dist && tsc -p ./tsconfig.json && cp -r ./core ./dist/server/core && cp -r ./email-plugin ./dist/server/email-plugin",
+        "run:server": "node ./dist/index.js",
+        "start": "concurrently yarn:run*",
+        "run:worker": "node ./dist/index-worker.js",
+        "build": "rimraf dist && tsc -p ./tsconfig.json && cp -r ./email-plugin ./dist/server/",
         "populate": "node -r ts-node/register populate-dev-server.ts",
-        "run:server": "node -r ts-node/register index.ts",
-        "run:worker": "node -r ts-node/register index-worker.ts",
-        "start:x": "concurrently yarn:run*",
         "load-test:1k": "node -r ts-node/register load-testing/run-load-test.ts 1000",
         "load-test:10k": "node -r ts-node/register load-testing/run-load-test.ts 10000",
         "load-test:100k": "node -r ts-node/register load-testing/run-load-test.ts 100000"

@@ -1,23 +1,13 @@
 import { VerifyCustomerAccountResult } from '@vendure/common/lib/generated-shop-types';
 import { ID } from '@vendure/common/lib/shared-types';
-
 import { RequestContext } from '../../api/common/request-context';
 import { ErrorResultUnion } from '../../common/error/error-result';
-import {
-    IdentifierChangeTokenExpiredError,
-    IdentifierChangeTokenInvalidError,
-    InvalidCredentialsError,
-    OTPRequestTimeoutError,
-    PasswordResetTokenExpiredError,
-    PasswordResetTokenInvalidError,
-    PasswordValidationError,
-} from '../../common/error/generated-graphql-shop-errors';
+import { IdentifierChangeTokenExpiredError, IdentifierChangeTokenInvalidError, InvalidCredentialsError, OTPRequestTimeoutError, PasswordResetTokenExpiredError, PasswordResetTokenInvalidError, PasswordValidationError } from '../../common/error/generated-graphql-shop-errors';
 import { ConfigService } from '../../config/config.service';
 import { TransactionalConnection } from '../../connection/transactional-connection';
 import { User } from '../../entity/user/user.entity';
 import { PasswordCipher } from '../helpers/password-cipher/password-cipher';
 import { VerificationTokenGenerator } from '../helpers/verification-token-generator/verification-token-generator';
-
 import { RoleService } from './role.service';
 /**
  * @description
@@ -31,36 +21,21 @@ export declare class UserService {
     private roleService;
     private passwordCipher;
     private verificationTokenGenerator;
-    constructor(
-        connection: TransactionalConnection,
-        configService: ConfigService,
-        roleService: RoleService,
-        passwordCipher: PasswordCipher,
-        verificationTokenGenerator: VerificationTokenGenerator,
-    );
+    constructor(connection: TransactionalConnection, configService: ConfigService, roleService: RoleService, passwordCipher: PasswordCipher, verificationTokenGenerator: VerificationTokenGenerator);
     getUserById(ctx: RequestContext, userId: ID): Promise<User | undefined>;
     getUserByIdentifier(ctx: RequestContext, identifier: string): Promise<User | undefined>;
     /**
      * @description
      * Creates a new User with the special `customer` Role and using the {@link NativeAuthenticationStrategy}.
      */
-    createCustomerUser(
-        ctx: RequestContext,
-        identifier: string,
-        password?: string,
-    ): Promise<User | PasswordValidationError>;
+    createCustomerUser(ctx: RequestContext, identifier: string, password?: string): Promise<User | PasswordValidationError>;
     /**
      * @description
      * Adds a new {@link NativeAuthenticationMethod} to the User. If the {@link AuthOptions} `requireVerification`
      * is set to `true` (as is the default), the User will be marked as unverified until the email verification
      * flow is completed.
      */
-    addNativeAuthenticationMethod(
-        ctx: RequestContext,
-        user: User,
-        identifier: string,
-        password?: string,
-    ): Promise<User | PasswordValidationError>;
+    addNativeAuthenticationMethod(ctx: RequestContext, user: User, identifier: string, password?: string): Promise<User | PasswordValidationError>;
     /**
      * @description
      * Creates a new verified User using the {@link NativeAuthenticationStrategy}.
@@ -80,21 +55,13 @@ export declare class UserService {
      *
      * If valid, the User will be set to `verified: true`.
      */
-    verifyUserByToken(
-        ctx: RequestContext,
-        verificationToken: string,
-        phoneNumber: string,
-        password?: string,
-    ): Promise<ErrorResultUnion<VerifyCustomerAccountResult, User>>;
+    verifyUserByToken(ctx: RequestContext, verificationToken: string, phoneNumber: string, password?: string): Promise<ErrorResultUnion<VerifyCustomerAccountResult, User>>;
     /**
      * @description
      * Sets the {@link NativeAuthenticationMethod} `passwordResetToken` as part of the User password reset
      * flow.
      */
-    setPasswordResetToken(
-        ctx: RequestContext,
-        phoneNumber: string,
-    ): Promise<User | OTPRequestTimeoutError | undefined>;
+    setPasswordResetToken(ctx: RequestContext, phoneNumber: string): Promise<User | OTPRequestTimeoutError | undefined>;
     /**
      * @description
      * Verifies a passwordResetToken by looking for a User which has previously had it set using the
@@ -102,14 +69,7 @@ export declare class UserService {
      *
      * If valid, the User's credentials will be updated with the new password.
      */
-    resetPasswordByToken(
-        ctx: RequestContext,
-        phoneNumber: string,
-        passwordResetToken: string,
-        password: string,
-    ): Promise<
-        User | PasswordResetTokenExpiredError | PasswordResetTokenInvalidError | PasswordValidationError
-    >;
+    resetPasswordByToken(ctx: RequestContext, phoneNumber: string, passwordResetToken: string, password: string): Promise<User | PasswordResetTokenExpiredError | PasswordResetTokenInvalidError | PasswordValidationError>;
     /**
      * @description
      * Changes the User identifier without an email verification step, so this should be only used when
@@ -127,26 +87,14 @@ export declare class UserService {
      * Changes the User identifier as part of the storefront flow used by Customers to set a
      * new email address, with the token previously set using the `setIdentifierChangeToken()` method.
      */
-    changeIdentifierByToken(
-        ctx: RequestContext,
-        token: string,
-    ): Promise<
-        | {
-              user: User;
-              oldIdentifier: string;
-          }
-        | IdentifierChangeTokenInvalidError
-        | IdentifierChangeTokenExpiredError
-    >;
+    changeIdentifierByToken(ctx: RequestContext, token: string): Promise<{
+        user: User;
+        oldIdentifier: string;
+    } | IdentifierChangeTokenInvalidError | IdentifierChangeTokenExpiredError>;
     /**
      * @description
      * Updates the password for a User with the {@link NativeAuthenticationMethod}.
      */
-    updatePassword(
-        ctx: RequestContext,
-        userId: ID,
-        currentPassword: string,
-        newPassword: string,
-    ): Promise<boolean | InvalidCredentialsError | PasswordValidationError>;
+    updatePassword(ctx: RequestContext, userId: ID, currentPassword: string, newPassword: string): Promise<boolean | InvalidCredentialsError | PasswordValidationError>;
     private validatePassword;
 }

@@ -149,5 +149,6 @@ export async function importProductsFromCsv(
         languageCode,
         channelOrToken: channel,
     });
-    return importer.parseAndImport(productData, ctx, true).toPromise();
+    const output = await importer.parseAndImport(productData, ctx, true).toPromise();
+    return output;
 }

@@ -1,13 +1,13 @@
 // tslint:disable-next-line:no-reference
 /// <reference path="../core/typings.d.ts" />
 import { bootstrap, defaultConfig, JobQueueService, Logger, mergeConfig } from '@vendure/core';
-import { populate } from '@vendure/core/cli';
 import { clearAllTables, populateCustomers } from '@vendure/testing';
 import path from 'path';
 
 import { initialData } from '../core/mock-data/data-sources/initial-data';
 
 import { devConfig } from './dev-config';
+import { populate } from '../core/src/cli';
 
 // tslint:disable:no-console
 
